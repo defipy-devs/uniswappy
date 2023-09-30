@@ -9,3 +9,7 @@ To install package:
 > git clone https://github.com/icmoore/uniswappy
 > pip install .
 ```
+or
+```
+> pip install UniswapPy
+```

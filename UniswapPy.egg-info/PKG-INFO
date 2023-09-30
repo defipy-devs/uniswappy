@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: UniswapPy
+Version: 0.1
+Summary: Uniswap for Python
+Home-page: http://github.com/icmoore/uniswappy
+Author: icmoore
+Author-email: imoore@syscoin.org
+License: MIT
+License-File: LICENSE.txt

@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='UniswapPy',
-      version='0.1',
+      version='1.0',
       description='Uniswap for Python',
       url='http://github.com/icmoore/uniswappy',
       author = "icmoore",

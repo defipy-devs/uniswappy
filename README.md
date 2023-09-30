@@ -1,2 +1,2 @@
-# uniswappy
+# UniswapPy
 Uniswap for python

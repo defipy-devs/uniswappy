@@ -1,8 +1,13 @@
 from setuptools import setup
 
+with open('README.md') as f:
+    long_description = f.read()
+
 setup(name='UniswapPy',
-      version='1.0.1',
+      version='1.0.3',
       description='Uniswap for Python',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       url='http://github.com/icmoore/uniswappy',
       author = "icmoore",
       author_email = "imoore@syscoin.org",

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: UniswapPy
-Version: 1.0.3
+Version: 1.0.4
 Summary: Uniswap for Python
 Home-page: http://github.com/icmoore/uniswappy
 Author: icmoore
@@ -23,7 +23,7 @@ or
 > pip install UniswapPy
 ```
 # Special Features
- * **Abstracted Actions**: Obvusication is removed from standard Uniswap action events to help streamline analysis and lower line count
+ * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count
  * **Rebasing**: Can calculate settlment LP token amounts given token amounts and vice versa 
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior
  * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior

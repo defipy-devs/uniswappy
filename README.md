@@ -11,3 +11,9 @@ or
 ```
 > pip install UniswapPy
 ```
+# Special Features
+ * **Swap Abstractions**: Removes obvusication to streamline analysis
+ * **Rebasing**: Can calculate settlment LP token amounts given token amounts and vice versa 
+ * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior
+ * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior
+ * **Revenue Tools**: Basic yeild calculators and risk tools to assist in analyzing outcomes

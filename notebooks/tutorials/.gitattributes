@@ -1,5 +1,5 @@
 # Jupyter notebook
 
 # text count
-*.ipynb text
+# *.ipynb text
 *.ipynb linguist-documentation

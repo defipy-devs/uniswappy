@@ -13,14 +13,20 @@ class SimpleLPSimulation:
         self.tkn_price_arr = []
         self.x_amt_arr = []
         self.y_amt_arr = []
+        self.tkn_x_amt = None
+        self.tkn_y_amt = None
 
-    def init_amts(self, tkn_x_amt, p0):
-        return tkn_x_amt, p0*tkn_x_amt 
+    def init_amts(self, tkn_x_amt, init_price):
+        self.tkn_x_amt = tkn_x_amt
+        self.tkn_y_amt = init_price*tkn_x_amt 
 
-    def create_lp(self, tkn_x, tkn_y, tkn_x_amt, tkn_y_amt):
+    def create_lp(self, tkn_x, tkn_y):
+        
+        assert self.tkn_x_amt != None or self.tkn_y_amt != None, 'SimpleLPSimulation: TKN AMTS NOT INITIALIZED'
+        
         factory = Factory("TKN pool factory", None)
         self.lp = factory.create_exchange(tkn_x, tkn_y, symbol='LP', address=None)
-        self.lp.add_liquidity(USER_NM, tkn_x_amt, tkn_y_amt, tkn_x_amt, tkn_y_amt)
+        self.lp.add_liquidity(USER_NM, self.tkn_x_amt, self.tkn_y_amt, self.tkn_x_amt, self.tkn_y_amt)
 
     def run(self, p_trial_arr):
         sDel = SolveDeltas(self.lp)
@@ -32,7 +38,7 @@ class SimpleLPSimulation:
         y_amt_arr = []
         for p in p_trial_arr[1:]: 
             
-            swap_dx, swap_dy = sDel.calc(p) # Simulation    
+            swap_dx, swap_dy = sDel.calc(p)   
             if(swap_dx >= 0):
                 expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(swap_dx))
                 expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(swap_dy))
@@ -41,7 +47,7 @@ class SimpleLPSimulation:
                 expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(swap_dx)) 
               
             # ************************* #
-            #  do extra lp stuff here
+            # do advanced lp stuff here
             # ************************* #
                 
             self.tkn_price_arr.append(self.lp.get_price(tkn_x))    

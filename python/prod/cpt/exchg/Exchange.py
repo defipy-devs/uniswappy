@@ -444,8 +444,11 @@ class Exchange(LPERC20):
         assert tokens.get(self.token0).token_addr != to, 'UniswapV2: INVALID_TO'
         assert tokens.get(self.token1).token_addr != to, 'UniswapV2: INVALID_TO'
 
-        balance0 = tokens.get(self.token0).token_total - amount0_out
-        balance1 = tokens.get(self.token1).token_total - amount1_out
+        tokens.get(self.token0).transfer(to, amount0_out)
+        tokens.get(self.token1).transfer(to, amount1_out)    
+        
+        balance0 = tokens.get(self.token0).token_total
+        balance1 = tokens.get(self.token1).token_total
 
         amount0_in = balance0 - (self.reserve0 - amount0_out) if balance0 > self.reserve0 - amount0_out else 0
         amount1_in = balance1 - (self.reserve1 - amount1_out) if balance1 > self.reserve1 - amount1_out else 0
@@ -454,24 +457,15 @@ class Exchange(LPERC20):
         balance0_adjusted = balance0 * 1000 - amount0_in * 3  # trading fee
         balance1_adjusted = balance1 * 1000 - amount1_in * 3  # trading fee
 
-        # disregarding trading fee here    
-        # balance0_adjusted = balance0 * 1000
-        # balance1_adjusted = balance1 * 1000
         
         adj_digits = max(len(str(balance0_adjusted * balance1_adjusted))-11, 1)
         lside = round(math.ceil(balance0_adjusted * balance1_adjusted), -adj_digits)
         rside = round(math.ceil(self.reserve0 * self.reserve1 * 1000**2), -adj_digits)
-        
-        #print('lside {} rside {}'.format(round(lside,5), round(rside,5)))   
-        
-        # ******** FIX ********
-        #assert  lside  ==  rside , 'UniswapV2: K'
-        
-        tokens.get(self.token0).transfer(to, amount0_out)
-        tokens.get(self.token1).transfer(to, amount1_out)
 
+        assert  lside  ==  rside , 'UniswapV2: K'
+    
         self._update(balance0, balance1)
-        self._tally_fees(amount0_in * 3 / 1000, amount1_in * 3 / 1000)
+        self._tally_fees(amount0_in * 3 / 1000, amount1_in * 3 / 1000)        
  
     def quote(self, amount0, reserve0, reserve1):
         
@@ -541,8 +535,7 @@ class Exchange(LPERC20):
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
-        #amount_in_with_fee = amount_in * 1000              # disconsidering the fee here: amount_in * 997
-        amount_in_with_fee = amount_in * 997              # disconsidering the fee here: amount_in * 997
+        amount_in_with_fee = amount_in * 997 
         numerator = amount_in_with_fee * self.reserve1
         denominator = self.reserve0 * 1000 + amount_in_with_fee
         amount_out = numerator / denominator
@@ -570,8 +563,7 @@ class Exchange(LPERC20):
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
-        #amount_in_with_fee = amount_in * 1000              # disconsidering the fee here: amount_in * 997
-        amount_in_with_fee = amount_in * 997              # disconsidering the fee here: amount_in * 997
+        amount_in_with_fee = amount_in * 997
         numerator = amount_in_with_fee * self.reserve0
         denominator = self.reserve1 * 1000 + amount_in_with_fee
         amount_out = numerator / denominator

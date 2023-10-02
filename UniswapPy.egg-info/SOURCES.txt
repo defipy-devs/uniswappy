@@ -51,5 +51,6 @@ python/prod/process/swap/RandomSwap.py
 python/prod/process/swap/Swap.py
 python/prod/process/swap/WithdrawSwap.py
 python/prod/process/swap/__init__.py
+python/prod/simulate/SimpleLPSimulation.py
 python/prod/simulate/SolveDeltas.py
 python/prod/simulate/__init__.py

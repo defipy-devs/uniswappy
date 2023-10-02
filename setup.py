@@ -4,7 +4,7 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='UniswapPy',
-      version='1.0.4',
+      version='1.0.5',
       description='Uniswap for Python',
       long_description=long_description,
       long_description_content_type="text/markdown",

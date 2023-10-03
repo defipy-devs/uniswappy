@@ -457,12 +457,11 @@ class Exchange(LPERC20):
         balance0_adjusted = balance0 * 1000 - amount0_in * 3  # trading fee
         balance1_adjusted = balance1 * 1000 - amount1_in * 3  # trading fee
 
-        
         adj_digits = max(len(str(balance0_adjusted * balance1_adjusted))-11, 1)
         lside = round(math.ceil(balance0_adjusted * balance1_adjusted), -adj_digits)
         rside = round(math.ceil(self.reserve0 * self.reserve1 * 1000**2), -adj_digits)
 
-        assert  lside  ==  rside , 'UniswapV2: K'
+        assert lside  ==  rside , 'UniswapV2: K'
     
         self._update(balance0, balance1)
         self._tally_fees(amount0_in * 3 / 1000, amount1_in * 3 / 1000)        

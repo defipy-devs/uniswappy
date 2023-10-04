@@ -13,7 +13,8 @@ or
 ```
 # Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count
- * **Rebasing**: Can calculate settlment LP token amounts given token amounts and vice versa 
+ * **Indexing**: Can calculate settlment LP token amounts given token 
+amounts and vice versa 
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior
  * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior
  * **Analytical Tools**: Basic yeild calculators and risk tools to assist in analyzing outcomes

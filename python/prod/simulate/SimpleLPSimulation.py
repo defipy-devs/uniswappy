@@ -1,5 +1,5 @@
-from python.prod.cpt.exchg import Exchange
-from python.prod.cpt.factory import Factory
+from uniswappy.cpt.exchg import Exchange
+from uniswappy.cpt.factory import Factory
 from python.prod.simulate import SolveDeltas
 from python.prod.process.deposit import SwapDeposit
 from python.prod.process.swap import WithdrawSwap

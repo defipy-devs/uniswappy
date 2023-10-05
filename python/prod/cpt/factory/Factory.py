@@ -4,7 +4,7 @@
 
 from python.prod.erc import ERC20
 from python.prod.erc import LPERC20
-from python.prod.cpt.exchg import Exchange 
+from uniswappy.cpt.exchg import Exchange 
 
 class Factory:
 

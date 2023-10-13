@@ -4,7 +4,7 @@
 
 from python.prod.cpt.factory import Factory
 from python.prod.erc import ERC20
-from python.prod.erc import LPERC20
+from python.prod.erc.LPERC20 import LPERC20
 import math
 
 MINIMUM_LIQUIDITY = 1e-15

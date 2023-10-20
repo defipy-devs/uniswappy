@@ -11,6 +11,43 @@ or
 ```
 > pip install UniswapPy
 ```
+
+# Basic Usage
+```
+from uniswappy.erc import ERC20
+from uniswappy.cpt.factory import Factory
+
+user_nm = 'user_intro'
+eth_amount = 1000
+dai_amount = 1000000
+
+dai = ERC20("DAI", "0x111")
+eth = ERC20("ETH", "0x09")
+factory = Factory("ETH pool factory", "0x2")
+lp = factory.create_exchange(eth, dai, symbol="LP", address="0x011")
+lp.add_liquidity(user_nm, eth_amount, dai_amount, eth_amount, dai_amount)
+lp.info()
+```
+
+```
+#OUTPUT:
+Exchange ETH/DAI (LP)
+Coins: ETH/DAI
+Reserves: ETH = 1000 | DAI = 1000000
+Liquidity: 31622.776601683792
+```
+```
+out = Swap().apply(lp, dai, user_nm, 1000)
+lp.info()
+```
+```
+#OUTPUT:
+Exchange ETH/DAI (LP)
+Coins: ETH/DAI
+Reserves: ETH = 999.00399301896 | DAI = 1001000
+Liquidity: 31622.776601683792
+```
+
 # Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count
  * **Indexing**: Can calculate settlment LP token amounts given token 
@@ -18,3 +55,5 @@ amounts and vice versa
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior
  * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior
  * **Analytical Tools**: Basic yeild calculators and risk tools to assist in analyzing outcomes
+ 
+ 

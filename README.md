@@ -13,6 +13,9 @@ or
 ```
 
 # Basic Usage
+
+* See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) for basic usage
+
 ```
 from uniswappy.erc import ERC20
 from uniswappy.cpt.factory import Factory

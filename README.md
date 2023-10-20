@@ -36,7 +36,7 @@ lp.info()
 Exchange ETH/DAI (LP) <br/>
 Coins: ETH/DAI <br/>
 Reserves: ETH = 1000 | DAI = 1000000 <br/>
-Liquidity: 31622.776601683792 <br/>
+Liquidity: 31622.776601683792 <br/><br/>
 
 ```
 from uniswappy.process.swap import Swap
@@ -48,7 +48,7 @@ lp.info()
 Exchange ETH/DAI (LP) <br/>
 Coins: ETH/DAI <br/>
 Reserves: ETH = 999.00399301896 | DAI = 1001000 <br/>
-Liquidity: 31622.776601683792 <br/>
+Liquidity: 31622.776601683792 <br/><br/>
 
 
 # Special Features

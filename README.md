@@ -32,25 +32,24 @@ lp.add_liquidity(user_nm, eth_amount, dai_amount, eth_amount, dai_amount)
 lp.info()
 ```
 
-```
-#OUTPUT:
+#### OUTPUT:
 Exchange ETH/DAI (LP)
 Coins: ETH/DAI
 Reserves: ETH = 1000 | DAI = 1000000
 Liquidity: 31622.776601683792
-```
+
 ```
 from uniswappy.process.swap import Swap
 out = Swap().apply(lp, dai, user_nm, 1000)
 lp.info()
 ```
-```
-#OUTPUT:
+
+#### OUTPUT:
 Exchange ETH/DAI (LP)
 Coins: ETH/DAI
 Reserves: ETH = 999.00399301896 | DAI = 1001000
 Liquidity: 31622.776601683792
-```
+
 
 # Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c)

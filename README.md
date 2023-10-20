@@ -40,6 +40,7 @@ Liquidity: 31622.776601683792 <br/><br/>
 
 ```
 from uniswappy.process.swap import Swap
+
 out = Swap().apply(lp, dai, user_nm, 1000)
 lp.info()
 ```

@@ -54,8 +54,7 @@ Liquidity: 31622.776601683792 <br/><br/>
 
 # Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c)
- * **Indexing**: Can calculate settlment LP token amounts given token; see article [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc) 
-amounts and vice versa 
+ * **Indexing**: Can calculate settlment LP token amounts given token amounts and vice versa; ; see article [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc)
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior; see article [How to Simulate a Liquidity Pool for Decentralized Finance](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentralized-finance-6f357ec8564b)
  * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior
  * **Analytical Tools**: Basic yeild calculators and risk tools to assist in analyzing outcomes

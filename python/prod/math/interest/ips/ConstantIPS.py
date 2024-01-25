@@ -1,5 +1,5 @@
 # ConstantIPS.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Sept 2022
 
 from python.prod.math.interest.ips import IPS

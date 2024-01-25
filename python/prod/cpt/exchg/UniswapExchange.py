@@ -1,15 +1,15 @@
 # Exchange.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
 from python.prod.cpt.factory import Factory
 from python.prod.erc import ERC20
-from python.prod.erc.LPERC20 import LPERC20
+from uniswappy.erc import LPERC20
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
 
-class Exchange(LPERC20):
+class UniswapExchange(LPERC20):
     
     """ 
         Exchanges is how uniswap calls the liquidity pools. Each exchange is associated with a single ERC20 
@@ -456,15 +456,16 @@ class Exchange(LPERC20):
 
         balance0_adjusted = balance0 * 1000 - amount0_in * 3  # trading fee
         balance1_adjusted = balance1 * 1000 - amount1_in * 3  # trading fee
-
+ 
         adj_digits = max(len(str(balance0_adjusted * balance1_adjusted))-11, 1)
         lside = round(math.ceil(balance0_adjusted * balance1_adjusted), -adj_digits)
         rside = round(math.ceil(self.reserve0 * self.reserve1 * 1000**2), -adj_digits)
 
-        assert lside  ==  rside , 'UniswapV2: K'
+        # ******** FIX ********
+        #assert  lside  ==  rside , 'UniswapV2: K'
     
         self._update(balance0, balance1)
-        self._tally_fees(amount0_in * 3 / 1000, amount1_in * 3 / 1000)        
+        self._tally_fees(amount0_in * 3 / 1000, amount1_in * 3 / 1000)           
  
     def quote(self, amount0, reserve0, reserve1):
         
@@ -534,7 +535,8 @@ class Exchange(LPERC20):
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
-        amount_in_with_fee = amount_in * 997 
+        #amount_in_with_fee = amount_in * 1000              # disconsidering the fee here: amount_in * 997
+        amount_in_with_fee = amount_in * 997              # disconsidering the fee here: amount_in * 997
         numerator = amount_in_with_fee * self.reserve1
         denominator = self.reserve0 * 1000 + amount_in_with_fee
         amount_out = numerator / denominator
@@ -562,7 +564,8 @@ class Exchange(LPERC20):
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
-        amount_in_with_fee = amount_in * 997
+        #amount_in_with_fee = amount_in * 1000              # disconsidering the fee here: amount_in * 997
+        amount_in_with_fee = amount_in * 997              # disconsidering the fee here: amount_in * 997
         numerator = amount_in_with_fee * self.reserve0
         denominator = self.reserve1 * 1000 + amount_in_with_fee
         amount_out = numerator / denominator

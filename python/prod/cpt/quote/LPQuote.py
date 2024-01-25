@@ -1,5 +1,5 @@
 # LPQuote.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Jul 2023
 
 from python.prod.cpt.index import RebaseIndexToken

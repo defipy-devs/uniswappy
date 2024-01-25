@@ -1,5 +1,5 @@
 # RemoveLiquidity.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
 from python.prod.process import Process

@@ -1,10 +1,10 @@
 # Factory.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
 from python.prod.erc import ERC20
 from python.prod.erc import LPERC20
-from uniswappy.cpt.exchg import Exchange 
+from uniswappy.cpt.exchg import UniswapExchange 
 
 class Factory:
 
@@ -64,7 +64,7 @@ class Factory:
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp            
                
-        new_exchange = Exchange(
+        new_exchange = UniswapExchange(
             self,
             token0.token_name,
             token1.token_name,

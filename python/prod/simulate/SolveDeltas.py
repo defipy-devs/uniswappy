@@ -1,5 +1,5 @@
 # SolveDeltas.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Mar 2023
 
 from scipy.optimize import fsolve

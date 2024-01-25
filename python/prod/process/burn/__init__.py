@@ -1,0 +1,1 @@
+from .IndexTokenBurn import IndexTokenBurn

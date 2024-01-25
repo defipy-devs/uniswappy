@@ -1,5 +1,5 @@
 # deposit_test.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
 TEST_PATH = "python/test/process/deposit"

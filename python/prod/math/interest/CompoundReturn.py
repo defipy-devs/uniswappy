@@ -1,8 +1,8 @@
 # CompoundReturn.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Sept 2022
 
-from src.prod.math.basic import RoundFloat
+from python.prod.math.basic import RoundFloat
 
 class CompoundReturn():        
        

@@ -1,5 +1,5 @@
 # liquidity_leak_test.py
-# Author: Ian Moore ( imoore@syscoin.org )
+# Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
 TEST_PATH = "python/test/defi/process/liquidity"
@@ -10,10 +10,8 @@ import unittest
 sys.path.append(os.getcwd().replace(TEST_PATH,""))
 
 from python.prod.cpt.factory import Factory
-from python.prod.cpt.exchg import Exchange
 from python.prod.erc import ERC20
 from python.prod.erc import LPERC20
-from python.prod.process.liquidity import AddLiquidity
 from python.prod.process.liquidity import AddLiquidity
 from python.prod.process.liquidity import RemoveLiquidity
 from python.prod.cpt.index import RebaseIndexToken

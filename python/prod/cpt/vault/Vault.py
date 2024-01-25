@@ -1,0 +1,23 @@
+# Vault.py
+# Author: Ian Moore ( utiliwire@gmail.com )
+# Date: Jun 2023
+
+from abc import *
+
+class Vault(ABC):
+             
+    @abstractmethod        
+    def rebase_index_tkn(self, lp_token, token):
+        pass
+    @abstractmethod     
+    def deposit_lp_tkn(self, _to, token, amt):
+        pass    
+    @abstractmethod     
+    def remove_lp_tkn(self, _to, token, amt):
+        pass
+    @abstractmethod 
+    def get_tkn_pair_amount(self, lp_tkn, tkn, liq):
+        pass     
+    @abstractmethod 
+    def get_token_type(self, lp_tkn, tkn, liq):
+        pass      

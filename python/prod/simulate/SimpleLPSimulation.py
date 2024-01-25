@@ -1,4 +1,7 @@
-from uniswappy.cpt.exchg import Exchange
+# SimpleLPSimulation.py
+# Author: Ian Moore ( utiliwire@gmail.com )
+# Date: Oct 2023
+
 from uniswappy.cpt.factory import Factory
 from python.prod.simulate import SolveDeltas
 from python.prod.process.deposit import SwapDeposit

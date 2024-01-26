@@ -18,7 +18,7 @@ or
 
 ```
 from uniswappy.erc import ERC20
-from uniswappy.cpt.factory import Factory
+from uniswappy.cpt.factory import UniswapFactory
 
 user_nm = 'user_intro'
 eth_amount = 1000
@@ -26,7 +26,7 @@ dai_amount = 1000000
 
 dai = ERC20("DAI", "0x111")
 eth = ERC20("ETH", "0x09")
-factory = Factory("ETH pool factory", "0x2")
+factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.create_exchange(eth, dai, symbol="LP", address="0x011")
 lp.add_liquidity(user_nm, eth_amount, dai_amount, eth_amount, dai_amount)
 lp.info()
@@ -53,7 +53,7 @@ Liquidity: 31622.776601683792 <br/><br/>
 
 
 # Special Features
- * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c)
+ * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c), and [Setup your Uniswap Deposits like a Baller](https://medium.com/coinmonks/setup-your-uniswap-deposits-like-a-baller-b99340ea302f)
  * **Indexing**: Can calculate settlment LP token amounts given token amounts and vice versa; see article [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc)
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior; see article [How to Simulate a Liquidity Pool for Decentralized Finance](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentralized-finance-6f357ec8564b)
  * **Randomized Events**: Token amount and time delta models to simulate possible trading behavior

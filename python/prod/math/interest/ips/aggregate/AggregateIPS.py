@@ -2,7 +2,7 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Sept 2022
 
-from python.prod.math.interest.ips import IPS
+from ..IPS import IPS
 
 class AggregateIPS():
     

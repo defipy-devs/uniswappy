@@ -2,9 +2,9 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.process import Process
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
+from ..Process import Process
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
 
 class AddLiquidity(Process):
      

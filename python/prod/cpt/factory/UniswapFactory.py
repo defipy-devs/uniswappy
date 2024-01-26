@@ -2,11 +2,13 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.erc import ERC20
-from python.prod.erc import LPERC20
-from uniswappy.cpt.exchg import UniswapExchange 
+from ..exchg import UniswapExchange 
+from .UniswapFactoryStruct import UniswapFactoryStruct 
+from ...erc import ERC20
+from ...erc import LPERC20
 
-class Factory:
+
+class UniswapFactory:
 
     """ 
         Create liquidity pools for given token pairs.
@@ -62,10 +64,11 @@ class Factory:
             raise Exception("Exchange already created")
             
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
-        self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp            
-               
+        self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
+        
+        factory_params = UniswapFactoryStruct(self.exchange_to_tokens, self.name, self.address)
         new_exchange = UniswapExchange(
-            self,
+            factory_params,
             token0.token_name,
             token1.token_name,
             f"{token0.token_name}/{token1.token_name}",

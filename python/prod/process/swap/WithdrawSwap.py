@@ -2,11 +2,11 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
-from python.prod.process import Process
-from python.prod.process.swap import Swap
-from python.prod.process.liquidity import RemoveLiquidity
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
+from ..Process import Process
+from .Swap import Swap
+from ..liquidity import RemoveLiquidity
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
 import math
 
 class WithdrawSwap(Process):

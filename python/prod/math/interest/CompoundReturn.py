@@ -2,7 +2,7 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Sept 2022
 
-from python.prod.math.basic import RoundFloat
+from ..basic import RoundFloat
 
 class CompoundReturn():        
        

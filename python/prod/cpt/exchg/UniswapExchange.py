@@ -2,9 +2,8 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.cpt.factory import Factory
-from python.prod.erc import ERC20
-from uniswappy.erc import LPERC20
+from ...erc import ERC20
+from ...erc import LPERC20
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -46,10 +45,10 @@ class UniswapExchange(LPERC20):
     """      
     
     
-    def __init__(self, creator: Factory, token0_name: str, token1_name: str, 
+    def __init__(self, factory_struct: {}, token0_name: str, token1_name: str, 
                        name: str, symbol: str, addr : str) -> None:
         super().__init__(token0_name+token1_name, addr)
-        self.factory = creator
+        self.factory = factory_struct
         self.token0 = token0_name       # addresses or names. Actual tokens get stored in another place
         self.token1 = token1_name       # addresses or names. Actual tokens get stored in another place
         self.reserve0 = 0               # single storage slot

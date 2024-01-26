@@ -1,9 +1,9 @@
-# TreeAmount.py
+# TreeAmountQuote.py
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
-from python.prod.cpt.index import RebaseIndexToken
-from python.prod.cpt.quote import LPQuote
+from ..index import RebaseIndexToken
+from .LPQuote import LPQuote
 import math
 
 class TreeAmountQuote():

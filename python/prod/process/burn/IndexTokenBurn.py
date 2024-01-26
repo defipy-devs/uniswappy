@@ -2,11 +2,11 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.process import Process
-from python.prod.process.swap import Swap
-from python.prod.cpt.vault import IndexVault
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
+from ..Process import Process
+from ..swap import Swap
+from ...cpt.vault import IndexVault
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
 
 class IndexTokenBurn(Process):
 

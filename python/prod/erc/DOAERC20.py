@@ -2,7 +2,7 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.erc import ERC20
+from .ERC20 import ERC20
 
 class DOAERC20(ERC20):
     

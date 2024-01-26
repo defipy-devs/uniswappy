@@ -2,10 +2,10 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.process import Process
-from python.prod.process.deposit import SwapDeposit
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
+from ..Process import Process
+from ..deposit import SwapDeposit
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
 
 class SwapIndexMint(Process):
     

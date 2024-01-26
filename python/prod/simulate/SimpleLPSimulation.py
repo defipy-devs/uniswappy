@@ -2,10 +2,10 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Oct 2023
 
-from uniswappy.cpt.factory import Factory
-from python.prod.simulate import SolveDeltas
-from python.prod.process.deposit import SwapDeposit
-from python.prod.process.swap import WithdrawSwap
+from ..cpt.factory import UniswapFactory
+from ..simulate import SolveDeltas
+from ..process.deposit import SwapDeposit
+from ..process.swap import WithdrawSwap
 
 USER_NM = 'USER_SIM'
 
@@ -27,7 +27,7 @@ class SimpleLPSimulation:
         
         assert self.tkn_x_amt != None or self.tkn_y_amt != None, 'SimpleLPSimulation: TKN AMTS NOT INITIALIZED'
         
-        factory = Factory("TKN pool factory", None)
+        factory = UniswapFactory("TKN pool factory", None)
         self.lp = factory.create_exchange(tkn_x, tkn_y, symbol='LP', address=None)
         self.lp.add_liquidity(USER_NM, self.tkn_x_amt, self.tkn_y_amt, self.tkn_x_amt, self.tkn_y_amt)
 

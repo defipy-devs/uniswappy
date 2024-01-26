@@ -10,7 +10,7 @@ import unittest
 sys.path.append(os.getcwd().replace(TEST_PATH,""))
 
 from python.prod.erc import ERC20
-from python.prod.cpt.factory import Factory
+from python.prod.cpt.factory import UniswapFactory
 from python.prod.cpt.index import RebaseIndexToken
 from python.prod.process.swap import WithdrawSwap
 import numpy as np 
@@ -24,7 +24,7 @@ class Test_DrainLP(unittest.TestCase):
     def setup_lp(self, eth, tkn):
         eth_amount = 1000
         tkn_amount = 100000
-        factory = Factory("ETH pool factory", "0x2")
+        factory = UniswapFactory("ETH pool factory", "0x2")
         lp_tkn = factory.create_exchange(eth, tkn, symbol="LP", address="0x011")
         lp_tkn.add_liquidity(USER0, eth_amount, tkn_amount, eth_amount, tkn_amount)
         return lp_tkn

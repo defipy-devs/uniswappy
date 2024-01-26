@@ -2,10 +2,9 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Oct 2023
 
-from python.prod.erc import ERC20
-from uniswappy.cpt.exchg import UniswapExchange
-from python.prod.cpt.factory import Factory
-from python.prod.cpt.quote import LPQuote
+from ...erc import ERC20
+from ..exchg import UniswapExchange
+from ..quote import LPQuote
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -13,9 +12,9 @@ MINIMUM_LIQUIDITY = 1e-15
 class ChildUniswapExchange(UniswapExchange):
     
     
-    def __init__(self, creator: Factory, token0_name: str, token1_name: str, 
+    def __init__(self, factory_struct: {}, token0_name: str, token1_name: str, 
                        name: str, symbol: str, addr : str) -> None:
-        super().__init__(creator, token0_name, token1_name, name, symbol, addr)
+        super().__init__(factory_struct, token0_name, token1_name, name, symbol, addr)
         self.hybrid_supply = 0
         self.hybrid_liquidity_providers = {}
 

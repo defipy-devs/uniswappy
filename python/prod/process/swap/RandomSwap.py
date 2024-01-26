@@ -2,10 +2,10 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: May 2023
 
-from python.prod.process import Process
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
-from python.prod.process.swap import Swap
+from ..Process import Process
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
+from ...process.swap import Swap
 
 class RandomSwap(Process):
     

@@ -2,7 +2,7 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Sept 2023
 
-from python.prod.cpt.quote import LPQuote
+from .LPQuote import LPQuote
 
 class IndexTokenQuote():
     

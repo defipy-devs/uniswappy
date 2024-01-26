@@ -2,8 +2,8 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Jul 2023
 
-from python.prod.cpt.index import RebaseIndexToken
-from python.prod.cpt.index import SettlementLPToken
+from ..index import RebaseIndexToken
+from ..index import SettlementLPToken
 import math
 
 class LPQuote():

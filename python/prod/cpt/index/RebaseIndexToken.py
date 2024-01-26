@@ -2,9 +2,8 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
-from python.prod.cpt.factory import Factory
-from python.prod.erc import ERC20
-from python.prod.process.swap import WithdrawSwap
+from ...erc import ERC20
+from ...process.swap import WithdrawSwap
 
 class RebaseIndexToken():
     

@@ -9,7 +9,7 @@ import sys
 import unittest   
 sys.path.append(os.getcwd().replace(TEST_PATH,""))
 
-from python.prod.cpt.factory import Factory
+from python.prod.cpt.factory import UniswapFactory
 from python.prod.erc import ERC20
 from python.prod.erc import LPERC20
 from python.prod.process.liquidity import AddLiquidity
@@ -28,7 +28,7 @@ class Test_LiquidityLeak(unittest.TestCase):
         return factory.create_exchange(tkn1, tkn2, symbol=lp_nm, address="0x012")      
 
     def setup(self, sys1, dai1):
-        factory = Factory("SYS pool factory", "0x2")
+        factory = UniswapFactory("SYS pool factory", "0x2")
         lp = self.setup_lp(factory, sys1, dai1, 'LP')
         lp.add_liquidity(USER_NM, SYS_AMT, DAI_AMT, SYS_AMT, DAI_AMT)           
         return lp

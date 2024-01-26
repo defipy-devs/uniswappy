@@ -3,7 +3,7 @@
 # Date: Sept 2022
 
 import numpy as np
-from python.prod.math.model import EventSelectionModel
+from .EventSelectionModel import EventSelectionModel
   
 MAX_TRADE = 10000    
     

@@ -2,11 +2,11 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Aug 2023
 
-from python.prod.process import Process
-from python.prod.process.liquidity import AddLiquidity
-from python.prod.process.swap import Swap
-from python.prod.math.model import TokenDeltaModel
-from python.prod.math.model import EventSelectionModel
+from ..Process import Process
+from ..liquidity import AddLiquidity
+from ..swap import Swap
+from ...math.model import TokenDeltaModel
+from ...math.model import EventSelectionModel
 import math
 
 

@@ -2,9 +2,9 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Jun 2023
 
-from python.prod.erc import ERC20
-from python.prod.cpt.vault import Vault 
-from python.prod.cpt.index import RebaseIndexToken
+from ...erc import ERC20
+from .Vault import Vault 
+from ..index import RebaseIndexToken
 
 INDEX_TOKEN = 'INDEX'
 

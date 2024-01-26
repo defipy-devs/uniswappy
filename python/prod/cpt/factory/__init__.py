@@ -1,2 +1,3 @@
-from .Factory import Factory
+from .UniswapFactory import UniswapFactory
+from .UniswapFactoryStruct import UniswapFactoryStruct
 

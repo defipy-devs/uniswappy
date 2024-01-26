@@ -4,9 +4,9 @@
 
 import numpy as np
 import pandas as pd
-from python.prod.cpt.quote import LPQuote
-from python.prod.process.swap import Swap
-from python.prod.math.model import TokenDeltaModel
+from ..cpt.quote import LPQuote
+from ..process.swap import Swap
+from ..math.model import TokenDeltaModel
 
 class Arbitrage():
     

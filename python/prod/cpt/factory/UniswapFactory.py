@@ -66,9 +66,9 @@ class UniswapFactory:
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
-        factory_params = UniswapFactoryStruct(self.exchange_to_tokens, self.name, self.address)
+        factory_struct = UniswapFactoryStruct(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
         new_exchange = UniswapExchange(
-            factory_params,
+            factory_struct,
             token0.token_name,
             token1.token_name,
             f"{token0.token_name}/{token1.token_name}",

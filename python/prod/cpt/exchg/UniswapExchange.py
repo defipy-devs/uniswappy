@@ -4,11 +4,12 @@
 
 from ...erc import ERC20
 from ...erc import LPERC20
+from ...utils.interfaces import IExchange 
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
 
-class UniswapExchange(LPERC20):
+class UniswapExchange(IExchange, LPERC20):
     
     """ 
         Exchanges is how uniswap calls the liquidity pools. Each exchange is associated with a single ERC20 
@@ -65,14 +66,11 @@ class UniswapExchange(LPERC20):
         self.last_liquidity_deposit = 0
         self.total_supply = 0
 
-    def info(self):
+    def summary(self):
         print(f"Exchange {self.name} ({self.symbol})")
-        print(f"Coins: {self.token0}/{self.token1}")
-        print(f"Reserves: {self.token0} = {self.reserve0} | {self.token1} = {self.reserve1}")
+        print(f"Tokens: {self.token0}/{self.token1}")
+        print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
-
-    def doc(self):
-        print(f"Available features:\n- Add liquidity\n- Remove liquidity\n- Exchange tokens\n")
 
     def add_liquidity(self, _from, balance0, balance1, balance0Min, balance1Min):
         

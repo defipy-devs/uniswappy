@@ -34,7 +34,10 @@ setup(name='UniswapPy',
           'uniswappy.process.liquidity',
           'uniswappy.process.mint',
           'uniswappy.process.swap',
-          'uniswappy.simulate'
+          'uniswappy.simulate',
+          'uniswappy.utils.interfaces',
+          'uniswappy.utils.structs',
+          
       ],
       install_requires=[
           'scipy >= 1.7.3'

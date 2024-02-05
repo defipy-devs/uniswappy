@@ -6,9 +6,12 @@ from ..exchg import UniswapExchange
 from .UniswapFactoryStruct import UniswapFactoryStruct 
 from ...erc import ERC20
 from ...erc import LPERC20
+from ...utils.interfaces import IExchangeFactory 
+from ...utils.structs import UniswapExchangeStruct
+from ...utils.structs import FactoryStruct 
 
 
-class UniswapFactory:
+class UniswapFactory(IExchangeFactory):
 
     """ 
         Create liquidity pools for given token pairs.
@@ -37,7 +40,7 @@ class UniswapFactory:
         self.exchange_to_tokens = {}
         self.parent_lp = None
 
-    def create_exchange(self, token0: ERC20, token1: ERC20, symbol: str, address : str):
+    def create_exchange(self, exchg_data : UniswapExchangeStruct):
         
         """ create_exchange
 
@@ -58,7 +61,12 @@ class UniswapFactory:
             -------
             new_exchange : Exchange
                 newly created exchange that is also a LP token                    
-        """         
+        """  
+        
+        token0 = exchg_data.tkn0
+        token1 = exchg_data.tkn1
+        symbol = exchg_data.symbol
+        address = exchg_data.address
         
         if self.exchange_to_tokens.get(f"{token0.token_name}/{token1.token_name}"):
             raise Exception("Exchange already created")
@@ -66,7 +74,7 @@ class UniswapFactory:
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
-        factory_struct = UniswapFactoryStruct(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
+        factory_struct = FactoryStruct(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
         new_exchange = UniswapExchange(
             factory_struct,
             token0.token_name,

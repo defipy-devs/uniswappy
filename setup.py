@@ -36,7 +36,7 @@ setup(name='UniswapPy',
           'uniswappy.process.swap',
           'uniswappy.simulate',
           'uniswappy.utils.interfaces',
-          'uniswappy.utils.structs',
+          'uniswappy.utils.data',
           
       ],
       install_requires=[

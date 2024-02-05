@@ -1,8 +1,6 @@
 from abc import *
 
-from ...erc import LPERC20
-
-class IExchange(ABC, LPERC20):
+class IExchange(ABC):
     
     @abstractmethod        
     def summary(self, agents):

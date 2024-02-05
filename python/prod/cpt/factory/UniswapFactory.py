@@ -3,12 +3,11 @@
 # Date: May 2023
 
 from ..exchg import UniswapExchange 
-from .UniswapFactoryStruct import UniswapFactoryStruct 
 from ...erc import ERC20
 from ...erc import LPERC20
 from ...utils.interfaces import IExchangeFactory 
-from ...utils.structs import UniswapExchangeStruct
-from ...utils.structs import FactoryStruct 
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 
 
 class UniswapFactory(IExchangeFactory):
@@ -40,7 +39,7 @@ class UniswapFactory(IExchangeFactory):
         self.exchange_to_tokens = {}
         self.parent_lp = None
 
-    def create_exchange(self, exchg_data : UniswapExchangeStruct):
+    def create_exchange(self, exchg_data : UniswapExchangeData):
         
         """ create_exchange
 
@@ -74,7 +73,7 @@ class UniswapFactory(IExchangeFactory):
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
-        factory_struct = FactoryStruct(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
+        factory_struct = FactoryData(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
         new_exchange = UniswapExchange(
             factory_struct,
             token0.token_name,

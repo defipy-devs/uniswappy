@@ -154,8 +154,8 @@ class UniswapExchange(IExchange, LPERC20):
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
-        amountA = liquidity * balanceA / self.total_supply      # using balances ensures pro-rata distribution
-        amountB = liquidity * balanceB / self.total_supply      # using balances ensures pro-rata distribution
+        amountA = liquidity * balanceA / self.total_supply     
+        amountB = liquidity * balanceB / self.total_supply    
 
         return amountA, amountB    
     
@@ -178,9 +178,9 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Returns
             -------
-            amount0 : float
+            amountA : float
                 removed liquidity from reserve0    
-            amount1 : float
+            amountB : float
                 removed liquidity from reserve1                    
         """         
         
@@ -193,11 +193,11 @@ class UniswapExchange(IExchange, LPERC20):
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
-        amountA = liquidity * balanceA / self.total_supply      # using balances ensures pro-rata distribution
-        amountB = liquidity * balanceB / self.total_supply      # using balances ensures pro-rata distribution
+        amountA = liquidity * balanceA / self.total_supply    
+        amountB = liquidity * balanceB / self.total_supply  
 
         if not (round(amountA,5) >= round(amountAMin,5)):
-            print('amount0 {} amount0_min {}'.format(round(amountA,5), round(amountAMin,5)))        
+            print('amount0 {} amountAMin {}'.format(round(amountA,5), round(amountAMin,5)))        
         
         assert amountA > 0 and amountB > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED'
         assert round(amountA,5) >= round(amountAMin,5), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
@@ -399,9 +399,9 @@ class UniswapExchange(IExchange, LPERC20):
             Parameters
             -------
             amountA_out : float
-                swap amount 0 out
+                swap amountA out
             amountB_out : float
-                swap amount 1 out               
+                swap amountB out               
             to : str
                receiving user address                   
         """         

@@ -4,7 +4,7 @@ from .IExchange import IExchange
 class IExchangeFactory(ABC):
     
     @abstractmethod        
-    def create_exchange(self, agents):
+    def deploy(self, agents):
         pass
     
     @abstractmethod        

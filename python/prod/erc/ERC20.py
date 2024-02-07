@@ -16,15 +16,11 @@ class ERC20:
             Token address  
         self.token_total : float
             Token holdings 
-            
-        Reference
-        ----------   
-        https://docs.uniswap.org/protocol/V1/guides/connect-to-uniswap#token-interface
     """   
-    def __init__(self, name: str, addr: str, decimal: int = None) -> None:
+    
+    def __init__(self, name: str, addr: str, decimal: int = None):
         self.token_name = name
         self.token_addr = addr
-        self.token_supply = 1_000_000_000
         self.token_total = 0
         self.token_decimal = GWEI_PRECISION if decimal == None else decimal
         self.type = 'standard'
@@ -33,7 +29,7 @@ class ERC20:
         
         """ deposit
 
-            Reset token LP
+            Deposit token
                 
             Parameters
             -------
@@ -49,7 +45,7 @@ class ERC20:
         
         """ transfer
 
-            Reset token LP
+            Transfer token
                 
             Parameters
             -------

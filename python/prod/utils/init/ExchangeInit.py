@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
 @dataclass
-class ExchangeData:
+class ExchangeInit:
     symbol: str
     address : str    

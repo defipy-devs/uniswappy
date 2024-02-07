@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from .ExchangeData import ExchangeData
+from .ExchangeInit import ExchangeInit
 from ...erc import ERC20
 
 @dataclass
-class UniswapExchangeData(ExchangeData):
+class UniswapExchangeInit(ExchangeInit):
     tkn0: ERC20
     tkn1: ERC20 

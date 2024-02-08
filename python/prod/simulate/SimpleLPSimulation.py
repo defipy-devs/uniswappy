@@ -2,6 +2,7 @@
 # Author: Ian Moore ( utiliwire@gmail.com )
 # Date: Oct 2023
 
+from ..utils.data import UniswapExchangeData
 from ..cpt.factory import UniswapFactory
 from ..simulate import SolveDeltas
 from ..process.deposit import SwapDeposit
@@ -28,13 +29,15 @@ class SimpleLPSimulation:
         assert self.tkn_x_amt != None or self.tkn_y_amt != None, 'SimpleLPSimulation: TKN AMTS NOT INITIALIZED'
         
         factory = UniswapFactory("TKN pool factory", None)
-        self.lp = factory.create_exchange(tkn_x, tkn_y, symbol='LP', address=None)
+        
+        exchg_data = UniswapExchangeData(tkn0 = tkn_x, tkn1 = tkn_y, symbol='LP', address=None)
+        self.lp = factory.deploy(exchg_data)
         self.lp.add_liquidity(USER_NM, self.tkn_x_amt, self.tkn_y_amt, self.tkn_x_amt, self.tkn_y_amt)
 
     def run(self, p_trial_arr):
         sDel = SolveDeltas(self.lp)
-        tkn_x = self.lp.factory.exchange_to_tokens[self.lp.name][self.lp.token0]
-        tkn_y = self.lp.factory.exchange_to_tokens[self.lp.name][self.lp.token1]
+        tkn_x = self.lp.factory.token_from_exchange[self.lp.name][self.lp.token0]
+        tkn_y = self.lp.factory.token_from_exchange[self.lp.name][self.lp.token1]
         tkn_price_arr = []
         lp_tot_arr = []
         x_amt_arr = []

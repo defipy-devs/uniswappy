@@ -5,8 +5,8 @@
 from ...erc import ERC20
 from ..exchg import UniswapExchange
 from ..quote import LPQuote
-from ...utils.init import UniswapExchangeInit
-from ...utils.init import FactoryInit
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -14,7 +14,7 @@ MINIMUM_LIQUIDITY = 1e-15
 class ChildUniswapExchange(UniswapExchange):
     
     
-    def __init__(self, factory_struct: FactoryInit, exchg_struct: UniswapExchangeInit) -> None:
+    def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData) -> None:
         super().__init__(factory_struct, exchg_struct)
         self.hybrid_supply = 0
         self.hybrid_liquidity_providers = {}

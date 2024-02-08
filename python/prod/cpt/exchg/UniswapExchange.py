@@ -5,8 +5,8 @@
 from ...erc import ERC20
 from ...erc import LPERC20
 from ...utils.interfaces import IExchange 
-from ...utils.init import UniswapExchangeInit
-from ...utils.init import FactoryInit
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -23,7 +23,7 @@ class UniswapExchange(IExchange, LPERC20):
         self.exchg_struct : UniswapExchangeInit
             Exchange initialization data           
     """          
-    def __init__(self, factory_struct: FactoryInit, exchg_struct: UniswapExchangeInit):
+    def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
         self.factory = factory_struct
         self.token0 = exchg_struct.tkn0.token_name     
@@ -116,7 +116,7 @@ class UniswapExchange(IExchange, LPERC20):
                 amountA = amountADesired
                 amountB = amountBOptimal
             else:
-                amountAOptimal = self.quote(balance1, self.reserve1, self.reserve0)
+                amountAOptimal = self.quote(amountBDesired, self.reserve1, self.reserve0)
                 assert round(amountAOptimal,5) <= round(amountADesired,5)
                 assert round(amountAOptimal,5) >= round(amountAMin,5), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
                 amountA = amountAOptimal

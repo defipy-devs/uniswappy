@@ -6,8 +6,8 @@ from ..exchg import UniswapExchange
 from ...erc import ERC20
 from ...erc import LPERC20
 from ...utils.interfaces import IExchangeFactory 
-from ...utils.init import UniswapExchangeInit
-from ...utils.init import FactoryInit
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 
 
 class UniswapFactory(IExchangeFactory):
@@ -34,7 +34,7 @@ class UniswapFactory(IExchangeFactory):
         self.token_from_exchange = {}
         self.parent_lp = None
 
-    def deploy(self, exchg_data : UniswapExchangeInit):
+    def deploy(self, exchg_data : UniswapExchangeData):
         
         """ create_exchange
 
@@ -62,8 +62,8 @@ class UniswapFactory(IExchangeFactory):
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
-        factory_struct = FactoryInit(self.token_from_exchange,  self.parent_lp, self.name, self.address)
-        exchg_struct = UniswapExchangeInit(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
+        factory_struct = FactoryData(self.token_from_exchange,  self.parent_lp, self.name, self.address)
+        exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
         exchange = UniswapExchange(factory_struct, exchg_struct)       
         
         self.exchange_from_token[token0.token_name] = exchange

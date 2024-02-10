@@ -232,7 +232,7 @@ class IndexVault(Vault):
         tkn_nm = tkn.token_name
         for account in self.lp_providers:
             amt = self.lp_providers[account][exchange]['amount']
-            exch_tkn = lp_tkn.factory.exchange_to_tokens[lp_tkn.name][tkn_nm]
+            exch_tkn = lp_tkn.factory.token_from_exchange[lp_tkn.name][tkn_nm]
             self.lp_providers[account][index_tokens[tkn_nm]] = {}
             self.lp_providers[account][index_tokens[tkn_nm]]['amount'] = self.get_tkn_pair_amount(lp_tkn, exch_tkn, amt)             
                   
@@ -258,7 +258,7 @@ class IndexVault(Vault):
 
         for tkn_nm in index_tokens.keys():
             amt = self.lp_providers[_from][exchange]['amount']
-            exch_tkn = lp_tkn.factory.exchange_to_tokens[lp_tkn.name][tkn_nm]
+            exch_tkn = lp_tkn.factory.token_from_exchange[lp_tkn.name][tkn_nm]
             self.lp_providers[_from][index_tokens[tkn_nm]] = {}
             self.lp_providers[_from][index_tokens[tkn_nm]]['amount'] = self.get_tkn_pair_amount(lp_tkn, exch_tkn, amt)  
             

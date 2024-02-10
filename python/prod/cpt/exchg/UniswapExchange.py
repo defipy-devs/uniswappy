@@ -48,7 +48,7 @@ class UniswapExchange(IExchange, LPERC20):
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
 
-    def add_liquidity(self, _from, amountADesired, amountBDesired, amountAMin, amountBMin):
+    def add_liquidity(self, _from_addr, amountADesired, amountBDesired, amountAMin, amountBMin):
         
         """ add_liquidity
 
@@ -56,7 +56,7 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------
-            _from : str
+            _from_addr : str
                 receiving user address      
             amountADesired : float
                 desired amount of A      
@@ -72,10 +72,10 @@ class UniswapExchange(IExchange, LPERC20):
         assert tokens.get(self.token0) and tokens.get(self.token1), 'UniswapV2: TOKEN_UNAVAILABLE' 
         amountA, amountB = self._add_liquidity(amountADesired, amountBDesired, amountAMin, amountBMin)
 
-        tokens.get(self.token0).deposit(_from, amountA)
-        tokens.get(self.token1).deposit(_from, amountB)
+        tokens.get(self.token0).deposit(_from_addr, amountA)
+        tokens.get(self.token1).deposit(_from_addr, amountB)
 
-        self.mint(_from, amountA, amountB)
+        self.mint(_from_addr, amountA, amountB)
         return amountA, amountB
 
     def _add_liquidity(self, amountADesired, amountBDesired, amountAMin, amountBMin):
@@ -124,7 +124,7 @@ class UniswapExchange(IExchange, LPERC20):
 
         return amountA, amountB
 
-    def get_amounts(self, to, liquidity):
+    def get_amounts(self, to_addr, liquidity):
         
         """ get_amounts
 
@@ -132,7 +132,7 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------
-            to : str
+            to_addr : str
                 receiving user address  
             liquidity : float
                 lp amount                  
@@ -150,7 +150,7 @@ class UniswapExchange(IExchange, LPERC20):
 
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total
-        total_liquidity = self.liquidity_providers[to]
+        total_liquidity = self.liquidity_providers[to_addr]
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
@@ -159,7 +159,7 @@ class UniswapExchange(IExchange, LPERC20):
 
         return amountA, amountB    
     
-    def remove_liquidity(self, to, liquidity, amountAMin, amountBMin):
+    def remove_liquidity(self, to_addr, liquidity, amountAMin, amountBMin):
         
         """ remove_liquidity
 
@@ -167,7 +167,7 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------
-            to : str
+            to_addr : str
                 receiving user address  
             liquidity : float
                 lp amount to removed                 
@@ -189,24 +189,22 @@ class UniswapExchange(IExchange, LPERC20):
 
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total
-        total_liquidity = self.liquidity_providers[to]
+        total_liquidity = self.liquidity_providers[to_addr]
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
         amountA = liquidity * balanceA / self.total_supply    
         amountB = liquidity * balanceB / self.total_supply  
-
-        if not (round(amountA,5) >= round(amountAMin,5)):
-            print('amount0 {} amountAMin {}'.format(round(amountA,5), round(amountAMin,5)))        
         
+        assert (round(amountA,5) >= round(amountAMin,5)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
         assert amountA > 0 and amountB > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED'
         assert round(amountA,5) >= round(amountAMin,5), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
         assert round(amountB,5) >= round(amountBMin,5), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
         
-        self.burn(to, liquidity, amountA, amountB)
+        self.burn(to_addr, liquidity, amountA, amountB)
         return amountA, amountB
 
-    def swap_exact_tokens_for_tokens(self, amountIn, amountOutMin, token_in, to):
+    def swap_exact_tokens_for_tokens(self, amountIn, amountOutMin, token_in, to_addr):
         
         """ swap_exact_tokens_for_tokens
 
@@ -220,7 +218,7 @@ class UniswapExchange(IExchange, LPERC20):
                 min swap amount in                
             token_in : ERC20
                 Token to be swapped
-            to : str
+            to_addr : str
                receiving user address  
                 
             Returns
@@ -234,15 +232,15 @@ class UniswapExchange(IExchange, LPERC20):
 
         tokens = self.factory.token_from_exchange[self.name]
         if(token_in.token_name == self.token0):
-            tokens.get(self.token0).deposit(to, amountIn)
-            self.swap(0, amount_out_expected, to)
+            tokens.get(self.token0).deposit(to_addr, amountIn)
+            self.swap(0, amount_out_expected, to_addr)
         elif(token_in.token_name == self.token1):
-            tokens.get(self.token1).deposit(to, amountIn)
-            self.swap(amount_out_expected, 0, to)
+            tokens.get(self.token1).deposit(to_addr, amountIn)
+            self.swap(amount_out_expected, 0, to_addr)
             
         return amount_out_expected
 
-    def burn(self, to, liquidity, amountA, amountB):
+    def burn(self, to_addr, liquidity, amountA, amountB):
         
         """ burn
 
@@ -250,7 +248,7 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------
-            to : str
+            to_addr : str
                receiving user address  
             liquidity : float
                 amount of liquidity to be burned                  
@@ -260,18 +258,18 @@ class UniswapExchange(IExchange, LPERC20):
                 est. amount from reserve1 to be burned               
         """          
         
-        self._burn(to, liquidity)
+        self._burn(to_addr, liquidity)
 
         tokens = self.factory.token_from_exchange[self.name]
-        tokens.get(self.token0).transfer(to, amountA)
-        tokens.get(self.token1).transfer(to, amountB)
+        tokens.get(self.token0).transfer(to_addr, amountA)
+        tokens.get(self.token1).transfer(to_addr, amountB)
 
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total
 
         self._update(balanceA, balanceB)
 
-    def _burn(self, to, value):
+    def _burn(self, to_addr, value):
         
         """ _burn
 
@@ -285,11 +283,11 @@ class UniswapExchange(IExchange, LPERC20):
                 amount of liquidity to be burned                           
         """            
         
-        available_liquidity = self.liquidity_providers.get(to)
-        self.liquidity_providers[to] = available_liquidity - value
+        available_liquidity = self.liquidity_providers.get(to_addr)
+        self.liquidity_providers[to_addr] = available_liquidity - value
         self.total_supply -= value
 
-    def mint(self, to, _amountA, _amountB):
+    def mint(self, to_addr, _amountA, _amountB):
         
         """ mint
 
@@ -297,7 +295,7 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------
-            to : str
+            to_addr : str
                 receiving user address      
             _amountA : float
                 desired amount of A      
@@ -329,7 +327,7 @@ class UniswapExchange(IExchange, LPERC20):
         assert liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED'
         
         self._update(balanceA, balanceB)
-        self._mint(to, liquidity)
+        self._mint(to_addr, liquidity)
 
     def _update(self, balanceA, balanceB):
         
@@ -348,7 +346,7 @@ class UniswapExchange(IExchange, LPERC20):
         self.reserve0 = balanceA
         self.reserve1 = balanceB
 
-    def _mint(self, to, value):
+    def _mint(self, to_addr, value):
         
         """ _mint
 
@@ -356,16 +354,16 @@ class UniswapExchange(IExchange, LPERC20):
                 
             Parameters
             -------   
-            to : str
+            to_addr : str
                 receiving user address       
             value : float
                 amount of new liquidity                  
         """          
         
-        if self.liquidity_providers.get(to):
-            self.liquidity_providers[to] += value
+        if self.liquidity_providers.get(to_addr):
+            self.liquidity_providers[to_addr] += value
         else:
-            self.liquidity_providers[to] = value
+            self.liquidity_providers[to_addr] = value
 
         self.last_liquidity_deposit = value     
         self.total_supply += value
@@ -390,7 +388,7 @@ class UniswapExchange(IExchange, LPERC20):
         self.aggr_fee0 += fee0 
         self.aggr_fee1 += fee1
         
-    def swap(self, amountA_out, amountB_out, to):
+    def swap(self, amountA_out, amountB_out, to_addr):
         
         """ swap
 
@@ -402,7 +400,7 @@ class UniswapExchange(IExchange, LPERC20):
                 swap amountA out
             amountB_out : float
                 swap amountB out               
-            to : str
+            to_addr : str
                receiving user address                   
         """         
         
@@ -410,11 +408,11 @@ class UniswapExchange(IExchange, LPERC20):
         assert amountA_out < self.reserve0 and amountB_out < self.reserve1, 'UniswapV2: INSUFFICIENT_LIQUIDITY'
 
         tokens = self.factory.token_from_exchange[self.name]
-        assert tokens.get(self.token0).token_addr != to, 'UniswapV2: INVALID_TO_ADDRESS'
-        assert tokens.get(self.token1).token_addr != to, 'UniswapV2: INVALID_TO_ADDRESS'
+        assert tokens.get(self.token0).token_addr != to_addr, 'UniswapV2: INVALID_TO_ADDRESS'
+        assert tokens.get(self.token1).token_addr != to_addr, 'UniswapV2: INVALID_TO_ADDRESS'
 
-        tokens.get(self.token0).transfer(to, amountA_out)
-        tokens.get(self.token1).transfer(to, amountB_out)    
+        tokens.get(self.token0).transfer(to_addr, amountA_out)
+        tokens.get(self.token1).transfer(to_addr, amountB_out)    
         
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total

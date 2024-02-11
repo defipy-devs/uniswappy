@@ -1,6 +1,6 @@
-# Exchange.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: May 2023
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 from ...erc import ERC20
 from ...erc import LPERC20
@@ -36,7 +36,7 @@ class UniswapExchange(IExchange, LPERC20):
         self.aggr_fee1 = 0
         self.collected_fee0 = 0
         self.collected_fee1 = 0              
-        self.name =  f"{self.token0}/{self.token1}"
+        self.name =  f"{self.token0}|{self.token1}"
         self.symbol = exchg_struct.symbol
         self.liquidity_providers = {}
         self.last_liquidity_deposit = 0
@@ -44,7 +44,6 @@ class UniswapExchange(IExchange, LPERC20):
 
     def summary(self):
         print(f"Exchange {self.name} ({self.symbol})")
-        print(f"Tokens: {self.token0}/{self.token1}")
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
 

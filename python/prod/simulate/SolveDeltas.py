@@ -1,6 +1,6 @@
-# SolveDeltas.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: Mar 2023
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 from scipy.optimize import fsolve
 import warnings

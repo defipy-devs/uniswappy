@@ -1,6 +1,6 @@
-# EventSelectionModel.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: Sept 2022
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 import numpy as np
 

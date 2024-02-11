@@ -1,10 +1,10 @@
-# PriceDrawDown.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: Dec 2022
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 import numpy as np
 
-class PriceDrawDown():
+class MaxDrop():
 
     """ Determine maximum percentage drop for any numerical array along with its
         starting and end points
@@ -41,9 +41,9 @@ class PriceDrawDown():
         self.__drop = self.calc_drop()
         return self.__pnt1, self.__pnt2, self.__drop  
  
-    def calc_drop(self):
+    def calc(self):
         
-        """ calc_drop
+        """ calc
 
             Calculate percentage drop given y_start and y_end values
 

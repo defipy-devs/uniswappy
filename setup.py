@@ -4,13 +4,13 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='UniswapPy',
-      version='1.1.2',
-      description='Uniswap for Python',
+      version='1.1.3',
+      description='Uniswap Analytics with Python',
       long_description=long_description,
       long_description_content_type="text/markdown",
-      url='http://github.com/icmoore/uniswappy',
+      url='http://github.com/defipy-devs/uniswappy',
       author = "icmoore",
-      author_email = "utiliwire@gmail.org",
+      author_email = "defipy.devs@gmail.com",
       license='MIT',
       package_dir = {"uniswappy": "python/prod"},
       packages=[
@@ -36,8 +36,7 @@ setup(name='UniswapPy',
           'uniswappy.process.swap',
           'uniswappy.simulate',
           'uniswappy.utils.interfaces',
-          'uniswappy.utils.data',
-          
+          'uniswappy.utils.data'
       ],
       install_requires=[
           'scipy >= 1.7.3'

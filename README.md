@@ -19,6 +19,7 @@ or
 ```
 from uniswappy.erc import ERC20
 from uniswappy.cpt.factory import UniswapFactory
+from uniswappy.utils.data import UniswapExchangeData
 
 user_nm = 'user_intro'
 eth_amount = 1000
@@ -26,31 +27,29 @@ dai_amount = 1000000
 
 dai = ERC20("DAI", "0x111")
 eth = ERC20("ETH", "0x09")
+exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = dai, symbol="LP", address="0x011")
+
 factory = UniswapFactory("ETH pool factory", "0x2")
-lp = factory.create_exchange(eth, dai, symbol="LP", address="0x011")
-lp.add_liquidity(user_nm, eth_amount, dai_amount, eth_amount, dai_amount)
-lp.info()
+lp = factory.deploy(exchg_data)
+lp.add_liquidity("user0", eth_amount, dai_amount, eth_amount, dai_amount)
+lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH/DAI (LP) <br/>
-Coins: ETH/DAI <br/>
-Reserves: ETH = 1000 | DAI = 1000000 <br/>
+Exchange ETH|DAI (LP) <br/>
+Reserves: ETH = 1000, DAI = 1000000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
-
 ```
 from uniswappy.process.swap import Swap
 
 out = Swap().apply(lp, dai, user_nm, 1000)
-lp.info()
+lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH/DAI (LP) <br/>
-Coins: ETH/DAI <br/>
-Reserves: ETH = 999.00399301896 | DAI = 1001000 <br/>
+Exchange ETH|DAI (LP) <br/>
+Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
-
 
 # Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c), and [Setup your Uniswap Deposits like a Baller](https://medium.com/coinmonks/setup-your-uniswap-deposits-like-a-baller-b99340ea302f)

@@ -1,6 +1,6 @@
-# swap_test.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: Aug 2023
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 TEST_PATH = "python/test/process/liquidity"
 

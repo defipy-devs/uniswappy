@@ -1,6 +1,6 @@
-# Factory.py
-# Author: Ian Moore ( utiliwire@gmail.com )
-# Date: May 2023
+# Copyright [2023] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
 
 from ..exchg import UniswapExchange 
 from ...erc import ERC20
@@ -8,7 +8,6 @@ from ...erc import LPERC20
 from ...utils.interfaces import IExchangeFactory 
 from ...utils.data import UniswapExchangeData
 from ...utils.data import FactoryData
-
 
 class UniswapFactory(IExchangeFactory):
 
@@ -57,7 +56,7 @@ class UniswapFactory(IExchangeFactory):
         address = exchg_data.address
         
         
-        assert f"{token0.token_name}/{token1.token_name}" not in self.token_from_exchange, 'UniswapV2Factory: EXCHANGE_CREATED'
+        assert symbol not in self.token_from_exchange, 'UniswapV2Factory: EXCHANGE_CREATED'
             
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 

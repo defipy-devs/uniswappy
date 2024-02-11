@@ -36,7 +36,7 @@ lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH|DAI (LP) <br/>
+Exchange ETH-DAI (LP) <br/>
 Reserves: ETH = 1000, DAI = 1000000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 ```
@@ -47,7 +47,7 @@ lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH|DAI (LP) <br/>
+Exchange ETH-DAI (LP) <br/>
 Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 

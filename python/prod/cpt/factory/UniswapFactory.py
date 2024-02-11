@@ -54,8 +54,7 @@ class UniswapFactory(IExchangeFactory):
         token1 = exchg_data.tkn1
         symbol = exchg_data.symbol
         address = exchg_data.address
-        
-        
+
         assert symbol not in self.token_from_exchange, 'UniswapV2Factory: EXCHANGE_CREATED'
             
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp

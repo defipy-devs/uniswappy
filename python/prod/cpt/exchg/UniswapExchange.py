@@ -36,7 +36,7 @@ class UniswapExchange(IExchange, LPERC20):
         self.aggr_fee1 = 0
         self.collected_fee0 = 0
         self.collected_fee1 = 0              
-        self.name =  f"{self.token0}|{self.token1}"
+        self.name =  f"{self.token0}-{self.token1}"
         self.symbol = exchg_struct.symbol
         self.liquidity_providers = {}
         self.last_liquidity_deposit = 0

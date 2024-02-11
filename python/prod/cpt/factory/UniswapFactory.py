@@ -3,12 +3,14 @@
 # Date: May 2023
 
 from ..exchg import UniswapExchange 
-from .UniswapFactoryStruct import UniswapFactoryStruct 
 from ...erc import ERC20
 from ...erc import LPERC20
+from ...utils.interfaces import IExchangeFactory 
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 
 
-class UniswapFactory:
+class UniswapFactory(IExchangeFactory):
 
     """ 
         Create liquidity pools for given token pairs.
@@ -19,25 +21,20 @@ class UniswapFactory:
             Token name 
         self.address : str
             Token 0 name  
-        self.token_to_exchange : dictionary
+        self.exchange_from_token : dictionary
             Map of tokens to exchanges
-        self.exchange_to_tokens : dictionary
+        self.tokens_from_exchange : dictionary
             Map of exchanges to pair tokens          
-           
-        References
-        ----------   
-        - https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol
-        - https://github.com/Uniswap/v2-periphery/blob/master/contracts/UniswapV2Router02.sol
     """     
     
     def __init__(self, name: str, address: str) -> None:
         self.name = name
         self.address = address
-        self.token_to_exchange = {}
-        self.exchange_to_tokens = {}
+        self.exchange_from_token = {}
+        self.token_from_exchange = {}
         self.parent_lp = None
 
-    def create_exchange(self, token0: ERC20, token1: ERC20, symbol: str, address : str):
+    def deploy(self, exchg_data : UniswapExchangeData):
         
         """ create_exchange
 
@@ -45,42 +42,34 @@ class UniswapFactory:
                 
             Parameters
             -------
-            token0 : ERC20
-                ERC20 token within LP pair     
-            token1 : ERC20
-                ERC20 token within LP pair       
-            symbol : str
-                name of exchange  
-            address : float
-                address of exchange  
-                
+            exchg_data : UniswapExchangeInit
+                Exchange initialization data     
+
             Returns
             -------
-            new_exchange : Exchange
-                newly created exchange that is also a LP token                    
-        """         
+            exchange : UniswapExchange
+                Newly created exchange that is also a LP token                    
+        """  
         
-        if self.exchange_to_tokens.get(f"{token0.token_name}/{token1.token_name}"):
-            raise Exception("Exchange already created")
+        token0 = exchg_data.tkn0
+        token1 = exchg_data.tkn1
+        symbol = exchg_data.symbol
+        address = exchg_data.address
+        
+        
+        assert f"{token0.token_name}/{token1.token_name}" not in self.token_from_exchange, 'UniswapV2Factory: EXCHANGE_CREATED'
             
         self.parent_lp = token0.parent_lp if token0.type == 'index' else self.parent_lp
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
-        factory_struct = UniswapFactoryStruct(self.exchange_to_tokens,  self.parent_lp, self.name, self.address)
-        new_exchange = UniswapExchange(
-            factory_struct,
-            token0.token_name,
-            token1.token_name,
-            f"{token0.token_name}/{token1.token_name}",
-            symbol,
-            address
-        )       
+        factory_struct = FactoryData(self.token_from_exchange,  self.parent_lp, self.name, self.address)
+        exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
+        exchange = UniswapExchange(factory_struct, exchg_struct)       
         
-        self.token_to_exchange[token0.token_name] = new_exchange
-        self.exchange_to_tokens[new_exchange.name] = {token0.token_name: token0, 
-                                                      token1.token_name: token1}
+        self.exchange_from_token[token0.token_name] = exchange
+        self.token_from_exchange[exchange.name] = {token0.token_name: token0, token1.token_name: token1}
         
-        return new_exchange
+        return exchange
 
     def get_exchange(self, token):
         
@@ -95,11 +84,11 @@ class UniswapFactory:
                 
             Returns
             -------
-            exchange : Exchange
+            exchange : UniswapExchange
                 exchange from mapped token                    
         """         
         
-        return self.token_to_exchange.get(token)
+        return self.token_from_exchange.get(token)
 
     def get_token(self, exchange):
         
@@ -109,7 +98,7 @@ class UniswapFactory:
                 
             Parameters
             -------
-            exchange : Exchange
+            exchange : UniswapExchange
                 receiving user address      
                 
             Returns
@@ -118,18 +107,4 @@ class UniswapFactory:
                 token from mapped exchange                     
         """          
         
-        return self.exchange_to_token.get(exchange)
-
-    def token_count(self):
-        
-        """ token_count
-
-            Get token count from factory   
-                
-            Returns
-            -------
-            num token : int 
-                number of tokens in factory                    
-        """          
-        
-        return len(self.token_to_exchange)
+        return self.token_from_exchange.get(exchange)

@@ -14,7 +14,7 @@ class LPQuote():
 
     def get_opposing_token(self, lp, tkn):
         opposing_tkn_nm = lp.token1 if(tkn.token_name == lp.token0) else lp.token0
-        return lp.factory.exchange_to_tokens[lp.name][opposing_tkn_nm]
+        return lp.factory.token_from_exchange[lp.name][opposing_tkn_nm]
 
     def get_reserve(self, lp, token):  
         

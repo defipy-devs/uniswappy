@@ -16,10 +16,6 @@ class IndexERC20(ERC20):
             Token address  
         self.token_total : float
             Token holdings 
-            
-        Reference
-        ----------   
-        https://docs.uniswap.org/protocol/V1/guides/connect-to-uniswap#token-interface
     """  
 
     def __init__(self, name, addr, parent_tkn, parent_lp):

@@ -24,7 +24,7 @@ class Arbitrage():
         self.x_tot = 0        
            
     def apply(self, price_benchmark, user_nm, amt_in = None):
-        tokens = self.lp.factory.exchange_to_tokens[self.lp.name]
+        tokens = self.lp.factory.token_from_exchange[self.lp.name]
         
         x_tkn = tokens[self.lp.token0]
         y_tkn = tokens[self.lp.token1]
@@ -81,7 +81,7 @@ class Arbitrage():
         return self.y_tot     
     
     def net_amount(self, token):
-        tokens = self.lp.factory.exchange_to_tokens[self.lp.name]
+        tokens = self.lp.factory.token_from_exchange[self.lp.name]
         x_tkn = tokens[self.lp.token0]
         y_tkn = tokens[self.lp.token1]
         net_amt = 0

@@ -122,7 +122,7 @@ class WithdrawSwap(Process):
                 opposing ERC20 token                   
         """          
         
-        tokens = lp.factory.exchange_to_tokens[lp.name]
+        tokens = lp.factory.token_from_exchange[lp.name]
         trading_token = tokens[lp.token1] if token.token_name == lp.token0 else tokens[lp.token0]
         return trading_token        
         

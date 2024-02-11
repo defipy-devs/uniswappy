@@ -11,14 +11,11 @@ sys.path.append(os.getcwd().replace(TEST_PATH,""))
 
 from python.prod.cpt.factory import UniswapFactory
 from python.prod.erc import ERC20
-from python.prod.erc import LPERC20
-from python.prod.process.liquidity import AddLiquidity
-from python.prod.process.liquidity import RemoveLiquidity
+from python.prod.utils.data import UniswapExchangeData
 from python.prod.process.swap import WithdrawSwap
 from python.prod.process.deposit import SwapDeposit
 from python.prod.cpt.index import RebaseIndexToken
 from python.prod.cpt.quote import LPQuote
-import numpy as np 
 
 USER_NM = 'user0'
 DAI_AMT = 10000
@@ -27,7 +24,8 @@ SYS_AMT = 100000
 class Test_SwapRevenue(unittest.TestCase):
    
     def setup_lp(self, factory, tkn1, tkn2, lp_nm):
-        return factory.create_exchange(tkn1, tkn2, symbol=lp_nm, address="0x012")
+        exchg_data = UniswapExchangeData(tkn0 = tkn1, tkn1 = tkn2, symbol="LP", address="0x011")
+        return factory.deploy(exchg_data)
     
         
     def calc_tkn_settlement(self, lp, token_in, dL):

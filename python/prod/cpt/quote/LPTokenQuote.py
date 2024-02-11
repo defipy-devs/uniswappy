@@ -10,9 +10,9 @@ class LPTokenQuote():
         self.quote_child = quote_child  
  
     def get_x(self, lp, amt_tkn_x): 
-        tkn_x = lp.factory.exchange_to_tokens[lp.name][lp.token0] 
+        tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0] 
         parent_lp = self.get_base_lp(lp, tkn_x)
-        parent_lp_x_tkn = parent_lp.factory.exchange_to_tokens[parent_lp.name][parent_lp.token0]
+        parent_lp_x_tkn = parent_lp.factory.token_from_exchange[parent_lp.name][parent_lp.token0]
         parent_x_tkn = tkn_x.parent_tkn if tkn_x.type == 'index' else tkn_x
 
         if(parent_x_tkn.token_name != parent_lp_x_tkn.token_name):
@@ -29,7 +29,7 @@ class LPTokenQuote():
         return lp_amt 
         
     def base_x_asset(self, lp):
-        tkn_x = lp.factory.exchange_to_tokens[lp.name][lp.token0]
+        tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
         if(tkn_x.type == 'index'):
             tkn = tkn_x.parent_tkn
         else:

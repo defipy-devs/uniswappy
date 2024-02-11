@@ -18,10 +18,6 @@ class LPERC20(ERC20):
             Token holdings 
         self.type : float
             Token type 
-            
-        Reference
-        ----------   
-        https://docs.uniswap.org/protocol/V1/guides/connect-to-uniswap#token-interface
     """      
 
     def __init__(self, name: str, addr: str) -> None:

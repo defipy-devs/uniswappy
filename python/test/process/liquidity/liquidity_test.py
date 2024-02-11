@@ -11,12 +11,9 @@ sys.path.append(os.getcwd().replace(TEST_PATH,""))
 
 from python.prod.cpt.factory import UniswapFactory
 from python.prod.erc import ERC20
-from python.prod.erc import LPERC20
 from python.prod.process.liquidity import AddLiquidity
 from python.prod.process.liquidity import RemoveLiquidity
-from python.prod.cpt.index import RebaseIndexToken
-from python.prod.cpt.quote import LPQuote
-import numpy as np 
+from python.prod.utils.data import UniswapExchangeData
 
 USER0 = 'user0'
 USER1 = 'user1' 
@@ -28,7 +25,8 @@ class Test_Liquidity(unittest.TestCase):
         eth_amount = 1000
         tkn_amount = 100000
         factory = UniswapFactory("ETH pool factory", "0x2")
-        lp_tkn = factory.create_exchange(eth, tkn, symbol="LP_TKN", address="0x011")
+        exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = tkn, symbol="LP", address="0x011")
+        lp_tkn = factory.deploy(exchg_data)
         lp_tkn.add_liquidity(USER0, eth_amount, tkn_amount, eth_amount, tkn_amount)
         return lp_tkn
             

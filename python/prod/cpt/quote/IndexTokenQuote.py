@@ -10,7 +10,7 @@ class IndexTokenQuote():
         self.quote_native_tokens = quote_native_tokens    
 
     def get_x(self, lp, amt_lp): 
-        tkn_x = lp.factory.exchange_to_tokens[lp.name][lp.token0]  
+        tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]  
         if(tkn_x.type == 'standard'):
             x_amt = LPQuote(False).get_amount_from_lp(lp, tkn_x, amt_lp)
         else: 
@@ -21,7 +21,7 @@ class IndexTokenQuote():
         return self.get_native_x(lp, tkn_x, x_amt) if self.quote_native_tokens else x_amt           
         
     def get_y(self, lp, amt_lp): 
-        tkn_y = lp.factory.exchange_to_tokens[lp.name][lp.token1]  
+        tkn_y = lp.factory.token_from_exchange[lp.name][lp.token1]  
         if(tkn_y.type == 'standard'):
             y_amt = LPQuote(False).get_amount_from_lp(lp, tkn_y, amt_lp)
         else:           
@@ -33,7 +33,7 @@ class IndexTokenQuote():
         return self.get_native_y(lp, tkn_y, y_amt) if self.quote_native_tokens else y_amt     
    
     def base_x_asset(self, lp):
-        tkn_x = lp.factory.exchange_to_tokens[lp.name][lp.token0]
+        tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
         if(tkn_x.type == 'index'):
             tkn = tkn_x.parent_tkn
         else:
@@ -42,7 +42,7 @@ class IndexTokenQuote():
         return tkn    
 
     def base_y_asset(self, lp):
-        tkn_y = lp.factory.exchange_to_tokens[lp.name][lp.token1]
+        tkn_y = lp.factory.token_from_exchange[lp.name][lp.token1]
         if(tkn_y.type == 'index'):
             tkn = tkn_y.parent_tkn
         else:
@@ -52,7 +52,7 @@ class IndexTokenQuote():
 
     def get_native_x(self, lp, tkn_x, x_amt):
         parent_lp = self.get_base_lp(lp, tkn_x)
-        parent_lp_x_tkn = parent_lp.factory.exchange_to_tokens[parent_lp.name][parent_lp.token0]
+        parent_lp_x_tkn = parent_lp.factory.token_from_exchange[parent_lp.name][parent_lp.token0]
         parent_x_tkn = tkn_x.parent_tkn if tkn_x.type == 'index' else tkn_x
 
         if(parent_x_tkn.token_name != parent_lp_x_tkn.token_name):
@@ -62,7 +62,7 @@ class IndexTokenQuote():
 
     def get_native_y(self, lp, tkn_y, y_amt):
         parent_lp = self.get_base_lp(lp, tkn_y)
-        parent_lp_y_tkn = parent_lp.factory.exchange_to_tokens[parent_lp.name][parent_lp.token1]
+        parent_lp_y_tkn = parent_lp.factory.token_from_exchange[parent_lp.name][parent_lp.token1]
         parent_y_tkn = tkn_y.parent_tkn if tkn_y.type == 'index' else tkn_y
 
         if(parent_y_tkn.token_name != parent_lp_y_tkn.token_name):

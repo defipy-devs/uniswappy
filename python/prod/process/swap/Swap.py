@@ -48,6 +48,6 @@ class Swap(Process):
         
         amount_in = tDel.delta() if amount_in == None else amount_in
         amount_out = math.floor(lp.get_amount_out(amount_in, token_in))
-        amount_out_expected = lp.swap_exact_tokens_for_tokens(amount_in, amount_out, token_in, to=user_nm)
+        amount_out_expected = lp.swap_exact_tokens_for_tokens(amount_in, amount_out, token_in, to_addr=user_nm)
         return amount_out_expected        
         

@@ -5,6 +5,8 @@
 from ...erc import ERC20
 from ..exchg import UniswapExchange
 from ..quote import LPQuote
+from ...utils.data import UniswapExchangeData
+from ...utils.data import FactoryData
 import math
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -12,9 +14,8 @@ MINIMUM_LIQUIDITY = 1e-15
 class ChildUniswapExchange(UniswapExchange):
     
     
-    def __init__(self, factory_struct: {}, token0_name: str, token1_name: str, 
-                       name: str, symbol: str, addr : str) -> None:
-        super().__init__(factory_struct, token0_name, token1_name, name, symbol, addr)
+    def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData) -> None:
+        super().__init__(factory_struct, exchg_struct)
         self.hybrid_supply = 0
         self.hybrid_liquidity_providers = {}
 
@@ -52,7 +53,7 @@ class ChildUniswapExchange(UniswapExchange):
                 removed liquidity from reserve1                    
         """         
         
-        tokens = self.factory.exchange_to_tokens[self.name]
+        tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0) and tokens.get(self.token1), "Error"
 
         balance0 = tokens.get(self.token0).token_total
@@ -97,7 +98,7 @@ class ChildUniswapExchange(UniswapExchange):
                 desired amount of B                   
         """          
         
-        tokens = self.factory.exchange_to_tokens[self.name]
+        tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0) and tokens.get(self.token1), "Error"
 
         balance0 = tokens.get(self.token0).token_total
@@ -146,7 +147,7 @@ class ChildUniswapExchange(UniswapExchange):
     
     def _get_iamounts(self, amt0, amt1):
 
-        tokens = self.factory.exchange_to_tokens[self.name]
+        tokens = self.factory.token_from_exchange[self.name]
         parent_lp = self.factory.parent_lp
         x_tkn = tokens.get(self.token0) 
         y_tkn = tokens.get(self.token1)

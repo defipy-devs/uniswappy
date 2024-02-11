@@ -4,7 +4,7 @@ utilized for the purpose of analysing and modelling its behavior for DeFi
 
 To install package:
 ```
-> git clone https://github.com/icmoore/uniswappy
+> git clone https://github.com/defipy-devs/uniswappy
 > pip install .
 ```
 or

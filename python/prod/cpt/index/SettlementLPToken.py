@@ -13,6 +13,27 @@ class SettlementLPToken():
         pass
      
     def apply(self, lp, tkn, itkn_amt): 
+        
+        """ apply
+
+            Apply LP calculation settlement; given token amount, what is the liquidity amount
+                
+            Parameters
+            -----------------
+            lp : UniswapExchange
+                Uniswap LP    
+            tkn: ERC20
+                Token asset from CPT pair       
+            itkn_amt: float
+                Token reserve amount to be priced in terms of liquidity                 
+
+            Returns
+            -----------------
+            lp_amount: float
+                Liquidity amount given reserve token amount
+                   
+        """          
+        
         return self.calc_lp_settlement(lp, tkn, itkn_amt)
     
     def calc_lp_settlement(self, lp, token_in, itkn_amt):

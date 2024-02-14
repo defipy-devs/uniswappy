@@ -7,13 +7,36 @@ from ...process.swap import WithdrawSwap
 
 class RebaseIndexToken():
     
-    """ Determine rebase amount of index token given a certain amount of liquidity from LP    
-    """  
+    """ 
+        Determine rebase amount of index token given a certain amount of liquidity from LP (inverse of SettlementLPToken)  
+    """      
+
     
     def __init__(self):
         self.fac = ERC20("DAI", "0x09")
      
     def apply(self, lp, tkn, liq_amt): 
+       
+        """ apply
+
+            Apply rebase token calculation settlement; given liquidity amount, what is the reserve amount
+                
+            Parameters
+            -----------------
+            lp : UniswapExchange
+                Uniswap LP    
+            tkn: ERC20
+                Token asset from CPT pair       
+            liq_amt: float
+                Liquidity amount to be priced in in terms of reserve token                 
+
+            Returns
+            -----------------
+            rebase_amount: float
+                Reserve token amount, given liquidity amount
+                   
+        """        
+        
         return self.calc_tkn_settlement(lp, tkn, liq_amt)
     
     def calc_tkn_settlement(self, lp, token_in, dL):

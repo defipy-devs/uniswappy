@@ -12,10 +12,10 @@ from ...utils.data import FactoryData
 class UniswapFactory(IExchangeFactory):
 
     """ 
-        Create liquidity pools for given token pairs.
+        Create Uniswap liquidity pools for given token pairs
         
         Parameters
-        ----------
+        -----------------
         self.name : str
             Token name 
         self.address : str
@@ -35,17 +35,17 @@ class UniswapFactory(IExchangeFactory):
 
     def deploy(self, exchg_data : UniswapExchangeData):
         
-        """ create_exchange
+        """ deploy
 
-            Create liquidity pool (LP) exchange
+            Deploy a Uniswap liquidity pool (LP) exchange
                 
             Parameters
-            -------
-            exchg_data : UniswapExchangeInit
-                Exchange initialization data     
+            -----------------
+            exchg_data : UniswapExchangeData
+                Uniswap exchange initialization data     
 
             Returns
-            -------
+            -----------------
             exchange : UniswapExchange
                 Newly created exchange that is also a LP token                    
         """  
@@ -76,12 +76,12 @@ class UniswapFactory(IExchangeFactory):
             Get exchange from given pair token
                 
             Parameters
-            -------
+            -----------------
             token : ERC20
                 receiving user address      
                 
             Returns
-            -------
+            -----------------
             exchange : UniswapExchange
                 exchange from mapped token                    
         """         
@@ -95,12 +95,12 @@ class UniswapFactory(IExchangeFactory):
             Get token from exchange
                 
             Parameters
-            -------
+            -----------------
             exchange : UniswapExchange
                 receiving user address      
                 
             Returns
-            -------
+            -----------------
             token : ERC20 
                 token from mapped exchange                     
         """          

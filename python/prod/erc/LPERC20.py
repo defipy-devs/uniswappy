@@ -9,7 +9,7 @@ class LPERC20(ERC20):
     """ DAOSYS ERC20 token
 
         Parameters
-        ----------
+        -----------------
         self.token_name : str
             Token name 
         self.token_addr : str
@@ -34,7 +34,7 @@ class LPERC20(ERC20):
             Reset token LP
                 
             Parameters
-            -------
+            -----------------
             token_total : float
                 token total        
         """         
@@ -48,7 +48,7 @@ class LPERC20(ERC20):
             Add token delta to token total
                 
             Parameters
-            -------
+            -----------------
             value : float
                 token delta        
         """            
@@ -62,7 +62,7 @@ class LPERC20(ERC20):
             Remove token delta to token total
                 
             Parameters
-            -------
+            -----------------
             value : float
                 token delta        
         """          

@@ -17,7 +17,7 @@ class UniswapExchange(IExchange, LPERC20):
         Uniswap Exchange  
 
         Parameters
-        ----------
+        -----------------
         self.factory_struct : FactoryInit
             Factory initialization data
         self.exchg_struct : UniswapExchangeInit
@@ -54,7 +54,7 @@ class UniswapExchange(IExchange, LPERC20):
             Add liquidity to both tokens in the pair
                 
             Parameters
-            -------
+            -----------------
             _from_addr : str
                 receiving user address      
             amountADesired : float
@@ -84,7 +84,7 @@ class UniswapExchange(IExchange, LPERC20):
             Add liquidity to both tokens in the pair
                 
             Parameters
-            -------    
+            -----------------    
             amountADesired : float
                 desired amount of A      
             amountBDesired : float
@@ -130,7 +130,7 @@ class UniswapExchange(IExchange, LPERC20):
             Remove liquidity from both coins in the pair based on lp amount
                 
             Parameters
-            -------
+            -----------------
             to_addr : str
                 receiving user address  
             liquidity : float
@@ -165,7 +165,7 @@ class UniswapExchange(IExchange, LPERC20):
             Remove liquidity from both coins in the pair based on lp amount
                 
             Parameters
-            -------
+            -----------------
             to_addr : str
                 receiving user address  
             liquidity : float
@@ -210,7 +210,7 @@ class UniswapExchange(IExchange, LPERC20):
             Swap amt of token for min opposing token out
                 
             Parameters
-            -------
+            -----------------
             amountIn : float
                 swap amount in
             amountOutMin : float
@@ -246,7 +246,7 @@ class UniswapExchange(IExchange, LPERC20):
             Burn liquidity from both coins in the pair based on lp amount
                 
             Parameters
-            -------
+            -----------------
             to_addr : str
                receiving user address  
             liquidity : float
@@ -275,7 +275,7 @@ class UniswapExchange(IExchange, LPERC20):
             Burn liquidity from both coins in the pair based on lp amount
                 
             Parameters
-            -------
+            -----------------
             to : str
                receiving user address  
             value : float
@@ -293,7 +293,7 @@ class UniswapExchange(IExchange, LPERC20):
             Mint new liquidity based on amounts on each coin in the pair
                 
             Parameters
-            -------
+            -----------------
             to_addr : str
                 receiving user address      
             _amountA : float
@@ -335,7 +335,7 @@ class UniswapExchange(IExchange, LPERC20):
             Update reserve amounts for both coins in the pair
                 
             Parameters
-            -------   
+            -----------------   
             balanceA : float
                 new reserve amount of A      
             balance1 : float
@@ -352,7 +352,7 @@ class UniswapExchange(IExchange, LPERC20):
             Update reserve amounts for both coins in the pair
                 
             Parameters
-            -------   
+            -----------------   
             to_addr : str
                 receiving user address       
             value : float
@@ -374,7 +374,7 @@ class UniswapExchange(IExchange, LPERC20):
             Tally fee from swap and record last collected fee
                 
             Parameters
-            -------   
+            -----------------   
             fee0 : float
                 fee from reserve0      
             fee1 : float
@@ -394,7 +394,7 @@ class UniswapExchange(IExchange, LPERC20):
             Remove liquidity from both coins in the pair based on lp amount
                 
             Parameters
-            -------
+            -----------------
             amountA_out : float
                 swap amountA out
             amountB_out : float
@@ -440,7 +440,7 @@ class UniswapExchange(IExchange, LPERC20):
             Given amount asset and reserves, return equivalent amount of other asset
                 
             Parameters
-            -------
+            -----------------
             amountA : float
                 amount of a given asset token
             reserveA : float
@@ -460,7 +460,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get maximum output of opposing asset given input amount of token
                 
             Parameters
-            -------
+            -----------------
             amount_in : float
                 input amount of an asset
             token_in : ERC20
@@ -486,7 +486,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get maximum amount of other asset given input amount of an asset
                 
             Parameters
-            -------
+            -----------------
             amount_in : float
                 input amount of an asset
                           
@@ -511,7 +511,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get maximum amount of other asset given input amount of an asset
                 
             Parameters
-            -------
+            -----------------
             amount_in : float
                 input amount of an asset
                           
@@ -536,7 +536,7 @@ class UniswapExchange(IExchange, LPERC20):
             Update reserve assets of either or both assets in the pair
                 
             Parameters
-            -------
+            -----------------
             user_nm : str
                 acccount holder
             amountA_update : float
@@ -560,7 +560,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get price of select token in the exchange pair
                 
             Parameters
-            -------
+            -----------------
             token : ERC20
                 ERC20 token                
         """          
@@ -585,7 +585,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get reserve amount of select token in the exchange pair
                 
             Parameters
-            -------
+            -----------------
             token : ERC20
                 ERC20 token                
         """         

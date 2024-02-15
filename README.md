@@ -2,7 +2,10 @@
 This package is a python re-factor of the original [Uniswap V2 pairing code](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and can be 
 utilized for the purpose of analysing and modelling its behavior for DeFi
 
-To install package:
+## Docs
+Visit [DeFiPy docs](https://defipy.org) for full documentation with walk-through tutorials
+
+## Installation 
 ```
 > git clone https://github.com/defipy-devs/uniswappy
 > pip install .
@@ -12,7 +15,7 @@ or
 > pip install UniswapPy
 ```
 
-# Basic Usage
+## Basic Usage
 
 * See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) for basic usage
 
@@ -51,7 +54,7 @@ Exchange ETH-DAI (LP) <br/>
 Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 
-# Special Features
+## Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap action events to help streamline analysis and lower line count; see article [How to Handle Uniswap Withdrawals like an OG](https://medium.com/coinmonks/handle-uniswap-withdrawals-like-an-og-389fe74be18c), and [Setup your Uniswap Deposits like a Baller](https://medium.com/coinmonks/setup-your-uniswap-deposits-like-a-baller-b99340ea302f)
  * **Indexing**: Can calculate settlment LP token amounts given token amounts and vice versa; see article [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc)
  * **Simulation**: Can simulate trading using Geometric Brownian Motion (GBM) process, or feed in actual raw price data to analyze behavior; see article [How to Simulate a Liquidity Pool for Decentralized Finance](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentralized-finance-6f357ec8564b)

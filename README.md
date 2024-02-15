@@ -3,7 +3,7 @@ This package is a python re-factor of the original [Uniswap V2 pairing code](htt
 utilized for the purpose of analysing and modelling its behavior for DeFi
 
 ## Docs
-Visit [DeFiPy docs](https://defipy.org) for full documentation with walk-through tutorials
+Visit [docs](https://defipy.org) for full documentation with walk-through tutorials
 
 ## Installation 
 ```

@@ -52,7 +52,7 @@ class RandomSwap(Process):
         
         amount_in = self.tDel.delta() if amount_in == None else amount_in
         direction = self.ev.bi_select(self.buy_sell_prob) 
-        tokens = lp.factory.exchange_to_tokens[lp.name]
+        tokens = lp.factory.token_from_exchange[lp.name]
         
         
         #print('direction {}, p {}'.format(direction, self.buy_sell_prob))

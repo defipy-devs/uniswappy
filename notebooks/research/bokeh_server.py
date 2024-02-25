@@ -3,8 +3,10 @@ from bokeh.models import ColumnDataSource, CustomJS, Range1d, NumeralTickFormatt
 from uniswappy.utils.client import API0x
 import time
 from bokeh.layouts import layout
+from bokeh.models.widgets import Button
 
-curdoc().theme = 'dark_minimal'
+# curdoc().theme = 'dark_minimal'
+curdoc().theme = 'light_minimal'
 
 # Initialize Bokeh figure and data source
 p = figure(title='USDC to WETH Price', 
@@ -13,7 +15,7 @@ p = figure(title='USDC to WETH Price',
         #    ,background_fill_color="#acadad", border_fill_color="#6d6e6e"
         )
 source = ColumnDataSource(data={'x': [], 'y': []})
-p.line(x='x', y='y', source=source, line_color='white')
+p.line(x='x', y='y', source=source)
 
 # Toolbar Styling
 p.toolbar.logo = None
@@ -72,6 +74,36 @@ def adjust_y_range():
         p.yaxis.formatter = NumeralTickFormatter(format='0,0.000000000') 
 
 curdoc().add_periodic_callback(adjust_y_range, 1000)
+
+# JavaScript to toggle between light and dark mode
+js_toggle_mode = """
+function toggleMode() {
+    var element = document.body;
+    element.classList.toggle("dark-mode");
+
+    // Toggle Bokeh theme
+    if (element.classList.contains("dark-mode")) {
+        Bokeh.documents[0].theme = 'dark_minimal';
+        element.style.backgroundColor = '#222'; // Dark mode background color
+    } else {
+        Bokeh.documents[0].theme = 'light_minimal';
+        element.style.backgroundColor = 'white'; // Light mode background color
+    }
+}
+"""
+
+# Attach toggleMode function to window object
+js_toggle_mode += "\nwindow.toggleMode = toggleMode;"
+
+# Execute JavaScript
+curdoc().add_root(CustomJS(code=js_toggle_mode))
+
+# Add a button to toggle mode
+button = Button(label="Toggle Mode")
+button.js_on_click(CustomJS(code="toggleMode()"))
+
+# Add button to layout
+curdoc().add_root(button)
 
 # Add plot to the document
 layout = layout([[p]], sizing_mode='stretch_both')

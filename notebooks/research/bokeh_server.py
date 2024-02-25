@@ -4,10 +4,34 @@ from uniswappy.utils.client import API0x
 import time
 from bokeh.layouts import layout
 
+curdoc().theme = 'dark_minimal'
+
 # Initialize Bokeh figure and data source
-p = figure(title='USDC to WETH Price', x_axis_label='Time', y_axis_label='Price', width=800, height=400)
+p = figure(title='USDC to WETH Price', 
+           x_axis_label='Time', y_axis_label='Price', 
+           width_policy='max', height_policy='max'
+        #    ,background_fill_color="#acadad", border_fill_color="#6d6e6e"
+        )
 source = ColumnDataSource(data={'x': [], 'y': []})
-p.line(x='x', y='y', source=source)
+p.line(x='x', y='y', source=source, line_color='white')
+
+# Toolbar Styling
+p.toolbar.logo = None
+
+# # Title Styling
+# p.title.text_color = 'white'
+# p.title.text_font_style = 'bold'
+
+# # X-axis styling
+# p.xaxis.axis_line_color = "white"  # X-axis line color
+# p.xaxis.major_tick_line_color = "white"  # X-axis major tick color
+# p.xaxis.major_label_text_color = "white"  # X-axis label color
+
+# # Y-axis styling
+# p.yaxis.axis_line_color = "white"  # Y-axis line color
+# p.yaxis.major_tick_line_color = "white"  # Y-axis major tick color
+# p.yaxis.major_label_text_color = "white"  # Y-axis label color
+
 
 timestamp_counter = 0
 timestamp = time.time()
@@ -22,6 +46,7 @@ def update_data():
     
     price = data_json['price']
     price_numeric = float(price)
+    # price_numeric = float(price) * 1000000000 # put price in GWEI
     
     # Update data source
     new_data = {'x': [timestamp_counter], 'y': [price_numeric]}
@@ -44,12 +69,12 @@ def adjust_y_range():
         y_range_min = min_price - 0.1 * min_price
         y_range_max = max_price + 0.1 * max_price
         p.y_range = Range1d(start=y_range_min, end=y_range_max)
-        p.yaxis.formatter = NumeralTickFormatter(format='0,0.000000')
+        p.yaxis.formatter = NumeralTickFormatter(format='0,0.000000000') 
 
 curdoc().add_periodic_callback(adjust_y_range, 1000)
 
 # Add plot to the document
-layout = layout([[p]], sizing_mode='scale_width')
+layout = layout([[p]], sizing_mode='stretch_both')
 
 # Add layout to the document
 curdoc().add_root(layout)

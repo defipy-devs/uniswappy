@@ -4,8 +4,6 @@
 
 from dataclasses import dataclass
 
-
-
 @dataclass
 class Chain0x:
     

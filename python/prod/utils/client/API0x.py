@@ -18,7 +18,7 @@ class API0x():
     """      
 
     def __init__(self, chain: str = None, api_key: str = None) -> None:
-        self.chain = CHAIN if chain == None else chain
+        self.chain = Chain0x.ETHEREUM if chain == None else chain
         self.api_key = API_KEY if api_key == None else api_key
         
     def apply(self, sell_tkn: str = None, buy_tkn: str = None, sell_amt: str = None):

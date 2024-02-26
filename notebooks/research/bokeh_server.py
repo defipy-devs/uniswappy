@@ -16,8 +16,45 @@ current_theme_is_dark = True
 timestamp_counter = 0
 rate = 3
 
+# # -------------------
+# # Canonical Settings
+# # -------------------
+usdc_tkn_nm = "USDC"
+usdc_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+time_window = 0.25 # how often sim runs and 0x API is pinged
+trade_bias = 0.5 # bias between USDC and WETH swaps (50/50)
+max_trade_percent = 0.005 # lower means less volatility
+
+weth_tkn_nm = "WETH"
+weth_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+weth_init_amt = 10000 # higher means less volatility
+weth_td_model = TokenDeltaModel(max_trade = max_trade_percent*weth_init_amt, 
+                                shape=1, # Gamma Dist. shape  - impacts volatility
+                                scale=1) # Gamma Dist. scale - impacts volatility more
+
+# shape * scale = mean, if mean is low the revenue is low, if high revenue is high
+# higher mean = higher revenue because revenue comes from the size of the position 
+# higher mean also means a health risk to the pool because there is a higher likelihood of destabilizing the pool
+
+# shape * scale^2 = variance, if variance is high risk is high, if variance is low risk is low
+# if variance is high risk is high because revenue is less predictable
+
+# if both are high impermanent loss risk is high
+
+# mean doesn't make much of a difference here because the arbitrage bots simulated constantly revert to the live price data
+# variance is the bigger factor and you would only want to split these out for more advanced quant finance type users
+
+# -------------------
+# ETHDenverSim
+# -------------------
+sim = ETHDenverSimulator(buy_token = weth_buy_token,
+                         sell_token = usdc_sell_token,
+                         time_window = time_window,
+                         trade_bias = trade_bias,
+                         td_model = weth_td_model)
+
 # Sim
-sim = ETHDenverSimulator() # start with default time window
+# sim = ETHDenverSimulator() # default mode
 init = False
 callback_id = None
 
@@ -46,7 +83,10 @@ def switch_theme(event):
 
 def initialize_sim(event):
     global init, callback_id
-    sim.init_lp(1000)
+
+    # sim.init_lp(init_x_tkn = bnb_init_amt, x_tkn_nm = bnb_tkn_nm)
+    sim.init_lp(init_x_tkn = weth_init_amt)
+
     if init:
         # Simulation is currently running, so stop it
         if callback_id:
@@ -118,7 +158,7 @@ init_button = Button(label="Start Simulation", button_type="success", width=200)
 init_button.on_click(initialize_sim)
 
 # Create the toggle button
-toggle_button = Button(label="Toggle Theme", button_type="primary", width=200)
+toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
 button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
@@ -166,9 +206,6 @@ p1.yaxis.formatter = custom_formatter
 p3.yaxis.formatter = custom_formatter
 
 ### Running  Code ###
-
-# Add periodic callback to update data every X seconds defined by rate
-# curdoc().add_periodic_callback(update_data, rate*1000)
 
 # Create a grid layout with the plots
 grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')

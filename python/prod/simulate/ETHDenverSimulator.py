@@ -130,6 +130,8 @@ class ETHDenverSimulator:
         
         time.sleep(remaining_sleep) 
         
+        return p
+        
     def process(self):
         while(True): 
             self.trial()

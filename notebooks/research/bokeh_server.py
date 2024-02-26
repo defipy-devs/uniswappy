@@ -34,43 +34,78 @@ toggle_button.on_click(switch_theme)
 
 button_row = row(Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', css_classes=['dark-background'])
 
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
+source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
+source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
+source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
+
 # Initialize Bokeh figures and data sources
-p1 = figure(title='WETH to USDC Price', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-source = ColumnDataSource(data={'x': [], 'y': []})
-p1.line(x='x', y='y', source=source)
+p1 = figure(title='WETH to USDC Price & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
+p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
+p1.line(x='x', y='lp_arb', source=source1, color='blue', legend_label='LP Arb Price')
+p1.line(x='x', y='lp_swap', source=source1, color='green', legend_label='LP Swap Price')
 p1.toolbar.logo = None
 
-p2 = figure(title='WETH to USDC Price', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p2.line(x='x', y='y', source=source)
+p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve', width_policy='max', height_policy='max')
+p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Swap Reserve')
+p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='Arb Reserve')
 p2.toolbar.logo = None
 
-p3 = figure(title='WETH to USDC Price', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p3.line(x='x', y='y', source=source)
+p3 = figure(title='USDC Reserve', x_axis_label='Time', y_axis_label='Reserve', width_policy='max', height_policy='max')
+p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Swap Reserve')
+p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='Arb Reserve')
 p3.toolbar.logo = None
 
-p4 = figure(title='WETH to USDC Price', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p4.line(x='x', y='y', source=source)
+p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount', width_policy='max', height_policy='max')
+p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
 p4.toolbar.logo = None
 
 timestamp_counter = 0
 
-rate = 6
+rate = 3
+# inits
+sim = ETHDenverSimulator(time_window = rate)
+sim.init_lp(1000)
+# sim.process() # infinite loop to start process in the background
 
 # Function to update data from API
 def update_data():
     global timestamp_counter
-    api = API0x()
-    sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'  # USDC
-    buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'  # WETH
-    sell_amount = 100000000  # 100 USDC (USDC has a base unit of 6)
-    data_json = api.apply(sell_token, buy_token, sell_amount)
     
-    price = data_json['price']
-    price_numeric = 1/float(price)
+    price = sim.trial() # meant to be run repeatedly 
+
+    # api = API0x()
+    # sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'  # USDC
+    # buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'  # WETH
+    # sell_amount = 10000000  # 10 USDC (USDC has a base unit of 6)
+    # data_json = api.apply(sell_token, buy_token, sell_amount)
+
+    print("Price: ", price)
     
-    # Update data source
-    new_data = {'x': [timestamp_counter], 'y': [price_numeric]}
-    source.stream(new_data, rollover=100)
+    # Arbitration and Swapping timestamps (Swap always comes first, one of each returned per trial)
+    arbtime = sim.get_time_stamp(ETHDenverSimulator.STATE_ARB)
+    swaptime = sim.get_time_stamp(ETHDenverSimulator.STATE_SWAP)
+
+    # X Reserve Plot (WETH)
+    x_swap = sim.get_x_reserve(ETHDenverSimulator.STATE_SWAP)
+    x_arb = sim.get_x_reserve(ETHDenverSimulator.STATE_ARB)
+
+    # Y Reserve Plot (USDC)
+    y_swap = sim.get_y_reserve(ETHDenverSimulator.STATE_SWAP)
+    y_arb = sim.get_y_reserve(ETHDenverSimulator.STATE_ARB)
+
+    # LP Price Deviation Overlay
+    lp_swap = sim.get_lp_price(ETHDenverSimulator.STATE_SWAP)
+    lp_arb = sim.get_lp_price(ETHDenverSimulator.STATE_ARB)
+
+    # Health Indicator - Measures Swap Amounts Over Time (Gives user an idea for how much users should be allowed to swap at once)
+    swap_amt = sim.get_swap_amt()
+
+    # Update Bokeh data sources
+    source1.stream({'x': [timestamp_counter], 'y': [price], 'lp_arb': [lp_arb], 'lp_swap': [lp_swap]}, rollover=200)
+    source2.stream({'x': [timestamp_counter], 'x_swap': [x_swap], 'x_arb': [x_arb]}, rollover=200)
+    source3.stream({'x': [timestamp_counter], 'y_swap': [y_swap], 'y_arb': [y_arb]}, rollover=200)
+    source4.stream({'x': [timestamp_counter], 'y': [swap_amt]}, rollover=200)
 
     timestamp_counter += rate
 

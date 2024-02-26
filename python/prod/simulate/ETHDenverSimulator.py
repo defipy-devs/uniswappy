@@ -25,18 +25,31 @@ class ETHDenverSimulator:
     
     STATE_ARB = 'arb'
     STATE_SWAP = 'swap'
+    STATE_INIT = 'init_lp'
     
-    def __init__(self, time_window = None, trade_bias = None):
-        self.lp = None 
-        self.api = API0x(chain = Chain0x.ETHEREUM)
+    def __init__(self, 
+                 buy_token = None,
+                 sell_token = None,                 
+                 time_window = None, 
+                 trade_bias = None,
+                 td_model = None,
+                 api = None
+                ):
+        
+        self.buy_token = BUY_TOKEN if buy_token == None else buy_token
+        self.sell_token = SELL_TOKEN if sell_token == None else sell_token
         self.time_window = TRADE_TIME_WINDOW if time_window == None else time_window
-        self.trade_bias = TKN_TRADE_BIAS if trade_bias == None else trade_bias
-        self.td_model = TokenDeltaModel(30)
+        self.trade_bias = TKN_TRADE_BIAS if trade_bias == None else trade_bias        
+        self.td_model = TokenDeltaModel(30) if td_model == None else td_model
+        self.api = API0x(chain = Chain0x.ETHEREUM) if api == None else api 
+        
+        self.lp = None 
         self.arb = None
         self.x_tkn = None
         self.y_tkn = None
         self.time_init = None
         self.state = 'instantiate'
+        self.remaining_sleep = self.time_window
         
         self.time_arb = None
         self.x_amt_arb = None
@@ -89,20 +102,23 @@ class ETHDenverSimulator:
             return self.y_amt_arb             
         
     def get_0x_data(self):    
-        return self.api.apply(SELL_TOKEN, BUY_TOKEN, SELL_AMOUNT)
+        return self.api.apply(self.sell_token, self.buy_token, SELL_AMOUNT)
     
     def get_market_price(self): 
         chain_call = self.get_0x_data()
         return 1/float(chain_call['price'])
     
-    def init_lp(self, amt_tkn0):
-        self.state = 'init_lp'
+    def init_lp(self, init_x_tkn, x_tkn_nm = None, y_tkn_nm = None):
+        self.state = self.STATE_INIT
         p = self.get_market_price()
-        x_tkn_amt = amt_tkn0
+        x_tkn_amt = init_x_tkn
         y_tkn_amt = x_tkn_amt*p
+        
+        x_tkn_nm = "WETH" if x_tkn_nm == None else x_tkn_nm
+        y_tkn_nm = "USDC" if y_tkn_nm == None else y_tkn_nm
 
-        self.x_tkn = ERC20("WETH", None)
-        self.y_tkn = ERC20("USDC", None)
+        self.x_tkn = ERC20(x_tkn_nm, None)
+        self.y_tkn = ERC20(y_tkn_nm, None)
         exchg_data = UniswapExchangeData(tkn0 = self.x_tkn, tkn1 = self.y_tkn, symbol="LP", address=None)
 
         factory = UniswapFactory("ETH pool factory", None)

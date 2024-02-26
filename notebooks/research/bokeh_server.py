@@ -40,9 +40,9 @@ source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y R
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Initialize Bokeh figures and data sources
-p1 = figure(title='WETH to USDC Price & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
+p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
 p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
-p1.line(x='x', y='lp_arb', source=source1, color='blue', legend_label='LP Arb Price')
+p1.line(x='x', y='lp_arb', source=source1, color='red', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
 p1.line(x='x', y='lp_swap', source=source1, color='green', legend_label='LP Swap Price')
 p1.toolbar.logo = None
 
@@ -62,16 +62,14 @@ p4.toolbar.logo = None
 
 timestamp_counter = 0
 
-rate = 3
-# inits
+rate = 2
 sim = ETHDenverSimulator(time_window = rate)
 sim.init_lp(1000)
-# sim.process() # infinite loop to start process in the background
 
 # Function to update data from API
 def update_data():
     global timestamp_counter
-    
+
     price = sim.trial() # meant to be run repeatedly 
 
     # api = API0x()
@@ -97,6 +95,10 @@ def update_data():
     # LP Price Deviation Overlay
     lp_swap = sim.get_lp_price(ETHDenverSimulator.STATE_SWAP)
     lp_arb = sim.get_lp_price(ETHDenverSimulator.STATE_ARB)
+    
+    print("LP ARB: ", lp_arb)
+    print("LP Swap: ", lp_swap,"\n")
+    
 
     # Health Indicator - Measures Swap Amounts Over Time (Gives user an idea for how much users should be allowed to swap at once)
     swap_amt = sim.get_swap_amt()

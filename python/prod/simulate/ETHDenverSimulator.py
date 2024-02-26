@@ -1,3 +1,7 @@
+# Copyright [2024] [Ian Moore, Bart Hofkin]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
+
 from ..utils.data import UniswapExchangeData
 from ..utils.data import Chain0x
 from ..erc import ERC20

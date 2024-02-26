@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, curdoc
-from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer
+from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter
 from bokeh.layouts import gridplot, column, row, layout
 from bokeh.models.widgets import Div
 from uniswappy import *
@@ -41,7 +41,7 @@ source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Initialize Bokeh figures and data sources
 p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
+p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
 p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
 p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
 p1.toolbar.logo = None
@@ -60,9 +60,26 @@ p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis
 p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
 p4.toolbar.logo = None
 
+# Create a custom tick formatter script
+formatter_script = """
+if (tick >= 1e6) {
+    return '$' + (tick / 1e6).toFixed(2) + 'M';
+} else {
+    return '$' + tick.toFixed(0);
+}
+"""
+
+# Create the formatter
+custom_formatter = FuncTickFormatter(code=formatter_script)
+
+# Apply this formatter to the y-axis of each of your plots
+p1.yaxis.formatter = custom_formatter
+p2.yaxis.formatter = custom_formatter
+p3.yaxis.formatter = custom_formatter
+
 timestamp_counter = 0
 
-rate = 2
+rate = 3
 sim = ETHDenverSimulator(time_window = rate)
 sim.init_lp(1000)
 

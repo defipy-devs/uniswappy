@@ -41,9 +41,9 @@ source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Initialize Bokeh figures and data sources
 p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
-p1.line(x='x', y='lp_arb', source=source1, color='red', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
-p1.line(x='x', y='lp_swap', source=source1, color='green', legend_label='LP Swap Price')
+p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
+p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
+p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
 p1.toolbar.logo = None
 
 p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve', width_policy='max', height_policy='max')

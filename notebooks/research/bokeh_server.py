@@ -5,10 +5,20 @@ from bokeh.models.widgets import Div
 from uniswappy import *
 import time
 
-curdoc().theme = 'dark_minimal'
-# curdoc().theme = 'white_minimal'
 
-current_theme_is_dark = True  # Assumes the initial theme is 'dark_minimal'
+### Init vars ###
+
+# Theme 
+curdoc().theme = 'dark_minimal'
+current_theme_is_dark = True
+
+# Time 
+timestamp_counter = 0
+rate = 3
+
+# Sim
+sim = ETHDenverSimulator(time_window = rate)
+init = False
 
 def switch_theme(event):
     global current_theme_is_dark  # Declare the variable as global to modify it
@@ -27,12 +37,21 @@ def switch_theme(event):
     # Print statements for debugging
     print(f"Theme changed to {new_theme}")
 
+def intialize_sim(event):
+    global init
+    sim.init_lp(1000)
+    init = True
+    print("Sim started")
+
+# Create Initialize button
+init_button = Button(label="Initialize", button_type="primary", width=400)
+init_button.on_click(intialize_sim)
 
 # Create the toggle button
 toggle_button = Button(label="Toggle Theme", button_type="primary", width=400)
 toggle_button.on_click(switch_theme)
 
-button_row = row(Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', css_classes=['dark-background'])
+button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
@@ -77,12 +96,6 @@ p1.yaxis.formatter = custom_formatter
 p2.yaxis.formatter = custom_formatter
 p3.yaxis.formatter = custom_formatter
 
-timestamp_counter = 0
-
-rate = 3
-sim = ETHDenverSimulator(time_window = rate)
-sim.init_lp(1000)
-
 # Function to update data from API
 def update_data():
     global timestamp_counter
@@ -116,7 +129,6 @@ def update_data():
     print("LP ARB: ", lp_arb)
     print("LP Swap: ", lp_swap,"\n")
     
-
     # Health Indicator - Measures Swap Amounts Over Time (Gives user an idea for how much users should be allowed to swap at once)
     swap_amt = sim.get_swap_amt()
 

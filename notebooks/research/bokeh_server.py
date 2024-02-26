@@ -19,6 +19,7 @@ rate = 3
 # Sim
 sim = ETHDenverSimulator() # start with default time window
 init = False
+callback_id = None
 
 ### Functions ###
 
@@ -29,9 +30,13 @@ def switch_theme(event):
     if current_theme_is_dark:
         curdoc().theme = 'light_minimal'
         new_theme = 'light_minimal'
+        toggle_button.label = "Dark Mode"
+        toggle_button.button_type = "primary"
     else:
         curdoc().theme = 'dark_minimal'
         new_theme = 'dark_minimal'
+        toggle_button.label = "Light Mode"
+        toggle_button.button_type = "default"
     
     # Toggle the flag
     current_theme_is_dark = not current_theme_is_dark
@@ -39,11 +44,27 @@ def switch_theme(event):
     # Print statements for debugging
     print(f"Theme changed to {new_theme}")
 
-def intialize_sim(event):
-    global init
+def initialize_sim(event):
+    global init, callback_id
     sim.init_lp(1000)
-    init = True
-    print("Sim started")
+    if init:
+        # Simulation is currently running, so stop it
+        if callback_id:
+            curdoc().remove_periodic_callback(callback_id)
+            callback_id = None
+        init_button.label = "Start Simulation"  # Update button label
+        init_button.button_type = "success"
+        print("Sim stopped")
+    else:
+        # Simulation is currently stopped, so start it
+        callback_id = curdoc().add_periodic_callback(update_data, rate * 1000)
+        init_button.label = "Stop Simulation"  # Update button label
+        init_button.button_type = "danger"
+        print("Sim started")
+    
+    init = not init  # Toggle the state
+    # init = True
+    
 
 def update_data():
     global timestamp_counter
@@ -93,11 +114,11 @@ def update_data():
 
 
 # Create Initialize button
-init_button = Button(label="Initialize", button_type="primary", width=400)
-init_button.on_click(intialize_sim)
+init_button = Button(label="Start Simulation", button_type="success", width=200)
+init_button.on_click(initialize_sim)
 
 # Create the toggle button
-toggle_button = Button(label="Toggle Theme", button_type="primary", width=400)
+toggle_button = Button(label="Toggle Theme", button_type="primary", width=200)
 toggle_button.on_click(switch_theme)
 
 button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
@@ -147,7 +168,7 @@ p3.yaxis.formatter = custom_formatter
 ### Running  Code ###
 
 # Add periodic callback to update data every X seconds defined by rate
-curdoc().add_periodic_callback(update_data, rate*1000)
+# curdoc().add_periodic_callback(update_data, rate*1000)
 
 # Create a grid layout with the plots
 grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')

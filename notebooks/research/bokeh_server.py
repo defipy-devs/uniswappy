@@ -17,7 +17,7 @@ timestamp_counter = 0
 rate = 3
 
 # Sim
-sim = ETHDenverSimulator(time_window = rate)
+sim = ETHDenverSimulator() # start with default time window
 init = False
 
 def switch_theme(event):
@@ -65,7 +65,7 @@ p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb P
 p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
 p1.toolbar.logo = None
 
-p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve', width_policy='max', height_policy='max')
+p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve (WETH)', width_policy='max', height_policy='max')
 p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Swap Reserve')
 p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='Arb Reserve')
 p2.toolbar.logo = None
@@ -75,7 +75,7 @@ p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Swap Rese
 p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='Arb Reserve')
 p3.toolbar.logo = None
 
-p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount', width_policy='max', height_policy='max')
+p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount (WETH)', width_policy='max', height_policy='max')
 p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
 p4.toolbar.logo = None
 
@@ -93,7 +93,6 @@ custom_formatter = FuncTickFormatter(code=formatter_script)
 
 # Apply this formatter to the y-axis of each of your plots
 p1.yaxis.formatter = custom_formatter
-p2.yaxis.formatter = custom_formatter
 p3.yaxis.formatter = custom_formatter
 
 # Function to update data from API

@@ -2,7 +2,7 @@ from bokeh.plotting import figure, curdoc
 from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer
 from bokeh.layouts import gridplot, column, row, layout
 from bokeh.models.widgets import Div
-from uniswappy.utils.client import API0x
+from uniswappy import *
 import time
 
 curdoc().theme = 'dark_minimal'

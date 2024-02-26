@@ -20,6 +20,8 @@ rate = 3
 sim = ETHDenverSimulator() # start with default time window
 init = False
 
+### Functions ###
+
 def switch_theme(event):
     global current_theme_is_dark  # Declare the variable as global to modify it
     
@@ -43,59 +45,6 @@ def intialize_sim(event):
     init = True
     print("Sim started")
 
-# Create Initialize button
-init_button = Button(label="Initialize", button_type="primary", width=400)
-init_button.on_click(intialize_sim)
-
-# Create the toggle button
-toggle_button = Button(label="Toggle Theme", button_type="primary", width=400)
-toggle_button.on_click(switch_theme)
-
-button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
-
-source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
-source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
-source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
-source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
-
-# Initialize Bokeh figures and data sources
-p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price', width_policy='max', height_policy='max')
-p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
-p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
-p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
-p1.toolbar.logo = None
-
-p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve (WETH)', width_policy='max', height_policy='max')
-p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Swap Reserve')
-p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='Arb Reserve')
-p2.toolbar.logo = None
-
-p3 = figure(title='USDC Reserve', x_axis_label='Time', y_axis_label='Reserve', width_policy='max', height_policy='max')
-p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Swap Reserve')
-p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='Arb Reserve')
-p3.toolbar.logo = None
-
-p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount (WETH)', width_policy='max', height_policy='max')
-p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
-p4.toolbar.logo = None
-
-# Create a custom tick formatter script
-formatter_script = """
-if (tick >= 1e6) {
-    return '$' + (tick / 1e6).toFixed(2) + 'M';
-} else {
-    return '$' + tick.toFixed(0);
-}
-"""
-
-# Create the formatter
-custom_formatter = FuncTickFormatter(code=formatter_script)
-
-# Apply this formatter to the y-axis of each of your plots
-p1.yaxis.formatter = custom_formatter
-p3.yaxis.formatter = custom_formatter
-
-# Function to update data from API
 def update_data():
     global timestamp_counter
 
@@ -132,12 +81,70 @@ def update_data():
     swap_amt = sim.get_swap_amt()
 
     # Update Bokeh data sources
-    source1.stream({'x': [timestamp_counter], 'y': [price], 'lp_arb': [lp_arb], 'lp_swap': [lp_swap]}, rollover=200)
-    source2.stream({'x': [timestamp_counter], 'x_swap': [x_swap], 'x_arb': [x_arb]}, rollover=200)
-    source3.stream({'x': [timestamp_counter], 'y_swap': [y_swap], 'y_arb': [y_arb]}, rollover=200)
-    source4.stream({'x': [timestamp_counter], 'y': [swap_amt]}, rollover=200)
+    source1.stream({'x': [timestamp_counter], 'y': [price], 'lp_arb': [lp_arb], 'lp_swap': [lp_swap]}, rollover=1000)
+    source2.stream({'x': [timestamp_counter], 'x_swap': [x_swap], 'x_arb': [x_arb]}, rollover=1000)
+    source3.stream({'x': [timestamp_counter], 'y_swap': [y_swap], 'y_arb': [y_arb]}, rollover=1000)
+    source4.stream({'x': [timestamp_counter], 'y': [swap_amt]}, rollover=1000)
 
     timestamp_counter += rate
+
+
+### Initialize Chart Data ####
+
+
+# Create Initialize button
+init_button = Button(label="Initialize", button_type="primary", width=400)
+init_button.on_click(intialize_sim)
+
+# Create the toggle button
+toggle_button = Button(label="Toggle Theme", button_type="primary", width=400)
+toggle_button.on_click(switch_theme)
+
+button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
+source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
+source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
+source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
+
+# Initialize Bokeh figures and data sources
+p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
+p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
+p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
+p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
+p1.toolbar.logo = None
+
+p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve (WETH)', width_policy='max', height_policy='max')
+p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Swap Reserve')
+p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='Arb Reserve')
+p2.toolbar.logo = None
+
+p3 = figure(title='USDC Reserve', x_axis_label='Time', y_axis_label='Reserve (USDC)', width_policy='max', height_policy='max')
+p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Swap Reserve')
+p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='Arb Reserve')
+p3.toolbar.logo = None
+
+p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount (WETH)', width_policy='max', height_policy='max')
+p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
+p4.toolbar.logo = None
+
+# Create a custom tick formatter script
+formatter_script = """
+if (tick >= 1e6) {
+    return '$' + (tick / 1e6).toFixed(2) + 'M';
+} else {
+    return '$' + tick.toFixed(0);
+}
+"""
+
+# Create the formatter
+custom_formatter = FuncTickFormatter(code=formatter_script)
+
+# Apply this formatter to the y-axis of each of your plots
+p1.yaxis.formatter = custom_formatter
+p3.yaxis.formatter = custom_formatter
+
+### Running  Code ###
 
 # Add periodic callback to update data every X seconds defined by rate
 curdoc().add_periodic_callback(update_data, rate*1000)

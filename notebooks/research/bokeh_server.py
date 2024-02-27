@@ -1,5 +1,5 @@
-from bokeh.plotting import figure, curdoc
-from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter, Dropdown, Select
+from bokeh.plotting import figure, curdoc, show
+from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter, Dropdown, Select, HoverTool
 from bokeh.layouts import gridplot, column, row, layout
 from bokeh.models.widgets import Div
 from uniswappy import *
@@ -27,7 +27,7 @@ max_trade_percent = 0.001 # lower means less volatility
 
 weth_tkn_nm = "WETH"
 weth_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-weth_init_amt = 10000 # higher means less volatility
+weth_init_amt = 1000 # higher means less volatility
 weth_td_model = TokenDeltaModel(max_trade = max_trade_percent*weth_init_amt, 
                                 shape=1, # Gamma Dist. shape  - impacts volatility
                                 scale=1) # Gamma Dist. scale - impacts volatility more
@@ -144,16 +144,16 @@ def update_data():
 
     # LP Price Deviation Overlay
     lp_swap = sim.get_lp_price(ETHDenverSimulator.STATE_SWAP)
-    lp_arb = sim.get_lp_price(ETHDenverSimulator.STATE_ARB)
+    # lp_arb = sim.get_lp_price(ETHDenverSimulator.STATE_ARB)
     
-    print("LP ARB: ", lp_arb)
+    # print("LP ARB: ", lp_arb)
     print("LP Swap: ", lp_swap,"\n")
     
     # Health Indicator - Measures Swap Amounts Over Time (Gives user an idea for how much users should be allowed to swap at once)
     swap_amt = sim.get_swap_amt()
 
     # Update Bokeh data sources
-    source1.stream({'x': [timestamp_counter], 'y': [price], 'lp_arb': [lp_arb], 'lp_swap': [lp_swap]}, rollover=1000)
+    source1.stream({'x': [timestamp_counter], 'y': [price], 'lp_swap': [lp_swap]}, rollover=1000)
     source2.stream({'x': [timestamp_counter], 'x_swap': [x_swap], 'x_arb': [x_arb]}, rollover=1000)
     source3.stream({'x': [timestamp_counter], 'y_swap': [y_swap], 'y_arb': [y_arb]}, rollover=1000)
     source4.stream({'x': [timestamp_counter], 'y': [swap_amt]}, rollover=1000)
@@ -187,26 +187,26 @@ select_token.on_change('value', token_selection)
 # Define buttons on top of screen
 button_row = row(init_button, select_token, Spacer(width_policy='max'), select_chain, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
-source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
 source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Initialize Bokeh figures and data sources
 p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
-p1.line(x='x', y='y', source=source1, color='red', legend_label='Market Price')
-p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price') # Arb Price too close to market price to display in Bokeh
-p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='LP Swap Price')
+p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
+# p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
+p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
 p1.toolbar.logo = None
 
 p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve (WETH)', width_policy='max', height_policy='max')
-p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Swap Reserve')
-p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='Arb Reserve')
+p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
+p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='WETH Reserves')
 p2.toolbar.logo = None
 
 p3 = figure(title='USDC Reserve', x_axis_label='Time', y_axis_label='Reserve (USDC)', width_policy='max', height_policy='max')
-p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Swap Reserve')
-p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='Arb Reserve')
+p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
+p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='USDC Reserves')
 p3.toolbar.logo = None
 
 p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount (WETH)', width_policy='max', height_policy='max')

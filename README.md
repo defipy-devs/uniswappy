@@ -6,6 +6,7 @@ the limitations of a Uniswap pool setup using live price feeds from [0x API](htt
 
 Install project requirements:
 ```
+> git clone https://github.com/defipy-devs/uniswappy/tree/ethdenver
 > pip install -r requirements.txt
 
 ```

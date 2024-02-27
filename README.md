@@ -1,6 +1,6 @@
 # 0x API: Live Trading Simulator
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
-the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org) 
+the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org). For backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
 
 ## Local Installation 
 
@@ -10,7 +10,7 @@ Install project requirements:
 
 ```
 
-Next, install local python package: 
+Next, install GH instance of Uniswappy python package: 
 ```
 > pip install .
 ```
@@ -18,18 +18,18 @@ Next, install local python package:
 ## Run application locally  
 
 ```
-> bokeh serve --show /python/application/bokeh_server.py
+> bokeh serve --show python/application/bokeh_server.py
 ```
 
 ## Technical References 
  * **Reblancing Pool**: 
      * Math behind rebalancing pool upon price change
-     * See article [How to Simulate a Uniswap Pool](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentralized-finance-6f357ec8564b)
+     * See [How to Simulate a Uniswap Pool](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentralized-finance-6f357ec8564b)
   * **Indexed Liquidity**: 
       * Monitoring profitability of swap positions
-      * See article [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc)
+      * See [The Uniswap Indexing Problem](https://medium.com/datadriveninvestor/the-uniswap-indexing-problem-8078b8b110fc)
    * **Impermanent Loss**: 
        * How variance impacts impermanent loss
-       * See article [Technical Survey of Impermanent Loss](https://github.com/icmoore/impermanent_loss/blob/main/article.pdf)
+       * See (Eq. 6) [Technical Survey of Impermanent Loss](https://github.com/icmoore/impermanent_loss/blob/main/article.pdf)
  
  

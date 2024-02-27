@@ -11,6 +11,7 @@ from ..math.model import EventSelectionModel
 from ..cpt.factory import UniswapFactory
 from ..cpt.quote import LPTokenQuote
 from ..cpt.quote import IndexTokenQuote
+from ..cpt.quote import TreeAmountQuote
 from ..simulate import CorrectReserves
 from ..process.deposit import SwapDeposit
 from ..process.swap import WithdrawSwap
@@ -61,6 +62,9 @@ class ETHDenverSimulator:
         
         self.x_redeem = None
         self.y_redeem = None
+        
+        self.x_trial_amt = 0
+        self.y_trial_amt = 0        
         
         self.time_arb = None
         self.x_amt_arb = None
@@ -116,7 +120,10 @@ class ETHDenverSimulator:
         if(state == self.STATE_SWAP):
             return self.y_amt_swap 
         else:
-            return self.y_amt_arb             
+            return self.y_amt_arb 
+        
+    def get_usd_trial_volume(self):
+        return TreeAmountQuote().get_tot_y(self.lp, self.x_trial_amt, self.y_trial_amt)
         
     def get_0x_data(self):    
         return self.api_0x_data      
@@ -150,6 +157,7 @@ class ETHDenverSimulator:
         self.time_init = datetime.datetime.now()
      
     def trial(self):
+        self._reset_trial()
         p = self.get_market_price()
         remaining_sleep = TRADE_TIME_WINDOW
         
@@ -181,9 +189,11 @@ class ETHDenverSimulator:
         select_tkn = EventSelectionModel().bi_select(self.trade_bias)
         
         if(select_tkn == 0):
-            out = Swap().apply(self.lp, self.x_tkn, USER_NM, rnd_amt)  
+            out = Swap().apply(self.lp, self.x_tkn, USER_NM, rnd_amt) 
+            self.x_trial_amt += rnd_amt
         else:
             out = Swap().apply(self.lp, self.y_tkn, USER_NM, 0.5*p*rnd_amt)  
+            self.y_trial_amt += 0.5*p*rnd_amt
             
         self.time_swap = datetime.datetime.now() 
         self.x_amt_swap = self.lp.get_reserve(self.arb.get_x_tkn())
@@ -199,10 +209,16 @@ class ETHDenverSimulator:
     def _update_investment(self): 
         self.x_redeem = IndexTokenQuote().get_x(self.lp, self.init_lp_invest)
         self.y_redeem = IndexTokenQuote().get_y(self.lp, self.init_lp_invest)
+        
+    def _reset_trial(self):
+        self.x_trial_amt = 0
+        self.y_trial_amt = 0
             
     def _market_arbitrage(self, p):  
         self.state = self.STATE_ARB
         self.arb.apply(p)
+        self.x_trial_amt += self.arb.get_swap_dx()
+        self.y_trial_amt += self.arb.get_swap_dy()
         
         self.time_arb = datetime.datetime.now()
         self.x_amt_arb = self.lp.get_reserve(self.arb.get_x_tkn())

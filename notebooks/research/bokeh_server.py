@@ -23,7 +23,7 @@ usdc_tkn_nm = "USDC"
 usdc_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between USDC and WETH swaps (50/50)
-max_trade_percent = 0.005 # lower means less volatility
+max_trade_percent = 0.001 # lower means less volatility
 
 weth_tkn_nm = "WETH"
 weth_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
@@ -190,20 +190,35 @@ p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
 p4.toolbar.logo = None
 
 # Create a custom tick formatter script
-formatter_script = """
+formatter_script_dollar = """
 if (tick >= 1e6) {
     return '$' + (tick / 1e6).toFixed(2) + 'M';
+} else if (tick >= 1e4) {
+    return '$' + (tick / 1e3).toFixed(2) + 'K';
 } else {
     return '$' + tick.toFixed(0);
 }
 """
 
+formatter_script_eth = """
+if (tick >= 1e6) {
+    return (tick / 1e6).toFixed(2) + 'M';
+} else if (tick >= 1e4) {
+    return (tick / 1e3).toFixed(2) + 'K';
+} else {
+    return tick.toFixed(0);
+}
+"""
+
 # Create the formatter
-custom_formatter = FuncTickFormatter(code=formatter_script)
+custom_formatter_dollar = FuncTickFormatter(code=formatter_script_dollar)
+
+custom_formatter_eth = FuncTickFormatter(code=formatter_script_eth)
 
 # Apply this formatter to the y-axis of each of your plots
-p1.yaxis.formatter = custom_formatter
-p3.yaxis.formatter = custom_formatter
+p1.yaxis.formatter = custom_formatter_dollar
+p2.yaxis.formatter = custom_formatter_eth
+p3.yaxis.formatter = custom_formatter_dollar
 
 ### Running  Code ###
 

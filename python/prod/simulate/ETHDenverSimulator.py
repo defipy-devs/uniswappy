@@ -193,6 +193,7 @@ class ETHDenverSimulator:
     def take_x_position(self, x_invest):
         x_invest = x_invest if x_invest == 1 else x_invest
         self.init_lp_invest = LPTokenQuote().get_x(self.lp, x_invest)
+        SwapDeposit().apply(self.lp, self.get_x_tkn(), USER_NM, x_invest)
         self._update_investment()
         
     def _update_investment(self): 

@@ -1,6 +1,6 @@
 # 0x API: Live Trading Simulator
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
-the limitations of a Uniswap pool setup using live price feeds
+the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org) 
 
 ## Local Installation 
 

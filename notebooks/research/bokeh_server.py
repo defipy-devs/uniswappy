@@ -108,9 +108,19 @@ def initialize_sim(event):
     # init = True
     
 # Chain drop down selection function
-def on_select_change(attr, old, new):
+def chain_selection(attr, old, new):
     # 'new' contains the new selection
-    print(f"Selected option: {new}")
+    print(f"Selected chain: {new}")
+
+# Token drop down selection function
+def token_selection(attr, old, new):
+    # 'new' contains the new selection
+    print(f"Selected crypto: {new}")
+
+# Stable coin drop down selection function
+def stable_selection(attr, old, new):
+    # 'new' contains the new selection
+    print(f"Selected stable: {new}")
 
 # Refresh graphs function
 def update_data():
@@ -163,10 +173,19 @@ toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
 # Create chain selection dropdown
-select_widget = Select(title="Choose Network (Defualt ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "ARBITRUM", "AVALANCHE", "BASE", "BINANCE", "CELO", "FANTOM", "OPTIMISM", "POLYGON"])
-select_widget.on_change('value', on_select_change)
+select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "ARBITRUM", "AVALANCHE", "BASE", "BINANCE", "CELO", "FANTOM", "OPTIMISM", "POLYGON"])
+select_chain.on_change('value', chain_selection)
 
-button_row = row(init_button,  Spacer(width_policy='max'), select_widget, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+# Create token selection dropdown
+select_token = Select(title="Choose Token (Default WETH):", value="WETH", options=["WETH", "LINK", "UNI", "WBTC", "BNB"])
+select_token.on_change('value', token_selection)
+
+# Create stable token selection dropdown
+# select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
+# select_stable.on_change('value', stable_selection)
+
+# Define buttons on top of screen
+button_row = row(init_button, select_token, Spacer(width_policy='max'), select_chain, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)

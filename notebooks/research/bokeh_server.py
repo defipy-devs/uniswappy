@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, curdoc
-from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter
+from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter, Dropdown, Select
 from bokeh.layouts import gridplot, column, row, layout
 from bokeh.models.widgets import Div
 from uniswappy import *
@@ -47,19 +47,20 @@ weth_td_model = TokenDeltaModel(max_trade = max_trade_percent*weth_init_amt,
 # -------------------
 # ETHDenverSim
 # -------------------
+
+init = False
+callback_id = None
+
+# sim = ETHDenverSimulator() # default mode
 sim = ETHDenverSimulator(buy_token = weth_buy_token,
                          sell_token = usdc_sell_token,
                          time_window = time_window,
                          trade_bias = trade_bias,
                          td_model = weth_td_model)
 
-# Sim
-# sim = ETHDenverSimulator() # default mode
-init = False
-callback_id = None
-
 ### Functions ###
 
+# Dark/Light mode button
 def switch_theme(event):
     global current_theme_is_dark  # Declare the variable as global to modify it
     
@@ -81,6 +82,7 @@ def switch_theme(event):
     # Print statements for debugging
     print(f"Theme changed to {new_theme}")
 
+# Start/Stop button
 def initialize_sim(event):
     global init, callback_id
 
@@ -105,17 +107,16 @@ def initialize_sim(event):
     init = not init  # Toggle the state
     # init = True
     
+# Chain drop down selection function
+def on_select_change(attr, old, new):
+    # 'new' contains the new selection
+    print(f"Selected option: {new}")
 
+# Refresh graphs function
 def update_data():
     global timestamp_counter
 
     price = sim.trial() # meant to be run repeatedly 
-
-    # api = API0x()
-    # sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'  # USDC
-    # buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'  # WETH
-    # sell_amount = 10000000  # 10 USDC (USDC has a base unit of 6)
-    # data_json = api.apply(sell_token, buy_token, sell_amount)
 
     print("Price: ", price)
     
@@ -161,7 +162,11 @@ init_button.on_click(initialize_sim)
 toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
-button_row = row(init_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+# Create chain selection dropdown
+select_widget = Select(title="Choose Network (Defualt ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "ARBITRUM", "AVALANCHE", "BASE", "BINANCE", "CELO", "FANTOM", "OPTIMISM", "POLYGON"])
+select_widget.on_change('value', on_select_change)
+
+button_row = row(init_button,  Spacer(width_policy='max'), select_widget, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_arb': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)

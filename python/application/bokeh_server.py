@@ -19,12 +19,17 @@ rate = 3
 # # -------------------
 # # Canonical Settings
 # # -------------------
+
+chain = "ETHEREUM"
+
+stable = "Chain0x.TKN_USDC"
 usdc_tkn_nm = "USDC"
 usdc_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between USDC and WETH swaps (50/50)
 max_trade_percent = 0.001 # lower means less volatility
 
+token = "Chain0x.TKN_WETH"
 weth_tkn_nm = "WETH"
 weth_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 weth_init_amt = 1000 # higher means less volatility
@@ -105,21 +110,23 @@ def initialize_sim(event):
         print("Sim started")
     
     init = not init  # Toggle the state
-    # init = True
     
 # Chain drop down selection function
 def chain_selection(attr, old, new):
-    # 'new' contains the new selection
+    global chain
+    chain = f"Chain0x.{new}"
     print(f"Selected chain: {new}")
 
 # Token drop down selection function
 def token_selection(attr, old, new):
-    # 'new' contains the new selection
+    global token
+    token = f"Chain0x.TKN_{new}"
     print(f"Selected crypto: {new}")
 
 # Stable coin drop down selection function
 def stable_selection(attr, old, new):
-    # 'new' contains the new selection
+    global stable
+    stable = f"Chain0x.TKN_{new}"
     print(f"Selected stable: {new}")
 
 # Refresh graphs function

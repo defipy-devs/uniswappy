@@ -230,7 +230,7 @@ if (tick >= 1e6) {
 } else if (tick >= 1e4) {
     return (tick / 1e3).toFixed(2) + 'K';
 } else {
-    return tick.toFixed(0);
+    return tick.toFixed(2);
 }
 """
 

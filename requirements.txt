@@ -1,4 +1,4 @@
-numpy==<compatible-version>
+numpy==1.24.3
 pandas==2.0.3
 Requests==2.31.0
 scipy==1.12.0

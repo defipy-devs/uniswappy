@@ -181,11 +181,11 @@ select_token = Select(title="Choose Token (Default WETH):", value="WETH", option
 select_token.on_change('value', token_selection)
 
 # Create stable token selection dropdown
-# select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
-# select_stable.on_change('value', stable_selection)
+select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
+select_stable.on_change('value', stable_selection)
 
 # Define buttons on top of screen
-button_row = row(init_button, select_token, Spacer(width_policy='max'), select_chain, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)

@@ -87,7 +87,7 @@ def initialize_sim(event):
     global init, callback_id
 
     # sim.init_lp(init_x_tkn = bnb_init_amt, x_tkn_nm = bnb_tkn_nm)
-    sim.init_lp(init_x_tkn = weth_init_amt)
+    sim.init_lp(init_x_tkn = weth_init_amt, x_tkn_nm = weth_tkn_nm)
 
     if init:
         # Simulation is currently running, so stop it

@@ -9,6 +9,8 @@ from ..utils.client import API0x
 from ..math.model import TokenDeltaModel
 from ..math.model import EventSelectionModel
 from ..cpt.factory import UniswapFactory
+from ..cpt.quote import LPTokenQuote
+from ..cpt.quote import IndexTokenQuote
 from ..simulate import CorrectReserves
 from ..process.deposit import SwapDeposit
 from ..process.swap import WithdrawSwap
@@ -52,8 +54,13 @@ class ETHDenverSimulator:
         self.x_tkn = None
         self.y_tkn = None
         self.time_init = None
+        self.init_lp_invest = None
         self.state = 'instantiate'
         self.remaining_sleep = self.time_window
+        self.api_0x_data = None
+        
+        self.x_redeem = None
+        self.y_redeem = None
         
         self.time_arb = None
         self.x_amt_arb = None
@@ -73,7 +80,13 @@ class ETHDenverSimulator:
         return self.state
     
     def get_swap_amt(self):
-        return self.amt_swap     
+        return self.amt_swap  
+    
+    def get_x_redeem(self):
+        return self.x_redeem
+    
+    def get_y_redeem(self):
+        return self.y_redeem    
     
     def get_x_tkn(self):
         return self.x_tkn    
@@ -106,14 +119,17 @@ class ETHDenverSimulator:
             return self.y_amt_arb             
         
     def get_0x_data(self):    
-        return self.api.apply(self.sell_token, self.buy_token, SELL_AMOUNT)
-    
+        return self.api_0x_data      
+        
     def get_market_price(self): 
-        chain_call = self.get_0x_data()
-        return 1/float(chain_call['price'])
+        return 1/float(self.api_0x_data['price']) if self.api_0x_data != None else -1
     
-    def init_lp(self, init_x_tkn, x_tkn_nm = None, y_tkn_nm = None):
+    def call_0x_api(self):    
+        return self.api.apply(self.sell_token, self.buy_token, SELL_AMOUNT)    
+    
+    def init_lp(self, init_x_tkn, x_tkn_nm = None, y_tkn_nm = None, init_x_invest = 1):
         self.state = self.STATE_INIT
+        self.api_0x_data = self.call_0x_api()
         p = self.get_market_price()
         x_tkn_amt = init_x_tkn
         y_tkn_amt = x_tkn_amt*p
@@ -128,7 +144,8 @@ class ETHDenverSimulator:
         factory = UniswapFactory("ETH pool factory", None)
         self.lp = factory.deploy(exchg_data)
         self.lp.add_liquidity(USER_NM, x_tkn_amt, y_tkn_amt, x_tkn_amt, y_tkn_amt) 
-        
+        self.take_x_position(init_x_invest)
+                
         self.arb = CorrectReserves(self.lp, x0 = p)
         self.time_init = datetime.datetime.now()
      
@@ -148,6 +165,7 @@ class ETHDenverSimulator:
         self._market_arbitrage(p)
         remaining_sleep -= pause
         
+        self._update_investment()
         time.sleep(remaining_sleep) 
 
         return p
@@ -171,6 +189,15 @@ class ETHDenverSimulator:
         self.x_amt_swap = self.lp.get_reserve(self.arb.get_x_tkn())
         self.y_amt_swap = self.lp.get_reserve(self.arb.get_y_tkn())
         self.price_swap = self.lp.get_price(self.arb.get_x_tkn())        
+            
+    def take_x_position(self, x_invest):
+        x_invest = x_invest if x_invest == 1 else x_invest
+        self.init_lp_invest = LPTokenQuote().get_x(self.lp, x_invest)
+        self._update_investment()
+        
+    def _update_investment(self): 
+        self.x_redeem = IndexTokenQuote().get_x(self.lp, self.init_lp_invest)
+        self.y_redeem = IndexTokenQuote().get_y(self.lp, self.init_lp_invest)
             
     def _market_arbitrage(self, p):  
         self.state = self.STATE_ARB

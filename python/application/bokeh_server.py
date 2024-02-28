@@ -66,7 +66,7 @@ chain_api = Chain0x.ETHEREUM
 stable = Chain0x.USDC
 token = Chain0x.WETH
 
-max_trade_percent = 0.001 # lower means less volatility
+max_trade_percent = 0.01 # lower means less volatility
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
@@ -102,7 +102,7 @@ sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
 
 # Dark/Light mode button
 def switch_theme(event):
-    global current_theme_is_dark, instructions, button_row, slider_row, slider
+    global current_theme_is_dark, instructions, button_row, slider_row, bias_slider, percent_slider
     
     # Toggle the theme based on the current state
     if current_theme_is_dark:
@@ -113,7 +113,8 @@ def switch_theme(event):
         instructions.styles=light_style_small
         button_row.styles=light_style
         slider_row.styles=light_style
-        slider.styles=light_style
+        bias_slider.styles=light_style
+        percent_slider.styles=light_style
     else:
         curdoc().theme = 'dark_minimal'
         new_theme = 'dark_minimal'
@@ -122,7 +123,8 @@ def switch_theme(event):
         instructions.styles=dark_style_small
         button_row.styles=dark_style
         slider_row.styles=dark_style
-        slider.styles=dark_style
+        bias_slider.styles=dark_style
+        percent_slider.styles=dark_style
     
     # Toggle the flag
     current_theme_is_dark = not current_theme_is_dark
@@ -159,7 +161,7 @@ def initialize_sim(event):
 def refresh_sim(event):
     global chain, sim
     print("chain_nm: ", chain_nm)
-    chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias)
+    chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias, max_trade_percent=max_trade_percent)
     api = API0x(chain = chain.chain_nm)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
                          sell_token = chain.get_sell_token(),
@@ -207,7 +209,12 @@ def update_trade_bias(attr, old, new):
     global trade_bias
     trade_bias = new
     print("New trade bias: ", new)
-    # refresh_sim(None)
+    # refresh_sim(None) update_percent
+
+def update_percent(attr, old, new):
+    global max_trade_percent
+    max_trade_percent = new/100
+    print("New trade percent: ", new)
 
 
 def initiate_charts():
@@ -262,6 +269,7 @@ def initiate_charts():
     p1.yaxis.formatter = custom_formatter_dollar
     p2.yaxis.formatter = custom_formatter_eth
     p3.yaxis.formatter = custom_formatter_dollar
+    p4.yaxis.formatter = custom_formatter_eth
 
     ### Running  Code ###
 
@@ -340,12 +348,17 @@ select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", 
 select_stable.on_change('value', stable_selection)
 
 # create slider for changing trade bias
-slider = Slider(start=0, end=1, value=.5, step=.05, title="Trading Bias")
-slider.on_change('value', update_trade_bias)
-slider.styles=dark_style
+bias_slider = Slider(start=0, end=1, value=.5, step=.05, title="Trading Bias")
+bias_slider.on_change('value', update_trade_bias)
+bias_slider.styles=dark_style
 
-# add refresh button for slider
-refresh_button = Button(label="Apply Bias", button_type="primary", width=100)
+# create slider for changing max trade %
+percent_slider = Slider(start=0.1, end=10, value=1, step=.1, title="Max Trade %")
+percent_slider.on_change('value', update_percent)
+percent_slider.styles=dark_style
+
+# add refresh button for sliders
+refresh_button = Button(label="Apply Slider Settings", button_type="primary", width=200)
 refresh_button.on_click(refresh_sim)
 
 
@@ -356,7 +369,7 @@ source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Define UI on top  of screen
 button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
-slider_row = row(slider0, slider, slider1, refresh_button, styles=dark_style)
+slider_row = row(Spacer(width_policy='max'), slider0, bias_slider, slider1, Spacer(width_policy='max'), percent_slider, Spacer(width_policy='max'), refresh_button, styles=dark_style)
 
 
 # add elements to UI

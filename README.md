@@ -31,7 +31,7 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
       allow end-users to stress test the limitations of a Uniswap pool setup using live price 
       feeds from 0x API
 * **[API0x.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/client/API0x.py)**
-    * 0x API class which calls Chain0x data class for data
+    * 0x API class which works with Chain0x data class for all necessary API relevant data
 * **[Chain0x.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/data/Chain0x.py)**
     * Data class for handling all hardcoded data (eg, token contract addresses)
 * **[CorrectReserves.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/CorrectReserves.py)**

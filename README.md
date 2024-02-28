@@ -23,19 +23,19 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
 ```
 
 ## ETHDenverSimulator Release Updates
-* **[class ETHDenverSimulator](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/ETHDenverSimulator.py)**:
+* **[ETHDenverSimulator](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/ETHDenverSimulator.py)**:
     * ETHDenver Simulator class for BUIDL week; applies the 0x API to produce a mock Uniswap pool to 
       allow end-users to stress test the limitations of a Uniswap pool setup using live price 
       feeds from 0x API
-* **[class API0x](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/client/API0x.py)
+* **[API0x](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/client/API0x.py)**
     * 0x API class which calls Chain0x data class for data
-* **[class API0x](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/data/Chain0x.py)
+* **[Chain0x](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/data/Chain0x.py)**
     * Data class handling all data for BUIDL week ETHDenver Simulator application
-* **[class CorrectReserves](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/CorrectReserves.py)
+* **[class CorrectReserves](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/CorrectReserves.py)**
     * Applies SolveDeltas class to Correct x/y reserve amounts so that price reflects desired input price; 
       in the case for the BUIDL week event, it would be the most recent market price returned from 
       the 0x API 
-* **[bokeh_server.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/application/bokeh_server.py) 
+* **[bokeh_server.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/application/bokeh_server.py)**
     * Front-end server to render simulator to front-end user
 		
 

@@ -113,6 +113,8 @@ def refresh_sim(event):
             x_tkn_nm = chain.buy_tkn_nm, 
             init_x_invest = chain.init_investment)
     print("Sim refreshed \n")
+    clear_data()
+    
 
 # Chain drop down selection function
 def chain_selection(attr, old, new):
@@ -120,8 +122,7 @@ def chain_selection(attr, old, new):
     Chain0x.chain_nm = new
     chain_api = Chain0x.chain_nm
     print(f"Selected chain: {chain_api}")
-    if not init:
-        refresh_sim(None)
+    refresh_sim(None)
 
 # Token drop down selection function
 def token_selection(attr, old, new):
@@ -129,8 +130,9 @@ def token_selection(attr, old, new):
     Chain0x.buy_tkn_nm = new
     token = Chain0x.buy_tkn_nm
     print(f"Selected crypto: {token}")
-    if not init:
-        refresh_sim(None)
+    refresh_sim(None)
+    # if not init:
+    #     refresh_sim(None)
 
 # Stable coin drop down selection function
 def stable_selection(attr, old, new):
@@ -138,8 +140,7 @@ def stable_selection(attr, old, new):
     Chain0x.sell_tkn_nm = new
     stable = Chain0x.sell_tkn_nm
     print(f"Selected stable: {stable}")
-    if not init:
-        refresh_sim(None)
+    refresh_sim(None)
 
 def initiate_charts():
     global p1, p2, p3, p4, grid
@@ -150,7 +151,7 @@ def initiate_charts():
     p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
     p1.toolbar.logo = None
 
-    p2 = figure(title=f'Token Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Token Amt)', width_policy='max', height_policy='max')
+    p2 = figure(title=f'Token Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Token)', width_policy='max', height_policy='max')
     p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
     p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'Token Reserves')
     p2.toolbar.logo = None
@@ -245,6 +246,7 @@ def clear_data():
     source2.data = {'x': [], 'x_swap': [], 'x_arb': []}
     source3.data = {'x': [], 'y_swap': [], 'y_arb': []}
     source4.data = {'x': [], 'y': []}
+    print("Data cleared")
 
 ### Initialize Chart Data ####
 

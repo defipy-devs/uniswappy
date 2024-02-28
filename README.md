@@ -11,7 +11,7 @@ Install project requirements:
 
 ```
 
-Next, install GH instance of Uniswappy python package: 
+Next, install modified ETHDenver GH instance of Uniswappy python package: 
 ```
 > pip install .
 ```

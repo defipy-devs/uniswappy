@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from dataclasses import dataclass, field
 from ...math.model import TokenDeltaModel
 
+DEFAULT_CHAIN_NM = "ETHEREUM"
 DEFAULT_BUY_TKN_NM = "WETH"
 DEFAULT_BUY_TOKEN = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 DEFAULT_SELL_TKN_NM = "USDC"
@@ -21,6 +22,7 @@ DEFAULT_MAX_TRADE_PERCENT = 0.003
 @dataclass
 class Chain0x:
     
+    # API Endpoints for Chains
     ETHEREUM = 'api.0x.org'
     ARBITRUM = 'arbitrum.api.0x.org'
     AVALANCHE = 'avalanche.api.0x.org'
@@ -43,6 +45,7 @@ class Chain0x:
     USDT = "USDT"
     DAI = "DAI"
 
+    chain_nm: str = DEFAULT_CHAIN_NM
     buy_tkn_nm: str = DEFAULT_BUY_TKN_NM
     sell_tkn_nm: str = DEFAULT_SELL_TKN_NM
     max_trade_percent: float = DEFAULT_MAX_TRADE_PERCENT
@@ -50,6 +53,30 @@ class Chain0x:
     trade_bias: float = DEFAULT_TRADE_BIAS 
     init_investment: float = DEFAULT_INIT_INVESTMENT 
 
+    def get_chain_name(self) -> str:
+
+        match self.chain_nm:
+            case self.ETHEREUM:
+                select_chain_name = 'api.0x.org'
+            case self.ARBITRUM:
+                select_chain_name = 'arbitrum.api.0x.org'
+            case self.AVALANCHE:
+                select_chain_name = 'avalanche.api.0x.org'
+            case self.BASE:
+                select_chain_name = 'base.api.0x.org'
+            case self.BINANCE:
+                select_chain_name = 'bsc.api.0x.org'
+            case self.CELO:
+                select_chain_name = 'celo.api.0x.org'
+            case self.FANTOM:
+                select_chain_name = 'fantom.api.0x.org'
+            case self.OPTIMISM:
+                select_chain_name = 'optimism.api.0x.org'
+            case self.POLYGON:
+                select_chain_name = 'polygon.api.0x.org'    
+
+        return select_chain_name   
+    
     def get_buy_token(self) -> str:
 
         match self.buy_tkn_nm:

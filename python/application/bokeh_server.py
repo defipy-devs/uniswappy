@@ -20,35 +20,17 @@ rate = 3
 # # Canonical Settings
 # # -------------------
 
-chain = "ETHEREUM"
-
-stable = "Chain0x.TKN_USDC"
-usdc_tkn_nm = "USDC"
-usdc_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-time_window = 0.25 # how often sim runs and 0x API is pinged
-trade_bias = 0.5 # bias between USDC and WETH swaps (50/50)
+# Default values
+chain_api = Chain0x.ETHEREUM
+stable = Chain0x.USDC
+token = Chain0x.WETH
 max_trade_percent = 0.001 # lower means less volatility
+time_window = 0.25 # how often sim runs and 0x API is pinged
+trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
-token = "Chain0x.TKN_WETH"
-weth_tkn_nm = "WETH"
-weth_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-weth_init_amt = 1000 # higher means less volatility
-weth_td_model = TokenDeltaModel(max_trade = max_trade_percent*weth_init_amt, 
-                                shape=1, # Gamma Dist. shape  - impacts volatility
-                                scale=1) # Gamma Dist. scale - impacts volatility more
-
-# shape * scale = mean, if mean is low the revenue is low, if high revenue is high
-# higher mean = higher revenue because revenue comes from the size of the position 
-# higher mean also means a health risk to the pool because there is a higher likelihood of destabilizing the pool
-
-# shape * scale^2 = variance, if variance is high risk is high, if variance is low risk is low
-# if variance is high risk is high because revenue is less predictable
-
-# if both are high impermanent loss risk is high
-
-# mean doesn't make much of a difference here because the arbitrage bots simulated constantly revert to the live price data
-# variance is the bigger factor and you would only want to split these out for more advanced quant finance type users
-
+# intialize chain and API with default values
+chain = Chain0x(buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
+api = API0x(chain = chain_api)
 # -------------------
 # ETHDenverSim
 # -------------------
@@ -57,11 +39,12 @@ init = False
 callback_id = None
 
 # sim = ETHDenverSimulator() # default mode
-sim = ETHDenverSimulator(buy_token = weth_buy_token,
-                         sell_token = usdc_sell_token,
+sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
+                         sell_token = chain.get_sell_token(),
                          time_window = time_window,
                          trade_bias = trade_bias,
-                         td_model = weth_td_model)
+                         td_model = chain.get_td_model(),
+                         api = api)
 
 ### Functions ###
 
@@ -92,7 +75,9 @@ def initialize_sim(event):
     global init, callback_id
 
     # sim.init_lp(init_x_tkn = bnb_init_amt, x_tkn_nm = bnb_tkn_nm)
-    sim.init_lp(init_x_tkn = weth_init_amt, x_tkn_nm = weth_tkn_nm)
+    sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
+            x_tkn_nm = chain.buy_tkn_nm, 
+            init_x_invest = chain.init_investment)
 
     if init:
         # Simulation is currently running, so stop it
@@ -111,23 +96,47 @@ def initialize_sim(event):
     
     init = not init  # Toggle the state
     
+def refresh_sim(event):
+    global chain, sim
+    chain = Chain0x(buy_tkn_nm = token, sell_tkn_nm = stable)
+    api = API0x(chain = chain_api)
+    sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
+                         sell_token = chain.get_sell_token(),
+                         time_window = time_window,
+                         trade_bias = trade_bias,
+                         td_model = chain.get_td_model(),
+                         api = api)
+    sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
+            x_tkn_nm = chain.buy_tkn_nm, 
+            init_x_invest = chain.init_investment)
+    print("Data refreshed")
+
 # Chain drop down selection function
 def chain_selection(attr, old, new):
-    global chain
-    chain = f"Chain0x.{new}"
-    print(f"Selected chain: {new}")
+    global chain_api, chain_nm
+    Chain0x.chain_nm = new
+    chain_api = Chain0x.chain_nm
+    print(f"Selected chain: {chain_api}")
+    if not init:
+        refresh_sim(None)
 
 # Token drop down selection function
 def token_selection(attr, old, new):
-    global token
-    token = f"Chain0x.TKN_{new}"
-    print(f"Selected crypto: {new}")
+    global token, buy_tkn_nm
+    Chain0x.buy_tkn_nm = new
+    token = Chain0x.buy_tkn_nm
+    print(f"Selected crypto: {token}")
+    if not init:
+        refresh_sim(None)
 
 # Stable coin drop down selection function
 def stable_selection(attr, old, new):
-    global stable
-    stable = f"Chain0x.TKN_{new}"
-    print(f"Selected stable: {new}")
+    global stable, sell_tkn_nm
+    Chain0x.sell_tkn_nm = new
+    stable = Chain0x.sell_tkn_nm
+    print(f"Selected stable: {stable}")
+    if not init:
+        refresh_sim(None)
 
 # Refresh graphs function
 def update_data():
@@ -175,6 +184,10 @@ def update_data():
 init_button = Button(label="Start Simulation", button_type="success", width=200)
 init_button.on_click(initialize_sim)
 
+# Create reinitialize button
+refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=200)
+refresh_button.on_click(refresh_sim)
+
 # Create the toggle button
 toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
@@ -191,32 +204,33 @@ select_token.on_change('value', token_selection)
 select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
 select_stable.on_change('value', stable_selection)
 
+# remove chain selection from front end for now until it works: select_chain
 # Define buttons on top of screen
-button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+button_row = row(init_button, select_token, select_stable, refresh_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
 
-source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For WETH to USDC Price and LP Price Deviation
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
 source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Initialize Bokeh figures and data sources
-p1 = figure(title='WETH/USDC & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
+p1 = figure(title=f'{token}/{stable} & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
 p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
 # p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
 p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
 p1.toolbar.logo = None
 
-p2 = figure(title='WETH Reserve', x_axis_label='Time', y_axis_label='Reserve (WETH)', width_policy='max', height_policy='max')
+p2 = figure(title=f'{token} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({token})', width_policy='max', height_policy='max')
 p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
-p2.line(x='x', y='x_arb', source=source2, color='green', legend_label='WETH Reserves')
+p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'{token} Reserves')
 p2.toolbar.logo = None
 
-p3 = figure(title='USDC Reserve', x_axis_label='Time', y_axis_label='Reserve (USDC)', width_policy='max', height_policy='max')
+p3 = figure(title=f'{stable} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({stable})', width_policy='max', height_policy='max')
 p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
-p3.line(x='x', y='y_arb', source=source3, color='green', legend_label='USDC Reserves')
+p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'{stable} Reserves')
 p3.toolbar.logo = None
 
-p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label='Amount (WETH)', width_policy='max', height_policy='max')
+p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount ({token})', width_policy='max', height_policy='max')
 p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
 p4.toolbar.logo = None
 

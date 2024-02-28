@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, curdoc, show
-from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div
+from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div, Styles
 from bokeh.layouts import gridplot, column, row, layout
 from uniswappy import *
 import time
@@ -11,6 +11,48 @@ from datetime import datetime
 # Theme 
 curdoc().theme = 'dark_minimal'
 current_theme_is_dark = True
+dark_style = Styles(
+    display="flex",  # Use flexbox layout
+    justify_content="center",  # Center horizontally in the flex container
+    align_items="center",  # Center vertically in the flex container
+    height="100px",  # Set a height for the Div to see the vertical centering effect
+    text_align="center", 
+    width="100%",
+    font_size="20px",
+    background_color="#21262a",
+    color = "white" 
+)
+button_dark_style = Styles(  
+    justify_content="center",  # Center horizontally in the flex container
+    align_items="center",  # Center vertically in the flex container
+    height="100px",  # Set a height for the Div to see the vertical centering effect
+    text_align="center", 
+    width="100%",
+    font_size="20px",
+    background_color="#21262a",
+    color = "white" 
+)
+light_style = Styles(
+    display="flex",  # Use flexbox layout
+    justify_content="center",  # Center horizontally in the flex container
+    align_items="center",  # Center vertically in the flex container
+    height="100px",  # Set a height for the Div to see the vertical centering effect
+    text_align="center", 
+    width="100%",
+    font_size="20px",
+    background_color="#fff",
+    color = "black"
+)
+button_light_style = Styles(
+    justify_content="center",  # Center horizontally in the flex container
+    align_items="center",  # Center vertically in the flex container
+    height="100px",  # Set a height for the Div to see the vertical centering effect
+    text_align="center", 
+    width="100%",
+    font_size="20px",
+    background_color="#fff",
+    color = "black"
+)
 
 # Time 
 timestamp_counter = 0
@@ -39,7 +81,7 @@ api = API0x(chain = chain_api)
 init = False
 callback_id = None
 div = Div(text="Last updated at:")
-instructions = Div(text="Choose a network and token/stablecoin pair then click start simulation to begin modelling")
+instructions = Div(text="First choose a network and token/stablecoin pair. Next click ""Start Simulation"" to begin modelling", styles=dark_style)
 
 # sim = ETHDenverSimulator() # default mode
 sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -53,7 +95,7 @@ sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
 
 # Dark/Light mode button
 def switch_theme(event):
-    global current_theme_is_dark  # Declare the variable as global to modify it
+    global current_theme_is_dark, instructions, button_row  # Declare the variable as global to modify it
     
     # Toggle the theme based on the current state
     if current_theme_is_dark:
@@ -61,11 +103,15 @@ def switch_theme(event):
         new_theme = 'light_minimal'
         toggle_button.label = "Dark Mode"
         toggle_button.button_type = "primary"
+        instructions.styles=light_style
+        button_row.styles=light_style
     else:
         curdoc().theme = 'dark_minimal'
         new_theme = 'dark_minimal'
         toggle_button.label = "Light Mode"
         toggle_button.button_type = "default"
+        instructions.styles=dark_style
+        button_row.styles=dark_style
     
     # Toggle the flag
     current_theme_is_dark = not current_theme_is_dark
@@ -280,12 +326,12 @@ source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y R
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Define UI on top of screen
-button_row = row(init_button, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width') # remove chain selection from front end for now until it works: select_chain
-# text_row = row(children=[instructions], sizing_mode='stretch_width', align='center')
+button_row = row(init_button, Spacer(width_policy='max'), select_chain, select_token, select_stable, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
 
 # add elements to UI
 curdoc().add_root(button_row) 
-# curdoc().add_root(text_row) 
+curdoc().add_root(instructions) 
+
 
 # Define chart appearance and add to UI
 initiate_charts()

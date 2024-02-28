@@ -24,6 +24,10 @@ DEFAULT_API_SELL_AMOUNT = '10000000'
 @dataclass
 class Chain0x:
     
+    """ 
+        Data class handling all data for BUIDL week ETHDenver Simulator application
+    """    
+    
     # API Endpoints for Chains
     ETHEREUM = 'api.0x.org'
     ARBITRUM = 'arbitrum.api.0x.org'

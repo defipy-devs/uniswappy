@@ -6,7 +6,7 @@ GWEI_PRECISION = 18
 
 class ERC20:
     
-    """ ERC20 token akjhsflkjbvjn cn vvk
+    """ ERC20 token
 
         Parameters
         -----------------
@@ -27,7 +27,7 @@ class ERC20:
 
     def deposit(self, _from, value):
         
-        """ deposit intlkaflkw nsdlkamnas
+        """ deposit
 
             Deposit token
                 
@@ -43,7 +43,7 @@ class ERC20:
 
     def transfer(self, _to, value):
         
-        """ transfer intlkaflkwns dlkamnas
+        """ transfer
 
             Transfer token
                 

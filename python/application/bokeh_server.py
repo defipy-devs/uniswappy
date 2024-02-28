@@ -38,9 +38,8 @@ api = API0x(chain = chain_api)
 
 init = False
 callback_id = None
-is_grid_in_roots = False
-first = True
 div = Div(text="Last updated at:")
+instructions = Div(text="Choose a network and token/stablecoin pair then click start simulation to begin modelling")
 
 # sim = ETHDenverSimulator() # default mode
 sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -113,8 +112,7 @@ def refresh_sim(event):
     sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
             x_tkn_nm = chain.buy_tkn_nm, 
             init_x_invest = chain.init_investment)
-    update_charts()
-    print("Data refreshed \n")
+    print("Sim refreshed \n")
 
 # Chain drop down selection function
 def chain_selection(attr, old, new):
@@ -143,28 +141,26 @@ def stable_selection(attr, old, new):
     if not init:
         refresh_sim(None)
 
-def update_charts():
-    global p1, p2, p3, p4, is_grid_in_roots, first, div
+def initiate_charts():
+    global p1, p2, p3, p4, grid
     # Initialize Bokeh figures and data sources
-    p1 = figure(title=f'{token}/{stable} & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
+    p1 = figure(title=f'Price of Token in Stablecoin & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
     p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
     # p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
     p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
     p1.toolbar.logo = None
-    print("P1: ", p1)
-    print("Token: ", token)
 
-    p2 = figure(title=f'{token} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({token})', width_policy='max', height_policy='max')
+    p2 = figure(title=f'Token Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Token Amt)', width_policy='max', height_policy='max')
     p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
-    p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'{token} Reserves')
+    p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'Token Reserves')
     p2.toolbar.logo = None
 
-    p3 = figure(title=f'{stable} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({stable})', width_policy='max', height_policy='max')
+    p3 = figure(title=f'Stable Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Stablecoin)', width_policy='max', height_policy='max')
     p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
-    p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'{stable} Reserves')
+    p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'Stable Reserves')
     p3.toolbar.logo = None
 
-    p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount ({token})', width_policy='max', height_policy='max')
+    p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount of Token per Swap', width_policy='max', height_policy='max')
     p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
     p4.toolbar.logo = None
 
@@ -175,7 +171,7 @@ def update_charts():
     } else if (tick >= 1e4) {
         return '$' + (tick / 1e3).toFixed(2) + 'K';
     } else {
-        return '$' + tick.toFixed(0);
+        return '$' + tick.toFixed(2);
     }
     """
 
@@ -203,29 +199,14 @@ def update_charts():
 
     # Create a grid layout with the plots
     grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')
-    print("Grid: ", grid)
-
-    if is_grid_in_roots:
-        for root in list(curdoc().roots):
-            if isinstance(root, figure):
-                curdoc().remove_root(root)
-                print("Grid Removed: ", curdoc().roots)
-                curdoc().add_root(p1)
-                print("Grid Added: ", curdoc().roots)
-    else:
-        # curdoc().add_root(grid)
-        curdoc().add_root(p1)
-        is_grid_in_roots = True
-        print("Grid Added")
-        print("Roots: ", curdoc().roots)
-    
-    div.text = f"Last updated at: {datetime.now()}"
 
 # Refresh graphs function
 def update_data():
-    global timestamp_counter
+    global timestamp_counter, div
 
-    price = sim.trial() # meant to be run repeatedly 
+    div.text = f"Last updated at: {datetime.now()}"
+
+    price = sim.trial() # initiate each trial run
 
     print("Price: ", price)
     
@@ -259,6 +240,11 @@ def update_data():
 
     timestamp_counter += rate
 
+def clear_data():
+    source1.data = {'x': [], 'y': [], 'lp_swap': []}
+    source2.data = {'x': [], 'x_swap': [], 'x_arb': []}
+    source3.data = {'x': [], 'y_swap': [], 'y_arb': []}
+    source4.data = {'x': [], 'y': []}
 
 ### Initialize Chart Data ####
 
@@ -267,8 +253,8 @@ init_button = Button(label="Start Simulation", button_type="success", width=200)
 init_button.on_click(initialize_sim)
 
 # Create reinitialize button
-refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=200)
-refresh_button.on_click(refresh_sim)
+# refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=200)
+# refresh_button.on_click(refresh_sim)
 
 # Create the toggle button
 toggle_button = Button(label="Light Mode", button_type="default", width=200)
@@ -286,15 +272,20 @@ select_token.on_change('value', token_selection)
 select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
 select_stable.on_change('value', stable_selection)
 
-# remove chain selection from front end for now until it works: select_chain
-# Define buttons on top of screen
-button_row = row(init_button, select_token, select_stable, refresh_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
-curdoc().add_root(div) 
-curdoc().add_root(button_row) 
-
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
 source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
-update_charts()
+# Define UI on top of screen
+button_row = row(init_button, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width') # remove chain selection from front end for now until it works: select_chain
+# text_row = row(children=[instructions], sizing_mode='stretch_width', align='center')
+
+# add elements to UI
+curdoc().add_root(button_row) 
+# curdoc().add_root(text_row) 
+
+# Define chart appearance and add to UI
+initiate_charts()
+curdoc().add_root(grid)
+

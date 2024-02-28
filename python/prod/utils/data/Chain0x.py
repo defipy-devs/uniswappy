@@ -90,28 +90,60 @@ class Chain0x:
     def get_buy_token(self) -> str:
 
         match self.buy_tkn_nm:
-            case self.WETH:
+            case self.WETH if self.chain_nm in self.ETHEREUM:
                 select_buy_token = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-            case self.LINK:
+            case self.LINK if self.chain_nm in self.ETHEREUM:
                 select_buy_token = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
-            case self.UNI:
+            case self.UNI if self.chain_nm in self.ETHEREUM:
                 select_buy_token = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
-            case self.WBTC:
+            case self.WBTC if self.chain_nm in self.ETHEREUM:
                 select_buy_token = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
-            case self.BNB:
+            case self.BNB if self.chain_nm in self.ETHEREUM:
                 select_buy_token = '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
+                
+            case self.WETH if self.chain_nm in self.POLYGON:
+                select_buy_token = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
+            case self.LINK if self.chain_nm in self.POLYGON:
+                select_buy_token = '0xb0897686c545045aFc77CF20eC7A532E3120E0F1'
+            case self.UNI if self.chain_nm in self.POLYGON:
+                select_buy_token = '0xb33EaAd8d922B1083446DC23f610c2567fB5180f'
+            case self.WBTC if self.chain_nm in self.POLYGON:
+                select_buy_token = '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6'
+            case self.BNB if self.chain_nm in self.POLYGON:
+                select_buy_token = '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3'    
+                
+            case self.WETH if self.chain_nm in self.OPTIMISM:
+                select_buy_token = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8'
+            case self.LINK if self.chain_nm in self.OPTIMISM:
+                select_buy_token = '0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6'
+            case self.WBTC if self.chain_nm in self.OPTIMISM:
+                select_buy_token = '0x68f180fcCe6836688e9084f035309E29Bf0A2095'                 
 
         return select_buy_token   
     
     def get_sell_token(self) -> str:
 
         match self.sell_tkn_nm:
-            case self.USDC:
+            case self.USDC if self.chain_nm in self.ETHEREUM:
                 select_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-            case self.USDT:
+            case self.USDT if self.chain_nm in self.ETHEREUM:
                 select_sell_token = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-            case self.DAI:
+            case self.DAI if self.chain_nm in self.ETHEREUM:
                 select_sell_token = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+                
+            case self.USDC if self.chain_nm in self.POLYGON:
+                select_sell_token = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
+            case self.USDT if self.chain_nm in self.POLYGON:
+                select_sell_token = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+            case self.DAI if self.chain_nm in self.POLYGON:
+                select_sell_token = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'    
+                
+            case self.USDC if self.chain_nm in self.OPTIMISM:
+                select_sell_token = '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
+            case self.USDT if self.chain_nm in self.OPTIMISM:
+                select_sell_token = '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'
+            case self.DAI if self.chain_nm in self.OPTIMISM:
+                select_sell_token = '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'                   
 
         return select_sell_token      
     

@@ -2,6 +2,9 @@
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
 the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org). For backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
 
+## Live link to application
+Click [here](https://6pg42n-5006.csb.app/bokeh_server) for live link
+
 ## Local Installation 
 
 Install project requirements:
@@ -20,7 +23,7 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
 
 ```
 > bokeh serve --show python/application/bokeh_server.py
-```
+``` 
 
 ## DeFiPy ETHDenver BUIDL week additions
 * **[ETHDenverSimulator.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/ETHDenverSimulator.py)**:

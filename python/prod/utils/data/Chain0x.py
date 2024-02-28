@@ -12,12 +12,14 @@ DEFAULT_BUY_TOKEN = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 DEFAULT_SELL_TKN_NM = "USDC"
 DEFAULT_SELL_TOKEN = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 DEFAULT_INIT_AMT = 1000
-DEFAULT_TIME_WINDOW = 3
+DEFAULT_TIME_WINDOW = 0.25
 DEFAULT_TRADE_BIAS = 0.5
 DEFAULT_INIT_INVESTMENT = 1
 DEFAULT_GAMMA_SHAPE = 1
 DEFAULT_GAMMA_SCALE = 1
 DEFAULT_MAX_TRADE_PERCENT = 0.003
+DEFAULT_API_KEY = "6cbf2275-5cee-4659-8d67-5491399a9c5e"
+DEFAULT_API_SELL_AMOUNT = '10000000'
 
 @dataclass
 class Chain0x:
@@ -52,6 +54,14 @@ class Chain0x:
     time_window: float = DEFAULT_TIME_WINDOW
     trade_bias: float = DEFAULT_TRADE_BIAS 
     init_investment: float = DEFAULT_INIT_INVESTMENT 
+    api_key: float = DEFAULT_API_KEY
+    api_sell_amount: str = DEFAULT_API_SELL_AMOUNT
+    
+    def get_api_key(self) -> str:
+        return self.api_key
+    
+    def get_api_sell_amount(self) -> str:
+        return self.api_sell_amount    
 
     def get_chain_name(self) -> str:
 

@@ -21,18 +21,14 @@ import time
 import datetime
 import random
 
-BUY_TOKEN = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-SELL_TOKEN = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-SELL_AMOUNT = '10000000'
 USER_NM = 'user'
-TRADE_TIME_WINDOW = 0.25
-TKN_TRADE_BIAS = 0.5
 
 class ETHDenverSimulator:
     
     STATE_ARB = 'arb'
     STATE_SWAP = 'swap'
     STATE_INIT = 'init_lp'
+    STATE_INSTANTIATE = 'instantiate'
     
     def __init__(self, 
                  buy_token = None,
@@ -43,10 +39,10 @@ class ETHDenverSimulator:
                  api = None
                 ):
         
-        self.buy_token = BUY_TOKEN if buy_token == None else buy_token
-        self.sell_token = SELL_TOKEN if sell_token == None else sell_token
-        self.time_window = TRADE_TIME_WINDOW if time_window == None else time_window
-        self.trade_bias = TKN_TRADE_BIAS if trade_bias == None else trade_bias        
+        self.buy_token = Chain0x().get_buy_token() if buy_token == None else buy_token
+        self.sell_token = Chain0x().get_sell_token() if sell_token == None else sell_token
+        self.time_window = Chain0x.time_window if time_window == None else time_window
+        self.trade_bias = Chain0x.trade_bias if trade_bias == None else trade_bias        
         self.td_model = TokenDeltaModel(30) if td_model == None else td_model
         self.api = API0x(chain = Chain0x.ETHEREUM) if api == None else api 
         
@@ -56,7 +52,7 @@ class ETHDenverSimulator:
         self.y_tkn = None
         self.time_init = None
         self.init_lp_invest = None
-        self.state = 'instantiate'
+        self.state = self.STATE_INSTANTIATE
         self.remaining_sleep = self.time_window
         self.api_0x_data = None
         
@@ -132,7 +128,7 @@ class ETHDenverSimulator:
         return 1/float(self.api_0x_data['price']) if self.api_0x_data != None else -1
     
     def call_0x_api(self):    
-        return self.api.apply(self.sell_token, self.buy_token, SELL_AMOUNT)    
+        return self.api.apply(self.sell_token, self.buy_token, Chain0x().get_api_sell_amount())    
     
     def init_lp(self, init_x_tkn, x_tkn_nm = None, y_tkn_nm = None, init_x_invest = 1):
         self.state = self.STATE_INIT
@@ -141,8 +137,8 @@ class ETHDenverSimulator:
         x_tkn_amt = init_x_tkn
         y_tkn_amt = x_tkn_amt*p
         
-        x_tkn_nm = "WETH" if x_tkn_nm == None else x_tkn_nm
-        y_tkn_nm = "USDC" if y_tkn_nm == None else y_tkn_nm
+        x_tkn_nm = Chain0x.buy_tkn_nm if x_tkn_nm == None else x_tkn_nm
+        y_tkn_nm = Chain0x.sell_tkn_nm if y_tkn_nm == None else y_tkn_nm
 
         self.x_tkn = ERC20(x_tkn_nm, None)
         self.y_tkn = ERC20(y_tkn_nm, None)
@@ -159,7 +155,7 @@ class ETHDenverSimulator:
     def trial(self):
         self._reset_trial()
         p = self.get_market_price()
-        remaining_sleep = TRADE_TIME_WINDOW
+        remaining_sleep = self.time_window
         
         # STATE: RANDOM SWAP
         pause = random.uniform(0, remaining_sleep)

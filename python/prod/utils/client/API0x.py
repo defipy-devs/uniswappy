@@ -8,7 +8,15 @@ from ..data import Chain0x
 
 class API0x():
     
-    """ API0x
+    """ 0x API class which calls Chain0x data class for data
+    
+        Parameters
+        -----------------
+        chain : str
+            API endpoint url indicating which chain to make API call (eg, api.0x.org)
+        api_key : str
+            0x API key (see dashboard.0x.org for more info)  
+    
     """      
 
     def __init__(self, chain: str = None, api_key: str = None) -> None:
@@ -16,6 +24,25 @@ class API0x():
         self.api_key = Chain0x().get_api_key() if api_key == None else api_key
         
     def apply(self, sell_tkn: str = None, buy_tkn: str = None, sell_amt: str = None):
+        
+        """ apply
+
+            Apply call to 0x API 
+            
+            Parameters
+            -----------------
+            buy_token : str
+                Buy token contract address (ie, pulled from Chain0x data class)
+            sell_token : str
+                Buy token contract address (ie, pulled from Chain0x data class)  
+            sell_amt : str
+                0x API requirement (set to 10000000 by default)                
+                
+            Returns
+            -----------------
+            0x api data : dictionary
+                JSON structured 0x api call data                 
+        """         
         
         sell_tkn = Chain0x().get_sell_token() if sell_tkn == None else sell_tkn
         buy_tkn = Chain0x().get_buy_token() if buy_tkn == None else buy_tkn     

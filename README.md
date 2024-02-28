@@ -36,7 +36,7 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
       in the case for the BUIDL week event, it would be the most recent market price returned from 
       the 0x API 
 * **[bokeh_server.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/application/bokeh_server.py)**
-    * Front-end server to render simulator to end user
+    * Front-end Bokeh server to render simulator to end user
 		
 
 ## Technical References 

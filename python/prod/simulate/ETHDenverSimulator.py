@@ -386,7 +386,6 @@ class ETHDenverSimulator:
             from the market price that the 0x API returns; this event is followed by an arbitrage to bring
             mock pool price in balance with the market price
                 
-
             Returns
             -----------------
             p : float

@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, curdoc, show
-from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div, Styles
+from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div, Styles, Slider
 from bokeh.layouts import gridplot, column, row, layout
 from uniswappy import *
 import time
@@ -22,16 +22,6 @@ dark_style = Styles(
     background_color="#21262a",
     color = "white" 
 )
-button_dark_style = Styles(  
-    justify_content="center",  # Center horizontally in the flex container
-    align_items="center",  # Center vertically in the flex container
-    height="100px",  # Set a height for the Div to see the vertical centering effect
-    text_align="center", 
-    width="100%",
-    font_size="20px",
-    background_color="#21262a",
-    color = "white" 
-)
 light_style = Styles(
     display="flex",  # Use flexbox layout
     justify_content="center",  # Center horizontally in the flex container
@@ -43,13 +33,25 @@ light_style = Styles(
     background_color="#fff",
     color = "black"
 )
-button_light_style = Styles(
+dark_style_small = Styles(
+    display="flex",  # Use flexbox layout
     justify_content="center",  # Center horizontally in the flex container
     align_items="center",  # Center vertically in the flex container
     height="100px",  # Set a height for the Div to see the vertical centering effect
     text_align="center", 
-    width="100%",
-    font_size="20px",
+    width="25%",
+    font_size="16px",
+    background_color="#21262a",
+    color = "white" 
+)
+light_style_small= Styles(
+    display="flex",  # Use flexbox layout
+    justify_content="center",  # Center horizontally in the flex container
+    align_items="center",  # Center vertically in the flex container
+    height="100px",  # Set a height for the Div to see the vertical centering effect
+    text_align="center", 
+    width="25%",
+    font_size="16px",
     background_color="#fff",
     color = "black"
 )
@@ -57,10 +59,6 @@ button_light_style = Styles(
 # Time 
 timestamp_counter = 0
 rate = 3
-
-# # -------------------
-# # Canonical Settings
-# # -------------------
 
 # Default values
 chain_api = Chain0x.ETHEREUM
@@ -74,14 +72,21 @@ trade_bias = 0.5 # bias between stable and token swaps (50/50)
 # intialize chain and API with default values
 chain = Chain0x(buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
 api = API0x(chain = chain_api)
+
+# Style elements
+div = Div(text="Last updated at:")
+slider = Slider(start=0, end=1, value=.5, step=.05, title="Trading Bias")
+slider0 = Div(text=f"Token: {token}")
+slider1 = Div(text=f"Stable: {stable}")
+instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
+slider.styles=dark_style
+
 # -------------------
 # ETHDenverSim
 # -------------------
 
 init = False
 callback_id = None
-div = Div(text="Last updated at:")
-instructions = Div(text="First choose a network and token/stablecoin pair. Next click ""Start Simulation"" to begin modelling", styles=dark_style)
 
 # sim = ETHDenverSimulator() # default mode
 sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -91,11 +96,13 @@ sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
                          td_model = chain.get_td_model(),
                          api = api)
 
-### Functions ###
+# -------------------
+# Functions
+# -------------------
 
 # Dark/Light mode button
 def switch_theme(event):
-    global current_theme_is_dark, instructions, button_row  # Declare the variable as global to modify it
+    global current_theme_is_dark, instructions, button_row, slider_row, slider
     
     # Toggle the theme based on the current state
     if current_theme_is_dark:
@@ -103,15 +110,19 @@ def switch_theme(event):
         new_theme = 'light_minimal'
         toggle_button.label = "Dark Mode"
         toggle_button.button_type = "primary"
-        instructions.styles=light_style
+        instructions.styles=light_style_small
         button_row.styles=light_style
+        slider_row.styles=light_style
+        slider.styles=light_style
     else:
         curdoc().theme = 'dark_minimal'
         new_theme = 'dark_minimal'
         toggle_button.label = "Light Mode"
         toggle_button.button_type = "default"
-        instructions.styles=dark_style
+        instructions.styles=dark_style_small
         button_row.styles=dark_style
+        slider_row.styles=dark_style
+        slider.styles=dark_style
     
     # Toggle the flag
     current_theme_is_dark = not current_theme_is_dark
@@ -175,6 +186,7 @@ def token_selection(attr, old, new):
     global token, buy_tkn_nm
     Chain0x.buy_tkn_nm = new
     token = Chain0x.buy_tkn_nm
+    slider0.text = f"Token: {token}"
     print(f"Selected crypto: {token}")
     refresh_sim(None)
     # if not init:
@@ -185,6 +197,7 @@ def stable_selection(attr, old, new):
     global stable, sell_tkn_nm
     Chain0x.sell_tkn_nm = new
     stable = Chain0x.sell_tkn_nm
+    slider1.text = f"Stable: {stable}"
     print(f"Selected stable: {stable}")
     refresh_sim(None)
 
@@ -294,7 +307,9 @@ def clear_data():
     source4.data = {'x': [], 'y': []}
     print("Data cleared")
 
-### Initialize Chart Data ####
+# -------------------
+# Initialize Chart Data
+# -------------------
 
 # Create Initialize button
 init_button = Button(label="Start Simulation", button_type="success", width=200)
@@ -326,11 +341,13 @@ source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y R
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
 # Define UI on top of screen
-button_row = row(init_button, Spacer(width_policy='max'), select_chain, select_token, select_stable, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
+button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
+slider_row = row(slider0, slider, slider1, styles=dark_style)
 
 # add elements to UI
-curdoc().add_root(button_row) 
-curdoc().add_root(instructions) 
+curdoc().add_root(button_row)
+# curdoc().add_root(instructions)
+curdoc().add_root(slider_row)
 
 
 # Define chart appearance and add to UI

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from dataclasses import dataclass, field
 from ...math.model import TokenDeltaModel
 
-DEFAULT_CHAIN_NM = "ETHEREUM"
+DEFAULT_CHAIN_NM = "api.0x.org"
 DEFAULT_BUY_TKN_NM = "WETH"
 DEFAULT_BUY_TOKEN = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 DEFAULT_SELL_TKN_NM = "USDC"
@@ -110,7 +110,18 @@ class Chain0x:
             case self.WBTC if self.chain_nm in self.POLYGON:
                 select_buy_token = '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6'
             case self.BNB if self.chain_nm in self.POLYGON:
-                select_buy_token = '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3'    
+                select_buy_token = '0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3'  
+                
+            case self.WETH if self.chain_nm in self.AVALANCHE:
+                select_buy_token = '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB'
+            case self.LINK if self.chain_nm in self.AVALANCHE:
+                select_buy_token = '0x5947BB275c521040051D82396192181b413227A3'
+            case self.UNI if self.chain_nm in self.AVALANCHE:
+                select_buy_token = '0x8eBAf22B6F053dFFeaf46f4Dd9eFA95D89ba8580'
+            case self.WBTC if self.chain_nm in self.AVALANCHE:
+                select_buy_token = '0x50b7545627a5162F82A992c33b87aDc75187B218'
+            case self.BNB if self.chain_nm in self.AVALANCHE:
+                select_buy_token = '0x264c1383EA520f73dd837F915ef3a732e204a493'                   
                 
             case self.WETH if self.chain_nm in self.OPTIMISM:
                 select_buy_token = '0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8'
@@ -122,7 +133,7 @@ class Chain0x:
         return select_buy_token   
     
     def get_sell_token(self) -> str:
-
+        
         match self.sell_tkn_nm:
             case self.USDC if self.chain_nm in self.ETHEREUM:
                 select_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
@@ -141,10 +152,18 @@ class Chain0x:
             case self.USDC if self.chain_nm in self.OPTIMISM:
                 select_sell_token = '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85'
             case self.USDT if self.chain_nm in self.OPTIMISM:
-                select_sell_token = '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'
+                select_sell_token = '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7'
             case self.DAI if self.chain_nm in self.OPTIMISM:
-                select_sell_token = '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'                   
+                select_sell_token = '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'      
+                
+            case self.USDC if self.chain_nm in self.AVALANCHE:
+                select_sell_token = '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
+            case self.USDT if self.chain_nm in self.AVALANCHE:
+                select_sell_token = '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7'
+            case self.DAI if self.chain_nm in self.AVALANCHE:
+                select_sell_token = '0xbA7dEebBFC5fA1100Fb055a87773e1E99Cd3507a'                  
 
+                
         return select_sell_token      
     
     def get_buy_init_amt(self) -> float:

@@ -1,9 +1,9 @@
 from bokeh.plotting import figure, curdoc, show
-from bokeh.models import ColumnDataSource, CustomJS, Button, Spacer, FuncTickFormatter, Dropdown, Select, HoverTool
+from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div
 from bokeh.layouts import gridplot, column, row, layout
-from bokeh.models.widgets import Div
 from uniswappy import *
 import time
+from datetime import datetime
 
 
 ### Init vars ###
@@ -24,6 +24,7 @@ rate = 3
 chain_api = Chain0x.ETHEREUM
 stable = Chain0x.USDC
 token = Chain0x.WETH
+
 max_trade_percent = 0.001 # lower means less volatility
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
@@ -37,6 +38,9 @@ api = API0x(chain = chain_api)
 
 init = False
 callback_id = None
+is_grid_in_roots = False
+first = True
+div = Div(text="Last updated at:")
 
 # sim = ETHDenverSimulator() # default mode
 sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -109,7 +113,8 @@ def refresh_sim(event):
     sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
             x_tkn_nm = chain.buy_tkn_nm, 
             init_x_invest = chain.init_investment)
-    print("Data refreshed")
+    update_charts()
+    print("Data refreshed \n")
 
 # Chain drop down selection function
 def chain_selection(attr, old, new):
@@ -137,6 +142,84 @@ def stable_selection(attr, old, new):
     print(f"Selected stable: {stable}")
     if not init:
         refresh_sim(None)
+
+def update_charts():
+    global p1, p2, p3, p4, is_grid_in_roots, first, div
+    # Initialize Bokeh figures and data sources
+    p1 = figure(title=f'{token}/{stable} & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
+    p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
+    # p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
+    p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
+    p1.toolbar.logo = None
+    print("P1: ", p1)
+    print("Token: ", token)
+
+    p2 = figure(title=f'{token} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({token})', width_policy='max', height_policy='max')
+    p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
+    p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'{token} Reserves')
+    p2.toolbar.logo = None
+
+    p3 = figure(title=f'{stable} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({stable})', width_policy='max', height_policy='max')
+    p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
+    p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'{stable} Reserves')
+    p3.toolbar.logo = None
+
+    p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount ({token})', width_policy='max', height_policy='max')
+    p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
+    p4.toolbar.logo = None
+
+    # Create a custom tick formatter script
+    formatter_script_dollar = """
+    if (tick >= 1e6) {
+        return '$' + (tick / 1e6).toFixed(2) + 'M';
+    } else if (tick >= 1e4) {
+        return '$' + (tick / 1e3).toFixed(2) + 'K';
+    } else {
+        return '$' + tick.toFixed(0);
+    }
+    """
+
+    formatter_script_eth = """
+    if (tick >= 1e6) {
+        return (tick / 1e6).toFixed(2) + 'M';
+    } else if (tick >= 1e4) {
+        return (tick / 1e3).toFixed(2) + 'K';
+    } else {
+        return tick.toFixed(2);
+    }
+    """
+
+    # Create the formatter
+    custom_formatter_dollar = FuncTickFormatter(code=formatter_script_dollar)
+
+    custom_formatter_eth = FuncTickFormatter(code=formatter_script_eth)
+
+    # Apply this formatter to the y-axis of each of your plots
+    p1.yaxis.formatter = custom_formatter_dollar
+    p2.yaxis.formatter = custom_formatter_eth
+    p3.yaxis.formatter = custom_formatter_dollar
+
+    ### Running  Code ###
+
+    # Create a grid layout with the plots
+    grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')
+    print("Grid: ", grid)
+
+    if is_grid_in_roots:
+        for root in list(curdoc().roots):
+            if isinstance(root, figure):
+                curdoc().remove_root(root)
+                print("Grid Removed: ", curdoc().roots)
+                curdoc().add_root(p1)
+                print("Grid Added: ", curdoc().roots)
+    else:
+        # curdoc().add_root(grid)
+        curdoc().add_root(p1)
+        is_grid_in_roots = True
+        print("Grid Added")
+        print("Roots: ", curdoc().roots)
+    
+    div.text = f"Last updated at: {datetime.now()}"
 
 # Refresh graphs function
 def update_data():
@@ -179,7 +262,6 @@ def update_data():
 
 ### Initialize Chart Data ####
 
-
 # Create Initialize button
 init_button = Button(label="Start Simulation", button_type="success", width=200)
 init_button.on_click(initialize_sim)
@@ -207,71 +289,12 @@ select_stable.on_change('value', stable_selection)
 # remove chain selection from front end for now until it works: select_chain
 # Define buttons on top of screen
 button_row = row(init_button, select_token, select_stable, refresh_button, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width')
+curdoc().add_root(div) 
+curdoc().add_root(button_row) 
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
 source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
-# Initialize Bokeh figures and data sources
-p1 = figure(title=f'{token}/{stable} & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
-p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
-# p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
-p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
-p1.toolbar.logo = None
-
-p2 = figure(title=f'{token} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({token})', width_policy='max', height_policy='max')
-p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
-p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'{token} Reserves')
-p2.toolbar.logo = None
-
-p3 = figure(title=f'{stable} Reserve', x_axis_label='Time', y_axis_label=f'Reserve ({stable})', width_policy='max', height_policy='max')
-p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
-p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'{stable} Reserves')
-p3.toolbar.logo = None
-
-p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount ({token})', width_policy='max', height_policy='max')
-p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
-p4.toolbar.logo = None
-
-# Create a custom tick formatter script
-formatter_script_dollar = """
-if (tick >= 1e6) {
-    return '$' + (tick / 1e6).toFixed(2) + 'M';
-} else if (tick >= 1e4) {
-    return '$' + (tick / 1e3).toFixed(2) + 'K';
-} else {
-    return '$' + tick.toFixed(0);
-}
-"""
-
-formatter_script_eth = """
-if (tick >= 1e6) {
-    return (tick / 1e6).toFixed(2) + 'M';
-} else if (tick >= 1e4) {
-    return (tick / 1e3).toFixed(2) + 'K';
-} else {
-    return tick.toFixed(2);
-}
-"""
-
-# Create the formatter
-custom_formatter_dollar = FuncTickFormatter(code=formatter_script_dollar)
-
-custom_formatter_eth = FuncTickFormatter(code=formatter_script_eth)
-
-# Apply this formatter to the y-axis of each of your plots
-p1.yaxis.formatter = custom_formatter_dollar
-p2.yaxis.formatter = custom_formatter_eth
-p3.yaxis.formatter = custom_formatter_dollar
-
-### Running  Code ###
-
-# Create a grid layout with the plots
-grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')
-
-# Add the final layout to the current document
-curdoc().add_root(button_row)
-curdoc().add_root(grid)
-
-
+update_charts()

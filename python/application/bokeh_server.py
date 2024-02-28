@@ -61,6 +61,7 @@ timestamp_counter = 0
 rate = 3
 
 # Default values
+chain_nm = "ETHEREUM"
 chain_api = Chain0x.ETHEREUM
 stable = Chain0x.USDC
 token = Chain0x.WETH
@@ -70,16 +71,14 @@ time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
 # intialize chain and API with default values
-chain = Chain0x(buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
-api = API0x(chain = chain_api)
+chain = Chain0x(chain_nm = chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
+api = API0x(chain = chain.chain_nm)
 
 # Style elements
 div = Div(text="Last updated at:")
-slider = Slider(start=0, end=1, value=.5, step=.05, title="Trading Bias")
 slider0 = Div(text=f"Token: {token}")
 slider1 = Div(text=f"Stable: {stable}")
 instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
-slider.styles=dark_style
 
 # -------------------
 # ETHDenverSim
@@ -158,12 +157,14 @@ def initialize_sim(event):
     
 def refresh_sim(event):
     global chain, sim
-    chain = Chain0x(buy_tkn_nm = token, sell_tkn_nm = stable)
-    api = API0x(chain = chain_api)
+    chain = Chain0x(chain_nm = chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias)
+    api = API0x(chain = chain.chain_nm)
+    print("Trade bias: ", trade_bias)
+    print("chain.trade bias: ", chain.trade_bias)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
                          sell_token = chain.get_sell_token(),
                          time_window = time_window,
-                         trade_bias = trade_bias,
+                         trade_bias = chain.trade_bias,
                          td_model = chain.get_td_model(),
                          api = api)
     sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
@@ -200,6 +201,14 @@ def stable_selection(attr, old, new):
     slider1.text = f"Stable: {stable}"
     print(f"Selected stable: {stable}")
     refresh_sim(None)
+
+# allow user to change trading bias
+def update_trade_bias(attr, old, new):
+    global trade_bias
+    trade_bias = new
+    print("New trade bias: ", new)
+    refresh_sim(None)
+
 
 def initiate_charts():
     global p1, p2, p3, p4, grid
@@ -315,16 +324,12 @@ def clear_data():
 init_button = Button(label="Start Simulation", button_type="success", width=200)
 init_button.on_click(initialize_sim)
 
-# Create reinitialize button
-# refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=200)
-# refresh_button.on_click(refresh_sim)
-
 # Create the toggle button
 toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
 # Create chain selection dropdown
-select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "ARBITRUM", "AVALANCHE", "BASE", "BINANCE", "CELO", "FANTOM", "OPTIMISM", "POLYGON"])
+select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "AVALANCHE", "OPTIMISM", "POLYGON"])
 select_chain.on_change('value', chain_selection)
 
 # Create token selection dropdown
@@ -334,6 +339,16 @@ select_token.on_change('value', token_selection)
 # Create stable token selection dropdown
 select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
 select_stable.on_change('value', stable_selection)
+
+# create slider for changing trade bias
+slider = Slider(start=0, end=1, value=.5, step=.05, title="Trading Bias")
+slider.on_change('value', update_trade_bias)
+slider.styles=dark_style
+
+# add refresh button for slider
+# refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=100)
+# refresh_button.on_click(refresh_sim)
+
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)

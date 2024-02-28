@@ -22,7 +22,7 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
 > bokeh serve --show python/application/bokeh_server.py
 ```
 
-## ETHDenver BUIDL week additions
+## DeFiPy ETHDenver BUIDL week additions
 * **[ETHDenverSimulator.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/ETHDenverSimulator.py)**:
     * ETHDenver Simulator class for BUIDL week; applies the 0x API to produce a mock Uniswap pool to 
       allow end-users to stress test the limitations of a Uniswap pool setup using live price 

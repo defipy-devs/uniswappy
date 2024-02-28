@@ -71,7 +71,8 @@ time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
 # intialize chain and API with default values
-chain = Chain0x(chain_nm = chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
+
+chain = Chain0x(chain_nm = chain_api, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
 api = API0x(chain = chain.chain_nm)
 
 # Style elements
@@ -157,10 +158,9 @@ def initialize_sim(event):
     
 def refresh_sim(event):
     global chain, sim
-    chain = Chain0x(chain_nm = chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias)
+    print("chain_nm: ", chain_nm)
+    chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias)
     api = API0x(chain = chain.chain_nm)
-    print("Trade bias: ", trade_bias)
-    print("chain.trade bias: ", chain.trade_bias)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
                          sell_token = chain.get_sell_token(),
                          time_window = time_window,
@@ -207,7 +207,7 @@ def update_trade_bias(attr, old, new):
     global trade_bias
     trade_bias = new
     print("New trade bias: ", new)
-    refresh_sim(None)
+    # refresh_sim(None)
 
 
 def initiate_charts():
@@ -215,7 +215,6 @@ def initiate_charts():
     # Initialize Bokeh figures and data sources
     p1 = figure(title=f'Price of Token in Stablecoin & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
     p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
-    # p1.line(x='x', y='lp_arb', source=source1, color='green', legend_label='LP Arb Price')
     p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
     p1.toolbar.logo = None
 
@@ -267,7 +266,7 @@ def initiate_charts():
     ### Running  Code ###
 
     # Create a grid layout with the plots
-    grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both')
+    grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both', toolbar_location="below")
 
 # Refresh graphs function
 def update_data():
@@ -346,8 +345,8 @@ slider.on_change('value', update_trade_bias)
 slider.styles=dark_style
 
 # add refresh button for slider
-# refresh_button = Button(label="Refresh Simulation Data", button_type="success", width=100)
-# refresh_button.on_click(refresh_sim)
+refresh_button = Button(label="Apply Bias", button_type="primary", width=100)
+refresh_button.on_click(refresh_sim)
 
 
 source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
@@ -355,13 +354,13 @@ source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X R
 source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
 
-# Define UI on top of screen
+# Define UI on top  of screen
 button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
-slider_row = row(slider0, slider, slider1, styles=dark_style)
+slider_row = row(slider0, slider, slider1, refresh_button, styles=dark_style)
+
 
 # add elements to UI
 curdoc().add_root(button_row)
-# curdoc().add_root(instructions)
 curdoc().add_root(slider_row)
 
 

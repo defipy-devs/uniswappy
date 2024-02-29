@@ -3,7 +3,6 @@
 # Email: defipy.devs@gmail.com
 
 from dataclasses import dataclass
-from dataclasses import dataclass, field
 from ...math.model import TokenDeltaModel
 
 DEFAULT_CHAIN_NM = "api.0x.org"
@@ -50,7 +49,8 @@ class Chain0x:
     USDC = "USDC"
     USDT = "USDT"
     DAI = "DAI"
-
+    
+    # Set defaults
     chain_nm: str = DEFAULT_CHAIN_NM
     buy_tkn_nm: str = DEFAULT_BUY_TKN_NM
     sell_tkn_nm: str = DEFAULT_SELL_TKN_NM
@@ -62,12 +62,44 @@ class Chain0x:
     api_sell_amount: str = DEFAULT_API_SELL_AMOUNT
     
     def get_api_key(self) -> str:
+        
+        """ get_api_key
+
+            Get 0x API key
+                
+            Returns
+            -----------------
+            api_key : str
+                0x API key                 
+        """          
+        
         return self.api_key
     
     def get_api_sell_amount(self) -> str:
+        
+        """ get_api_sell_amount
+
+            Get 0x API sell amount setting
+                
+            Returns
+            -----------------
+            api_sell_amount : str
+                0x API sell amount setting                
+        """          
+        
         return self.api_sell_amount    
 
     def get_chain_name(self) -> str:
+        
+        """ get_chain_name
+
+            Get URL name for 0x api
+                
+            Returns
+            -----------------
+            select_chain_name : str
+                URL name for 0x api             
+        """            
 
         match self.chain_nm:
             case self.ETHEREUM:
@@ -92,6 +124,16 @@ class Chain0x:
         return select_chain_name   
     
     def get_buy_token(self) -> str:
+        
+        """ get_buy_token
+
+            Get buy token contract address for 0x api
+                
+            Returns
+            -----------------
+            select_buy_token : str
+                Buy token contract address for 0x api           
+        """         
 
         match self.buy_tkn_nm:
             case self.WETH if self.chain_nm in self.ETHEREUM:
@@ -138,6 +180,16 @@ class Chain0x:
     
     def get_sell_token(self) -> str:
         
+        """ get_buy_token
+
+            Get sell token contract address for 0x api
+                
+            Returns
+            -----------------
+            select_buy_token : str
+                Sell token contract address for 0x api           
+        """           
+        
         match self.sell_tkn_nm:
             case self.USDC if self.chain_nm in self.ETHEREUM:
                 select_sell_token = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
@@ -171,6 +223,16 @@ class Chain0x:
         return select_sell_token      
     
     def get_buy_init_amt(self) -> float:
+        
+        """ get_buy_init_amt
+
+            Get x init amount for pool initialization
+                
+            Returns
+            -----------------
+            select_buy_init_amt : int
+                x init amount for pool initialization         
+        """           
 
         match self.buy_tkn_nm:
             case self.WETH:
@@ -187,6 +249,18 @@ class Chain0x:
         return select_buy_init_amt 
     
     def get_td_model(self) -> TokenDeltaModel:
+        
+        """ get_td_model
+
+            Get token delta model which is the non-deterministic model for incoming swap amounts; set 
+            to Gamma distribution with paramaters set to scale = 1 and shape = 1 (by default)
+                
+            Returns
+            -----------------
+            td_model : TokenDeltaModel
+                Token delta model      
+        """             
+        
         buy_init_amt = self.get_buy_init_amt()
         return TokenDeltaModel(max_trade = self.max_trade_percent*buy_init_amt, 
                                     shape = DEFAULT_GAMMA_SHAPE, # Gamma Dist. shape  

@@ -42,7 +42,7 @@ class ETHDenverSimulator:
             Random trade bias where probability of bias to buy verses sell token postions is set to 50/50 by default 
             (ie, pulled from Chain0x data class, or passed in directly from slider in GUI) 
         td_model : TokenDeltaModel
-            Token delta model is the non-deterministic model incoming for swap amounts; set 
+            Token delta model is the non-deterministic model for incoming swap amounts; set 
             to Gamma distribution with paramaters set to scale = 1 and shape = 1 (by default)
         api : API0x
             Ox API class; unless otherwise specified, set to ETHEREUM chain and WETH/USDC trading pair by default

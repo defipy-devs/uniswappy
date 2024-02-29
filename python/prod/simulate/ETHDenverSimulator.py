@@ -157,12 +157,12 @@ class ETHDenverSimulator:
         
         """ get_y_redeem
 
-            Get y token redeemtion amount from mock pool investment
+            Get y token redemption amount from mock pool investment
                 
             Returns
             -----------------
             y_redeem : float
-                y token redeemtion amount from mock pool investment                  
+                y token redemption amount from mock pool investment                  
         """          
         
         return self.y_redeem    
@@ -377,6 +377,8 @@ class ETHDenverSimulator:
                 
         self.arb = CorrectReserves(self.lp, x0 = p)
         self.time_init = datetime.datetime.now()
+
+        return p
      
     def trial(self):
         

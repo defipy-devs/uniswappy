@@ -1,6 +1,6 @@
 # 0x API: Live Trading Simulator
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
-the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org). For backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
+the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
 
 ## Live link to application
 Click [here](https://6pg42n-5006.csb.app/bokeh_server) for live link

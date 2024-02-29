@@ -199,7 +199,7 @@ def initialize_sim(event):
 
 # reinstantiate simulator with new variables after user changes
 def refresh_sim(event):
-    global chain, sim, initial_x, initial_y
+    global chain, sim, initial_x, initial_y, x_profit, y_profit
     chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias, max_trade_percent=max_trade_percent)
     api = API0x(chain = chain.chain_nm)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -213,6 +213,8 @@ def refresh_sim(event):
             init_x_invest = chain.init_investment)
     initial_x = sim.get_x_redeem()
     initial_y = sim.get_y_redeem()
+    x_profit = 0
+    y_profit = 0
     print("Sim refreshed \n")
     clear_data()
     

@@ -346,9 +346,7 @@ def update_data():
 
     # Profit indicators: measures profitability of position in pool by token and stable
     x_profit = sim.get_x_redeem() - initial_x
-    print("get_x_redeem: " , sim.get_x_redeem())
     y_profit = sim.get_y_redeem() - initial_y
-    print("get_y_redeem: ", sim.get_y_redeem())
     x_profit_formatted = f"{x_profit:,.5f}"
     y_profit_formatted = f"{y_profit:,.2f}"
     profit_token.text = f'Profitability of Pool in {token}: {x_profit_formatted}'

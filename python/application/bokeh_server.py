@@ -6,16 +6,18 @@ import time
 from datetime import datetime
 
 
-### Init vars ###
+# -------------------
+# Initial Variables
+# -------------------
 
-# Theme 
+# Theme styles
 curdoc().theme = 'dark_minimal'
 current_theme_is_dark = True
 dark_style = Styles(
-    display="flex",  # Use flexbox layout
-    justify_content="center",  # Center horizontally in the flex container
-    align_items="center",  # Center vertically in the flex container
-    height="100px",  # Set a height for the Div to see the vertical centering effect
+    display="flex",  
+    justify_content="center",  
+    align_items="center",  
+    height="100px",  
     text_align="center", 
     width="100%",
     font_size="20px",
@@ -23,10 +25,10 @@ dark_style = Styles(
     color = "white" 
 )
 light_style = Styles(
-    display="flex",  # Use flexbox layout
-    justify_content="center",  # Center horizontally in the flex container
-    align_items="center",  # Center vertically in the flex container
-    height="100px",  # Set a height for the Div to see the vertical centering effect
+    display="flex",  
+    justify_content="center", 
+    align_items="center",  
+    height="100px",  
     text_align="center", 
     width="100%",
     font_size="20px",
@@ -34,10 +36,10 @@ light_style = Styles(
     color = "black"
 )
 dark_style_small = Styles(
-    display="flex",  # Use flexbox layout
-    justify_content="center",  # Center horizontally in the flex container
-    align_items="center",  # Center vertically in the flex container
-    height="100px",  # Set a height for the Div to see the vertical centering effect
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="100px",  
     text_align="center", 
     width="25%",
     font_size="16px",
@@ -45,10 +47,10 @@ dark_style_small = Styles(
     color = "white" 
 )
 light_style_small= Styles(
-    display="flex",  # Use flexbox layout
-    justify_content="center",  # Center horizontally in the flex container
-    align_items="center",  # Center vertically in the flex container
-    height="100px",  # Set a height for the Div to see the vertical centering effect
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="100px", 
     text_align="center", 
     width="25%",
     font_size="16px",
@@ -57,26 +59,22 @@ light_style_small= Styles(
 )
 
 # Time 
-timestamp_counter = 0
-rate = 3
-
-# Default values
-chain_nm = "ETHEREUM"
-chain_api = Chain0x.ETHEREUM
-stable = Chain0x.USDC
-token = Chain0x.WETH
+timestamp_counter = 0 # time from intialization/last refresh
+rate = 3 # how often char tupdates
 
 max_trade_percent = 0.01 # lower means less volatility
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
 # intialize chain and API with default values
-
+chain_nm = "ETHEREUM"
+chain_api = Chain0x.ETHEREUM
+stable = Chain0x.USDC
+token = Chain0x.WETH
 chain = Chain0x(chain_nm = chain_api, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
 api = API0x(chain = chain.chain_nm)
 
 # Style elements
-div = Div(text="Last updated at:")
 slider0 = Div(text=f"Token: {token}")
 slider1 = Div(text=f"Stable: {stable}")
 instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
@@ -157,7 +155,8 @@ def initialize_sim(event):
         print("Sim started")
     
     init = not init  # Toggle the state
-    
+
+# reinstantiate simulator with new variables after user changes
 def refresh_sim(event):
     global chain, sim
     print("chain_nm: ", chain_nm)
@@ -192,8 +191,6 @@ def token_selection(attr, old, new):
     slider0.text = f"Token: {token}"
     print(f"Selected crypto: {token}")
     refresh_sim(None)
-    # if not init:
-    #     refresh_sim(None)
 
 # Stable coin drop down selection function
 def stable_selection(attr, old, new):
@@ -209,14 +206,14 @@ def update_trade_bias(attr, old, new):
     global trade_bias
     trade_bias = new
     print("New trade bias: ", new)
-    # refresh_sim(None) update_percent
 
+# allow user to change max amount swapped per trade by simulator
 def update_percent(attr, old, new):
     global max_trade_percent
     max_trade_percent = new/100
     print("New trade percent: ", new)
 
-
+# defines chart data and formatting
 def initiate_charts():
     global p1, p2, p3, p4, grid
     # Initialize Bokeh figures and data sources
@@ -260,27 +257,22 @@ def initiate_charts():
     }
     """
 
-    # Create the formatter
+    # Create the formatter for different types of plots
     custom_formatter_dollar = FuncTickFormatter(code=formatter_script_dollar)
-
     custom_formatter_eth = FuncTickFormatter(code=formatter_script_eth)
 
-    # Apply this formatter to the y-axis of each of your plots
+    # Formatting plots
     p1.yaxis.formatter = custom_formatter_dollar
     p2.yaxis.formatter = custom_formatter_eth
     p3.yaxis.formatter = custom_formatter_dollar
     p4.yaxis.formatter = custom_formatter_eth
-
-    ### Running  Code ###
 
     # Create a grid layout with the plots
     grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='stretch_both', toolbar_location="below")
 
 # Refresh graphs function
 def update_data():
-    global timestamp_counter, div
-
-    div.text = f"Last updated at: {datetime.now()}"
+    global timestamp_counter
 
     price = sim.trial() # initiate each trial run
 
@@ -300,9 +292,7 @@ def update_data():
 
     # LP Price Deviation Overlay
     lp_swap = sim.get_lp_price(ETHDenverSimulator.STATE_SWAP)
-    # lp_arb = sim.get_lp_price(ETHDenverSimulator.STATE_ARB)
     
-    # print("LP ARB: ", lp_arb)
     print("LP Swap: ", lp_swap,"\n")
     
     # Health Indicator - Measures Swap Amounts Over Time (Gives user an idea for how much users should be allowed to swap at once)
@@ -316,6 +306,7 @@ def update_data():
 
     timestamp_counter += rate
 
+# clear plot data for when user changes network/token/stablecoin/other vars
 def clear_data():
     source1.data = {'x': [], 'y': [], 'lp_swap': []}
     source2.data = {'x': [], 'x_swap': [], 'x_arb': []}
@@ -324,7 +315,7 @@ def clear_data():
     print("Data cleared")
 
 # -------------------
-# Initialize Chart Data
+# Define functional buttons and UI rows
 # -------------------
 
 # Create Initialize button
@@ -361,23 +352,29 @@ percent_slider.styles=dark_style
 refresh_button = Button(label="Apply Slider Settings", button_type="primary", width=200)
 refresh_button.on_click(refresh_sim)
 
-
-source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
-source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
-source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
-source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator
-
 # Define UI on top  of screen
 button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
 slider_row = row(Spacer(width_policy='max'), slider0, bias_slider, slider1, Spacer(width_policy='max'), percent_slider, Spacer(width_policy='max'), refresh_button, styles=dark_style)
 
 
+# -------------------
+# Initialize Chart Data
+# -------------------
+
+# define plot data
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
+source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
+source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
+source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator (Amount swapped per trade)
+
+initiate_charts()
+
+# -------------------
+# Create curdoc display
+# -------------------
+
 # add elements to UI
 curdoc().add_root(button_row)
 curdoc().add_root(slider_row)
-
-
-# Define chart appearance and add to UI
-initiate_charts()
 curdoc().add_root(grid)
 

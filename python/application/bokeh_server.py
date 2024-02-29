@@ -82,6 +82,7 @@ api = API0x(chain = chain.chain_nm)
 slider0 = Div(text=f"Token: {token}")
 slider1 = Div(text=f"Stable: {stable}")
 instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
+slider_instructions = Div(text='After adjusting slider values press this button to the right to refresh the simulator and apply those changes ----->', styles=dark_style_small)
 
 # -------------------
 # ETHDenverSim
@@ -104,7 +105,7 @@ sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
 
 # Dark/Light mode button
 def switch_theme(event):
-    global current_theme_is_dark, instructions, button_row, slider_row, bias_slider, percent_slider
+    global current_theme_is_dark, instructions, button_row, slider_row, bias_slider, percent_slider, slider_instructions
     
     # Toggle the theme based on the current state
     if current_theme_is_dark:
@@ -113,6 +114,7 @@ def switch_theme(event):
         toggle_button.label = "Dark Mode"
         toggle_button.button_type = "primary"
         instructions.styles=light_style_small
+        slider_instructions.styles=light_style_small
         button_row.styles=light_style
         slider_row.styles=light_style
         bias_slider.styles=light_style
@@ -123,6 +125,7 @@ def switch_theme(event):
         toggle_button.label = "Light Mode"
         toggle_button.button_type = "default"
         instructions.styles=dark_style_small
+        slider_instructions.styles=dark_style_small
         button_row.styles=dark_style
         slider_row.styles=dark_style
         bias_slider.styles=dark_style
@@ -358,7 +361,7 @@ refresh_button.on_click(refresh_sim)
 
 # Define UI on top  of screen
 button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
-slider_row = row(Spacer(width_policy='max'), slider0, bias_slider, slider1, Spacer(width_policy='max'), percent_slider, Spacer(width_policy='max'), refresh_button, styles=dark_style)
+slider_row = row(slider0, bias_slider, slider1, Spacer(width_policy='max'), percent_slider, Spacer(width_policy='max'), slider_instructions, refresh_button, styles=dark_style)
 
 
 # -------------------

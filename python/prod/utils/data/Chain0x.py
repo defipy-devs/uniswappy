@@ -174,15 +174,15 @@ class Chain0x:
 
         match self.buy_tkn_nm:
             case self.WETH:
-                select_buy_init_amt = 1000
-            case self.LINK:
-                select_buy_init_amt = 100000
-            case self.UNI:
-                select_buy_init_amt = 100000
-            case self.WBTC:
-                select_buy_init_amt = 100
-            case self.BNB:
                 select_buy_init_amt = 10000
+            case self.LINK:
+                select_buy_init_amt = 1000000
+            case self.UNI:
+                select_buy_init_amt = 1000000
+            case self.WBTC:
+                select_buy_init_amt = 1000
+            case self.BNB:
+                select_buy_init_amt = 100000
 
         return select_buy_init_amt 
     

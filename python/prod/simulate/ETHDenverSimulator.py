@@ -378,7 +378,6 @@ class ETHDenverSimulator:
         self.arb = CorrectReserves(self.lp, x0 = p)
         self.time_init = datetime.datetime.now()
 
-        return p
      
     def trial(self):
         

@@ -160,7 +160,6 @@ def initialize_sim(event):
 # reinstantiate simulator with new variables after user changes
 def refresh_sim(event):
     global chain, sim
-    print("chain_nm: ", chain_nm)
     chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias, max_trade_percent=max_trade_percent)
     api = API0x(chain = chain.chain_nm)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -275,17 +274,7 @@ def initiate_charts():
 def update_data():
     global timestamp_counter, sim
 
-    # api = API0x(chain = chain.chain_nm)
-    # sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
-    #                      sell_token = chain.get_sell_token(),
-    #                      time_window = time_window,
-    #                      trade_bias = chain.trade_bias,
-    #                      td_model = chain.get_td_model(),
-    #                      api = api)
-    # sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
-    #         x_tkn_nm = chain.buy_tkn_nm, 
-    #         init_x_invest = chain.init_investment)
-    price = sim.trial() # initiate each trial run
+    price = sim.trial() # initiate each trial run and return live price data from 0x API
 
     print("Price: ", price)
     

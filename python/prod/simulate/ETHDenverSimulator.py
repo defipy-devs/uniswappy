@@ -393,6 +393,7 @@ class ETHDenverSimulator:
         """            
         
         self._reset_trial()
+        self.api_0x_data = self.call_0x_api()
         p = self.get_market_price()
         remaining_sleep = self.time_window
         

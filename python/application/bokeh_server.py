@@ -149,6 +149,7 @@ def initialize_sim(event):
         print("Sim stopped")
     else:
         # Simulation is currently stopped, so start it
+        refresh_sim(None)
         callback_id = curdoc().add_periodic_callback(update_data, rate * 1000)
         init_button.label = "Stop Simulation"  # Update button label
         init_button.button_type = "danger"

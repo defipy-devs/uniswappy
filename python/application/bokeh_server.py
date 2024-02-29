@@ -1,3 +1,7 @@
+# Copyright [2024] [Bart Hofkin]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
+
 from bokeh.plotting import figure, curdoc, show
 from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div, Styles, Slider
 from bokeh.layouts import gridplot, column, row, layout

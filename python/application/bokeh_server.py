@@ -439,7 +439,7 @@ toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
 # Create chain selection dropdown
-select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "AVALANCHE", "OPTIMISM", "POLYGON"])
+select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "AVALANCHE", "POLYGON"])
 select_chain.on_change('value', chain_selection)
 
 # Create token selection dropdown

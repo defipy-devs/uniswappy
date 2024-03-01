@@ -88,7 +88,7 @@ light_style_smaller= Styles(
 timestamp_counter = 0 # time from intialization/last refresh
 rate = 3 # how often char tupdates
 
-max_trade_percent = 0.01 # lower means less volatility
+max_trade_percent = 0.001 # lower means less volatility
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
 
@@ -398,7 +398,7 @@ bias_slider.on_change('value', update_trade_bias)
 bias_slider.styles=dark_style
 
 # create slider for changing max trade %
-percent_slider = Slider(start=0.1, end=10, value=1, step=.1, title="Max Trade %")
+percent_slider = Slider(start=0.1, end=10, value=0.1, step=.1, title="Max Trade %")
 percent_slider.on_change('value', update_percent)
 percent_slider.styles=dark_style
 

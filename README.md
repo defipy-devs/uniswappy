@@ -35,7 +35,7 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
 * **[Chain0x.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/data/Chain0x.py)**
     * Data class for handling all application data (eg, token contract addresses)
 * **[CorrectReserves.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/CorrectReserves.py)**
-    * Applies SolveDeltas class to Correct x/y reserve amounts so that price reflects desired input price (see Rebalancing Pool in Technical References section below); 
+    * Applies SolveDeltas class to correct x/y reserve amounts so that price reflects desired input price (see Rebalancing Pool in Technical References section below); 
       in the case for the BUIDL week event, it would be the most recent market price returned from the 0x API 
 * **[bokeh_server.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/application/bokeh_server.py)**
     * Front-end Bokeh server to render simulator to end user

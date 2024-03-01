@@ -3,7 +3,7 @@
 # Email: defipy.devs@gmail.com
 
 from bokeh.plotting import figure, curdoc, show
-from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, HoverTool, GridPlot, Div, Styles, Slider
+from bokeh.models import ColumnDataSource, Button, Spacer, FuncTickFormatter, Select, GridPlot, Div, Styles, Slider, NumericInput
 from bokeh.layouts import gridplot, column, row, layout
 from uniswappy import *
 import time
@@ -24,7 +24,7 @@ dark_style = Styles(
     height="100px",  
     text_align="center", 
     width="100%",
-    font_size="20px",
+    font_size="18px",
     background_color="#21262a",
     color = "white" 
 )
@@ -35,7 +35,7 @@ light_style = Styles(
     height="100px",  
     text_align="center", 
     width="100%",
-    font_size="20px",
+    font_size="18px",
     background_color="#fff",
     color = "black"
 )
@@ -83,6 +83,50 @@ light_style_smaller= Styles(
     background_color="#fff",
     color = "black"
 )
+dark_style_smallest = Styles(
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="50px",  
+    text_align="center", 
+    width="10%",
+    font_size="16px",
+    background_color="#21262a",
+    color = "white" 
+)
+light_style_smallest= Styles(
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="50px", 
+    text_align="center", 
+    width="10%",
+    font_size="16px",
+    background_color="#fff",
+    color = "black"
+)
+dark_style_text = Styles(
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="100px",  
+    text_align="center", 
+    width="3%",
+    font_size="14px",
+    background_color="#21262a",
+    color = "white" 
+)
+light_style_text= Styles(
+    display="flex", 
+    justify_content="center",  
+    align_items="center",  
+    height="100px", 
+    text_align="center", 
+    width="3%",
+    font_size="14px",
+    background_color="#fff",
+    color = "black"
+)
 
 # Time 
 timestamp_counter = 0 # time from intialization/last refresh
@@ -91,6 +135,7 @@ rate = 3 # how often char tupdates
 max_trade_percent = 0.001 # lower means less volatility
 time_window = 0.25 # how often sim runs and 0x API is pinged
 trade_bias = 0.5 # bias between stable and token swaps (50/50)
+init_x_invest = 1 # initialize pool simulation witha position of 1 WETH/UNI/Other token
 
 # intialize chain and API with default values
 chain_nm = "ETHEREUM"
@@ -103,10 +148,10 @@ x_profit = 0
 y_profit = 0
 
 # Style elements
-slider0 = Div(text=f"Token: {token}")
-slider1 = Div(text=f"Stable: {stable}")
+slider0 = Div(text=f"Towards: {token}")
+slider1 = Div(text=f"Towards: {stable}")
 instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
-slider_instructions = Div(text='After adjusting slider values press this button to the right to refresh the simulator and apply those changes ----->', styles=dark_style_small)
+slider_instructions = Div(text='After adjusting values in this row press this button to refresh the simulator and apply those changes ----->', styles=dark_style_small)
 profit_token = Div(text=f'Profitability of Pool in {token}: {x_profit}', styles=dark_style_smaller)
 profit_stable = Div(text=f'Profitability of Pool in {stable}: ${y_profit}', styles=dark_style_smaller)
 
@@ -131,7 +176,7 @@ sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
 
 # Dark/Light mode button
 def switch_theme(event):
-    global current_theme_is_dark, instructions, button_row, slider_row, bias_slider, percent_slider, slider_instructions, profit_token, profit_stable
+    global current_theme_is_dark, instructions, button_row, slider_row, bias_slider, percent_slider, slider_instructions, profit_token, profit_stable, position_box, slider0, slider1
     
     # Toggle the theme based on the current state
     if current_theme_is_dark:
@@ -147,6 +192,9 @@ def switch_theme(event):
         percent_slider.styles=light_style
         profit_token.styles = light_style_smaller
         profit_stable.styles = light_style_smaller
+        position_box.styles=light_style_smallest
+        slider0.styles=light_style_text
+        slider1.styles=light_style_text
     else:
         curdoc().theme = 'dark_minimal'
         new_theme = 'dark_minimal'
@@ -160,6 +208,9 @@ def switch_theme(event):
         percent_slider.styles=dark_style
         profit_token.styles = dark_style_smaller
         profit_stable.styles = dark_style_smaller
+        position_box.styles=dark_style_smallest
+        slider0.styles=dark_style_text
+        slider1.styles=dark_style_text
     
     # Toggle the flag
     current_theme_is_dark = not current_theme_is_dark
@@ -169,12 +220,12 @@ def switch_theme(event):
 
 # Start/Stop button
 def initialize_sim(event):
-    global init, callback_id, initial_x, initial_y
+    global init, callback_id, initial_x, initial_y, init_x_invest
 
     # sim.init_lp(init_x_tkn = bnb_init_amt, x_tkn_nm = bnb_tkn_nm)
-    price = sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
+    sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
             x_tkn_nm = chain.buy_tkn_nm, 
-            init_x_invest = chain.init_investment)
+            init_x_invest = init_x_invest)
     
     initial_x = sim.get_x_redeem()
     initial_y = sim.get_y_redeem()
@@ -199,7 +250,7 @@ def initialize_sim(event):
 
 # reinstantiate simulator with new variables after user changes
 def refresh_sim(event):
-    global chain, sim, initial_x, initial_y, x_profit, y_profit
+    global chain, sim, initial_x, initial_y, x_profit, y_profit, init_x_invest
     chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias, max_trade_percent=max_trade_percent)
     api = API0x(chain = chain.chain_nm)
     sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
@@ -210,7 +261,7 @@ def refresh_sim(event):
                          api = api)
     sim.init_lp(init_x_tkn = chain.get_buy_init_amt(), 
             x_tkn_nm = chain.buy_tkn_nm, 
-            init_x_invest = chain.init_investment)
+            init_x_invest = init_x_invest)
     initial_x = sim.get_x_redeem()
     initial_y = sim.get_y_redeem()
     x_profit = 0
@@ -232,8 +283,9 @@ def token_selection(attr, old, new):
     global token, buy_tkn_nm, profit_token
     Chain0x.buy_tkn_nm = new
     token = Chain0x.buy_tkn_nm
-    slider0.text = f"Token: {token}"
+    slider0.text = f"Towards: {token}"
     profit_token.text = f'Profitability of Pool in {token}: {x_profit}'
+    position_box.title = f"Position Size (in {token}): "
     print(f"Selected crypto: {token}")
     refresh_sim(None)
 
@@ -258,6 +310,12 @@ def update_percent(attr, old, new):
     global max_trade_percent
     max_trade_percent = new/100
     print("New trade percent: ", new)
+
+# allow user to change max amount swapped per trade by simulator
+def init_position(attr, old, new):
+    global init_x_invest
+    init_x_invest = new
+    print("New investment amount: ", new)
 
 # defines chart data and formatting
 def initiate_charts():
@@ -401,14 +459,21 @@ bias_slider.styles=dark_style
 percent_slider = Slider(start=0.1, end=10, value=0.1, step=.1, title="Max Trade %")
 percent_slider.on_change('value', update_percent)
 percent_slider.styles=dark_style
+slider0.styles=dark_style_text
+slider1.styles=dark_style_text
+
+# allow user to select initial capital for LP simulation position
+position_box = NumericInput(value=1, low=0.1, high=100, mode="float", title=f"Position Size (in {token}): ")
+position_box.on_change('value', init_position)
+position_box.styles=dark_style_smallest
 
 # add refresh button for sliders
-refresh_button = Button(label="Apply Slider Settings", button_type="primary", width=200)
+refresh_button = Button(label="Apply Settings", button_type="primary", width=200)
 refresh_button.on_click(refresh_sim)
 
 # Define UI on top  of screen
 button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), profit_token, instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
-slider_row = row(slider0, bias_slider, slider1, percent_slider, Spacer(width_policy='max'), profit_stable, slider_instructions, Spacer(width_policy='max'), refresh_button, sizing_mode='stretch_width', styles=dark_style)
+slider_row = row(slider0, bias_slider, slider1, percent_slider, position_box, profit_stable, Spacer(width_policy='max'), slider_instructions, Spacer(width_policy='max'), refresh_button, sizing_mode='stretch_width', styles=dark_style)
 
 # -------------------
 # Initialize Chart Data

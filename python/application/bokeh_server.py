@@ -322,22 +322,22 @@ def initiate_charts():
     global p1, p2, p3, p4, grid
     # Initialize Bokeh figures and data sources
     p1 = figure(title=f'Price of Token in Stablecoin & LP Price Deviation', x_axis_label='Time', y_axis_label='Price ($)', width_policy='max', height_policy='max')
-    p1.line(x='x', y='y', source=source1, color='green', legend_label='Market Price')
-    p1.line(x='x', y='lp_swap', source=source1, color='blue', legend_label='Liquidity Pool Price')
+    p1.line(x='x', y='y', source=source1, color='green', line_width=3, legend_label='Market Price')
+    p1.line(x='x', y='lp_swap', source=source1, color='blue', line_width=3, legend_label='Liquidity Pool Price')
     p1.toolbar.logo = None
 
     p2 = figure(title=f'Token Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Token)', width_policy='max', height_policy='max')
-    p2.line(x='x', y='x_swap', source=source2, color='blue', legend_label='Pool Deviation')
-    p2.line(x='x', y='x_arb', source=source2, color='green', legend_label=f'Token Reserves')
+    p2.line(x='x', y='x_swap', source=source2, color='blue', line_width=3, legend_label='Pool Deviation')
+    p2.line(x='x', y='x_arb', source=source2, color='green', line_width=3, legend_label=f'Token Reserves')
     p2.toolbar.logo = None
 
     p3 = figure(title=f'Stable Reserve', x_axis_label='Time', y_axis_label=f'Reserve (Stablecoin)', width_policy='max', height_policy='max')
-    p3.line(x='x', y='y_swap', source=source3, color='blue', legend_label='Pool Deviation')
-    p3.line(x='x', y='y_arb', source=source3, color='green', legend_label=f'Stable Reserves')
+    p3.line(x='x', y='y_swap', source=source3, color='blue', line_width=3, legend_label='Pool Deviation')
+    p3.line(x='x', y='y_arb', source=source3, color='green', line_width=3, legend_label=f'Stable Reserves')
     p3.toolbar.logo = None
 
     p4 = figure(title='Health Indicator (Swap Amounts)', x_axis_label='Time', y_axis_label=f'Amount of Token per Swap', width_policy='max', height_policy='max')
-    p4.line(x='x', y='y', source=source4, color='red', legend_label='Swap Amount')
+    p4.line(x='x', y='y', source=source4, color='red', line_width=3, legend_label='Swap Amount')
     p4.toolbar.logo = None
 
     # Create a custom tick formatter script

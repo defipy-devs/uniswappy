@@ -1,4 +1,4 @@
-# 0x API: Live Trading Simulator
+# 0x API: DeFi Quant Terminal
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
 the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
 

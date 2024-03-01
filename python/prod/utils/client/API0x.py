@@ -55,6 +55,6 @@ class API0x():
                 '0x-api-key': self.api_key
             }
 
-        search_response = requests.get(url, headers=headers)
-        return search_response.json()
+        search_response = requests.get(url, headers=headers).json()
+        return search_response if 'price' in search_response else {}
         

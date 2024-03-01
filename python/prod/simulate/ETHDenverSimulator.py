@@ -79,6 +79,7 @@ class ETHDenverSimulator:
         self.state = self.STATE_INSTANTIATE
         self.remaining_sleep = self.time_window
         self.api_0x_data = None
+        self.prev_api_0x_data = None
         
         self.x_redeem = None
         self.y_redeem = None
@@ -335,9 +336,9 @@ class ETHDenverSimulator:
             -----------------
             0x api data : dictionary
                 JSON structured 0x api call data                 
-        """          
-        
-        return self.api.apply(self.sell_token, self.buy_token, Chain0x().get_api_sell_amount())    
+        """   
+        call_api = self.api.apply(self.sell_token, self.buy_token, Chain0x().get_api_sell_amount())   
+        return call_api if bool(call_api) else self.prev_api_0x_data   
     
     def init_lp(self, init_x_tkn, x_tkn_nm = None, y_tkn_nm = None, init_x_invest = 1):
         
@@ -411,6 +412,7 @@ class ETHDenverSimulator:
         remaining_sleep -= pause
         
         self._update_investment()
+        self.prev_api_0x_data = self.api_0x_data
         time.sleep(remaining_sleep) 
 
         return p
@@ -438,13 +440,14 @@ class ETHDenverSimulator:
         rnd_amt = self.td_model.delta()
         self.amt_swap = rnd_amt
         select_tkn = EventSelectionModel().bi_select(self.trade_bias)
+        bias_factor = 1
         
         if(select_tkn == 0):
             out = Swap().apply(self.lp, self.x_tkn, USER_NM, rnd_amt) 
             self.x_trial_amt += rnd_amt
         else:
-            out = Swap().apply(self.lp, self.y_tkn, USER_NM, 0.5*p*rnd_amt)  
-            self.y_trial_amt += 0.5*p*rnd_amt
+            out = Swap().apply(self.lp, self.y_tkn, USER_NM,  bias_factor*p*rnd_amt)  
+            self.y_trial_amt += bias_factor*p*rnd_amt
             
         self.time_swap = datetime.datetime.now() 
         self.x_amt_swap = self.lp.get_reserve(self.arb.get_x_tkn())

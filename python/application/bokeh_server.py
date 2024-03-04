@@ -143,6 +143,8 @@ chain_api = Chain0x.ETHEREUM
 stable = Chain0x.USDC
 token = Chain0x.WETH
 chain = Chain0x(chain_nm = chain_api, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
+# https://coins.llama.fi/prices/current/metis:0xEA32A96608495e54156Ae48931A7c20f0dcc1a21?searchWidth=0.011h
+# ^ for metis 
 api = API0x(chain = chain.chain_nm)
 x_profit = 0
 y_profit = 0

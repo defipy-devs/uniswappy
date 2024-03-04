@@ -21,7 +21,12 @@ Next, install modified ETHDenver GH instance of Uniswappy python package:
 ```
 > bokeh serve --show python/application/bokeh_server.py
 ``` 
-		
+
+## Kill local process (for restarting and showing updates)
+```
+> lsof -ti:5006
+> kill -9 pid
+``` 
 
 ## Technical References 
  * **Reblancing Pool**: 

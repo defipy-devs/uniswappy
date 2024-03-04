@@ -151,7 +151,7 @@ y_profit = 0
 
 # Style elements
 slider0 = Div(text=f"Towards: {token}")
-slider1 = Div(text=f"Towards: {stable}")
+slider1 = Div(text=f"Towards: m.USDC")
 instructions = Div(text='First choose a network and token/stablecoin pair. Next click "Start Simulation" to begin modelling', styles=dark_style_small)
 slider_instructions = Div(text='After adjusting values in this row press this button to refresh the simulator and apply those changes ----->', styles=dark_style_small)
 profit_token = Div(text=f'Profitability of Pool in {token}: {x_profit}', styles=dark_style_smaller)
@@ -482,9 +482,9 @@ slider_row = row(slider0, bias_slider, slider1, percent_slider, position_box, Sp
 # -------------------
 
 # define plot data
-source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (USDC) Price and LP Price Deviation
+source1 = ColumnDataSource(data={'x': [], 'y': [], 'lp_swap': []})  # For Buy (WETH)/ Sell (m.USDC) Price and LP Price Deviation
 source2 = ColumnDataSource(data={'x': [], 'x_swap': [], 'x_arb': []})  # For X Reserve (e.g., WETH)
-source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., USDC)
+source3 = ColumnDataSource(data={'x': [], 'y_swap': [], 'y_arb': []})  # For Y Reserve (e.g., m.USDC)
 source4 = ColumnDataSource(data={'x': [], 'y': []})  # For Health Indicator (Amount swapped per trade)
 
 initiate_charts()

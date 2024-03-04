@@ -141,7 +141,7 @@ init_x_invest = 1 # initialize pool simulation witha position of 1 WETH/UNI/Othe
 chain_nm = "ETHEREUM"
 chain_api = Chain0x.ETHEREUM
 stable = Chain0x.USDC
-token = Chain0x.WETH
+token = Chain0x.WBTC
 chain = Chain0x(chain_nm = chain_api, buy_tkn_nm = token, sell_tkn_nm = stable, max_trade_percent = max_trade_percent, time_window = time_window, trade_bias = trade_bias)
 # https://coins.llama.fi/prices/current/metis:0xEA32A96608495e54156Ae48931A7c20f0dcc1a21?searchWidth=0.011h
 # ^ for metis 
@@ -441,15 +441,15 @@ toggle_button = Button(label="Light Mode", button_type="default", width=200)
 toggle_button.on_click(switch_theme)
 
 # Create chain selection dropdown
-select_chain = Select(title="Choose Network (Default ETH Mainnet):", value="ETHEREUM", options=["ETHEREUM", "AVALANCHE", "POLYGON"])
+select_chain = Select(title="Choose Network (Default Metis):", value="METIS", options=["METIS", "AVALANCHE", "POLYGON"])
 select_chain.on_change('value', chain_selection)
 
 # Create token selection dropdown
-select_token = Select(title="Choose Token (Default WETH):", value="WETH", options=["WETH", "LINK", "UNI", "WBTC", "BNB"])
+select_token = Select(title="Choose Token (Default WBTC):", value="WBTC", options=["WBTC", "LINK", "UNI", "BNB"])
 select_token.on_change('value', token_selection)
 
 # Create stable token selection dropdown
-select_stable = Select(title="Choose Stablecoin (Default USDC):", value="USDC", options=["USDC", "USDT", "DAI"])
+select_stable = Select(title="Choose Stablecoin (Default m.USDC):", value="m.USDC", options=["m.USDC", "USDT", "DAI"])
 select_stable.on_change('value', stable_selection)
 
 # create slider for changing trade bias
@@ -474,8 +474,8 @@ refresh_button = Button(label="Apply Settings", button_type="primary", width=200
 refresh_button.on_click(refresh_sim)
 
 # Define UI on top  of screen
-button_row = row(init_button, select_chain, select_token, select_stable, Spacer(width_policy='max'), profit_token, instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
-slider_row = row(slider0, bias_slider, slider1, percent_slider, position_box, profit_stable, Spacer(width_policy='max'), slider_instructions, Spacer(width_policy='max'), refresh_button, sizing_mode='stretch_width', styles=dark_style)
+button_row = row(init_button, select_chain, select_token, Spacer(width_policy='max'), profit_token, instructions, Spacer(width_policy='max'), toggle_button, sizing_mode='stretch_width', styles=dark_style) 
+slider_row = row(slider0, bias_slider, slider1, percent_slider, position_box, Spacer(width_policy='max'), slider_instructions, Spacer(width_policy='max'), refresh_button, sizing_mode='stretch_width', styles=dark_style)
 
 # -------------------
 # Initialize Chart Data

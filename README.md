@@ -66,6 +66,8 @@ the limitations of a Uniswap pool setup using live price feeds from [0x API](htt
 
 Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link; for more detail see [README](https://github.com/defipy-devs/uniswappy/python/application/quant_terminal/README.md) 
 
+![plot](./doc/quant_terminal/screenshot.png)
+
 ## Run application locally  
 
 ```

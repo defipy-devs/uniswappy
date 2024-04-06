@@ -23,10 +23,10 @@ import random
 
 USER_NM = 'user'
 
-class ETHDenverSimulator:
+class QuantTerminal:
     
     """ 
-        ETHDenver Simulator class for BUIDL week; applies the 0x API to produce a mock Uniswap pool to 
+        Quant Terminal Simulator class applies the 0x API to produce a mock Uniswap pool to 
         allow end-users to stress test the limitations of a Uniswap pool setup using live price 
         feeds from 0x API
 

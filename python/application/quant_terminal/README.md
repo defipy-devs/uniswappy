@@ -1,33 +1,39 @@
 # 0x API: DeFi Quant Terminal
 This application uses the 0x API to produce a mock Uniswap pool which allows end-users to stress test
-the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/blob/ethdenver/notebooks/research/ethdenver_simulator.ipynb) 
+the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/notebooks/quant_terminal.ipynb) 
 
 ## Live link to application
-Click [here](https://6pg42n-5006.csb.app/bokeh_server) for live link
+Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link
 
 ## Local Installation 
 
 Install project requirements:
 ```
-> git clone https://github.com/defipy-devs/uniswappy/tree/ethdenver
+> git clone https://github.com/defipy-devs/uniswappy
 > pip install -r requirements.txt
 
 ```
 
-Next, install modified ETHDenver GH instance of Uniswappy python package: 
+Next, install Uniswappy python package: 
 ```
 > pip install .
+```
+
+or 
+
+```
+> pip install uniswappy
 ```
 
 ## Run application locally  
 
 ```
-> bokeh serve --show python/application/bokeh_server.py
+> bokeh serve --show python/application/quant_terminal/bokeh_server.py
 ``` 
 
 ## DeFiPy ETHDenver BUIDL week additions
-* **[ETHDenverSimulator.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/ETHDenverSimulator.py)**:
-    * ETHDenver Simulator class for BUIDL week; applies the 0x API to produce a mock Uniswap pool to 
+* **[QuantTerminal.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/simulate/QuantTerminal.py)**:
+    * QuantTerminal Simulator class for BUIDL week; applies the 0x API to produce a mock Uniswap pool to 
       allow end-users to stress test the limitations of a Uniswap pool setup using live price 
       feeds from 0x API
 * **[API0x.py](https://github.com/defipy-devs/uniswappy/blob/ethdenver/python/prod/utils/client/API0x.py)**

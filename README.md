@@ -60,6 +60,16 @@ Exchange ETH-DAI (LP) <br/>
 Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 
+## Quant Terminal
+
+Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link
+
+## Run application locally  
+
+```
+> bokeh serve --show python/application/quant_terminal/bokeh_server.py
+```
+
 ## Special Features
  * **Abstracted Actions**: Obfuscation is removed from standard Uniswap 
 action events to help streamline analysis and lower line count; see 

@@ -156,14 +156,14 @@ profit_token = Div(text=f'Profitability of Pool in {token}: {x_profit}', styles=
 profit_stable = Div(text=f'Profitability of Pool in {stable}: ${y_profit}', styles=dark_style_smaller)
 
 # -------------------
-# ETHDenverSim
+# QuantTerminal
 # -------------------
 
 init = False
 callback_id = None
 
-# sim = ETHDenverSimulator() # default mode
-sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
+# sim = QuantTerminal() # default mode
+sim = QuantTerminal(buy_token = chain.get_buy_token(),
                          sell_token = chain.get_sell_token(),
                          time_window = time_window,
                          trade_bias = trade_bias,
@@ -253,7 +253,7 @@ def refresh_sim(event):
     global chain, sim, initial_x, initial_y, x_profit, y_profit, init_x_invest
     chain = Chain0x(chain_nm = chain.chain_nm, buy_tkn_nm = token, sell_tkn_nm = stable, trade_bias=trade_bias, max_trade_percent=max_trade_percent)
     api = API0x(chain = chain.chain_nm)
-    sim = ETHDenverSimulator(buy_token = chain.get_buy_token(),
+    sim = QuantTerminal(buy_token = chain.get_buy_token(),
                          sell_token = chain.get_sell_token(),
                          time_window = time_window,
                          trade_bias = chain.trade_bias,
@@ -383,19 +383,19 @@ def update_data():
     print("Price: ", price)
     
     # Arbitration and Swapping timestamps (Swap always comes first, one of each returned per trial)
-    arbtime = sim.get_time_stamp(ETHDenverSimulator.STATE_ARB)
-    swaptime = sim.get_time_stamp(ETHDenverSimulator.STATE_SWAP)
+    arbtime = sim.get_time_stamp(QuantTerminal.STATE_ARB)
+    swaptime = sim.get_time_stamp(QuantTerminal.STATE_SWAP)
 
     # X Reserve Plot (WETH)
-    x_swap = sim.get_x_reserve(ETHDenverSimulator.STATE_SWAP)
-    x_arb = sim.get_x_reserve(ETHDenverSimulator.STATE_ARB)
+    x_swap = sim.get_x_reserve(QuantTerminal.STATE_SWAP)
+    x_arb = sim.get_x_reserve(QuantTerminal.STATE_ARB)
 
     # Y Reserve Plot (USDC)
-    y_swap = sim.get_y_reserve(ETHDenverSimulator.STATE_SWAP)
-    y_arb = sim.get_y_reserve(ETHDenverSimulator.STATE_ARB)
+    y_swap = sim.get_y_reserve(QuantTerminal.STATE_SWAP)
+    y_arb = sim.get_y_reserve(QuantTerminal.STATE_ARB)
 
     # LP Price Deviation Overlay
-    lp_swap = sim.get_lp_price(ETHDenverSimulator.STATE_SWAP)
+    lp_swap = sim.get_lp_price(QuantTerminal.STATE_SWAP)
     
     print("LP Swap: ", lp_swap,"\n")
     

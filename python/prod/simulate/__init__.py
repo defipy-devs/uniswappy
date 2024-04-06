@@ -3,4 +3,4 @@ from .SimpleLPSimulation import SimpleLPSimulation
 from .MarkovState import MarkovState
 from .Arbitrage import Arbitrage
 from .CorrectReserves import CorrectReserves
-from .ETHDenverSimulator import ETHDenverSimulator
+from .QuantTerminal import QuantTerminal

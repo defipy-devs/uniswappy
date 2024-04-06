@@ -68,7 +68,7 @@ Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link; for m
 
 ![plot](./doc/quant_terminal/screenshot.png)
 
-## Run application locally  
+### Run application locally  
 
 ```
 > bokeh serve --show python/application/quant_terminal/bokeh_server.py

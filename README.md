@@ -20,8 +20,7 @@ or
 
 ## Basic Usage
 
-* See [test 
-notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
+* See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
 for basic usage
 
 ```
@@ -62,7 +61,7 @@ Liquidity: 31622.776601683792 <br/><br/>
 
 ## Quant Terminal
 
-Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link
+Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link; for more detail see [README](https://github.com/defipy-devs/uniswappy/python/application/quant_terminal/README.md) 
 
 ## Run application locally  
 

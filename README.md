@@ -62,9 +62,11 @@ Liquidity: 31622.776601683792 <br/><br/>
 ## 0x Quant Terminal
 
 This application utilizes the 0x API to produce a mock Uniswap pool which allows end-users to stress test
-the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see [notebook](https://github.com/defipy-devs/uniswappy/notebooks/quant_terminal.ipynb) 
+the limitations of a Uniswap pool setup using live price feeds from [0x API](https://0x.org); for backend setup, see 
+[notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/quant_terminal.ipynb) 
 
-Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link; for more detail see [README](https://github.com/defipy-devs/uniswappy/python/application/quant_terminal/README.md) 
+Click [dashboard.defipy.org](https://dashboard.defipy.org/) for live link; for more detail see 
+[README](https://github.com/defipy-devs/uniswappy/tree/main/python/application/quant_terminal#readme) 
 
 ![plot](./doc/quant_terminal/screenshot.png)
 

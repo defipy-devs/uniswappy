@@ -1,5 +1,5 @@
 # UniswapPy: Uniswap V2 / V3 Analytics with Python
-This package is a python re-factor of the both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
+This package is a python re-factor of both the original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
 pairing codes and can be utilized for the purpose of analysing and modelling its behavior for DeFi
 
 ## Docs
@@ -56,8 +56,9 @@ Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 
 
-## Uniswap V3
+## Uniswap V3 (pre-release)
 
+* Pre-release available only via local pip install
 * See [test notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
 for basic usage
 

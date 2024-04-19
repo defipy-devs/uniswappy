@@ -88,9 +88,9 @@ lp.summary()
 ```
 
 #### OUTPUT:
-Exchange TKN-DAI (LP)
-Reserves: TKN = 9996, DAI = 1000 
-Liquidity: 3161
+Exchange TKN-DAI (LP) <br/>
+Reserves: TKN = 9996, DAI = 1000 <br/>
+Liquidity: 3161 <br/><br/>
 
 ## 0x Quant Terminal
 

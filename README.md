@@ -80,7 +80,7 @@ exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP",
                                    tick_spacing = tick_spacing, 
                                    fee = fee)
 
-factory = UniswapFactory("ETH pool factory", "0x2")
+factory = UniswapFactory("TKN pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
 lp.mint(user, lwr_tick, upr_tick, 3161)

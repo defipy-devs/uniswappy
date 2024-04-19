@@ -42,10 +42,6 @@ class SwapCache:
     ## liquidity at the beginning of the swap
     liquidityStart: int
 
-
-#from .libraries import Position, SqrtPriceMath, SafeMath
-
-
 MINIMUM_LIQUIDITY = 1e-15
 
 @dataclass

@@ -3,6 +3,7 @@
 # Email: defipy.devs@gmail.com
 
 from ..exchg import UniswapExchange 
+from ..exchg import UniswapV3Exchange 
 from ...erc import ERC20
 from ...erc import LPERC20
 from ...utils.interfaces import IExchangeFactory 
@@ -61,8 +62,16 @@ class UniswapFactory(IExchangeFactory):
         self.parent_lp = token1.parent_lp if token1.type == 'index' else self.parent_lp 
         
         factory_struct = FactoryData(self.token_from_exchange,  self.parent_lp, self.name, self.address)
-        exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
-        exchange = UniswapExchange(factory_struct, exchg_struct)       
+
+        match exchg_data.version:
+            case UniswapExchangeData.VERSION_V2:
+                exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
+                exchange = UniswapExchange(factory_struct, exchg_struct) 
+            case UniswapExchangeData.VERSION_V3: 
+                exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, 
+                                                   address=address, version = UniswapExchangeData.VERSION_V3, 
+                                                   tick_spacing = exchg_data.tick_spacing, fee = exchg_data.fee)                
+                exchange = UniswapV3Exchange(factory_struct, exchg_struct) 
         
         self.exchange_from_token[token0.token_name] = exchange
         self.token_from_exchange[exchange.name] = {token0.token_name: token0, token1.token_name: token1}

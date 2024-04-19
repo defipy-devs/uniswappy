@@ -10,6 +10,10 @@ DEFAULT_VERSION = 'V2'
 
 @dataclass
 class UniswapExchangeData(ExchangeData):
+
+    VERSION_V2 = DEFAULT_VERSION
+    VERSION_V3 = 'V3'
+        
     tkn0: ERC20
     tkn1: ERC20 
     version: str = DEFAULT_VERSION

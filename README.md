@@ -16,7 +16,7 @@ or
 > pip install UniswapPy
 ```
 
-## Basic Usage: Uniswap V2
+## Uniswap V2
 
 * See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
 for basic usage
@@ -56,7 +56,7 @@ Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 
 
-## Basic Usage: Uniswap V3
+## Uniswap V3
 
 * See [test notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
 for basic usage

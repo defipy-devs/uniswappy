@@ -1,8 +1,8 @@
 # UniswapPy: Uniswap Analytics with Python
-This package is a python re-factor of the original [Uniswap V2 pairing 
-code](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) 
-and can be 
-utilized for the purpose of analysing and modelling its behavior for DeFi
+This package is a python re-factor of the original Uniswap [V2 pairing 
+code](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [Uniswap V3 pairing 
+code](https://github.com/Uniswap/v3-core/blob/main/contracts/interfaces/pool/IUniswapV3PoolActions.sol)
+and can be  utilized for the purpose of analysing and modelling its behavior for DeFi
 
 ## Docs
 Visit [docs](https://defipy.org) for full documentation with walk-through 
@@ -18,15 +18,13 @@ or
 > pip install UniswapPy
 ```
 
-## Basic Usage
+## Basic Usage: Uniswap V2
 
 * See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
 for basic usage
 
 ```
-from uniswappy.erc import ERC20
-from uniswappy.cpt.factory import UniswapFactory
-from uniswappy.utils.data import UniswapExchangeData
+from uniswappy import *
 
 user_nm = 'user_intro'
 eth_amount = 1000
@@ -58,6 +56,43 @@ lp.summary()
 Exchange ETH-DAI (LP) <br/>
 Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
+
+
+## Basic Usage: Uniswap V3
+
+* See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
+for basic usage
+
+```
+from uniswappy import *
+from uniswappy.utils.tools.v3 import UniV3Utils 
+
+user = 'test_user'
+fee = UniV3Utils.FeeAmount.MEDIUM
+tick_spacing = UniV3Utils.TICK_SPACINGS[fee]
+lwr_tick = UniV3Utils.getMinTick(tick_spacing)
+upr_tick = UniV3Utils.getMaxTick(tick_spacing)
+init_price = UniV3Utils.encodePriceSqrt(1, 10)
+
+tkn = ERC20("TKN", "0x111")
+dai = ERC20("DAI", "0x09")
+
+exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP", 
+                                   address="0x011", version = 'V3', 
+                                   tick_spacing = tick_spacing, 
+                                   fee = UniV3Utils.FeeAmount.MEDIUM)
+
+factory = UniswapFactory("ETH pool factory", "0x2")
+lp = factory.deploy(exchg_data)
+lp.initialize(init_price)
+res = lp.mint(user, lwr_tick, upr_tick, 3161)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange TKN-DAI (LP) <br/>
+Reserves: TKN = 9996, DAI = 1000 <br/>
+Liquidity: 3161 <br/><br/>
 
 ## 0x Quant Terminal
 

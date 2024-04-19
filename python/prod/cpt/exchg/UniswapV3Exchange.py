@@ -11,8 +11,6 @@ from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
 import math
 from dataclasses import dataclass
 
-
-
 MINIMUM_LIQUIDITY = 1e-15
 
 @dataclass
@@ -135,9 +133,14 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.feeGrowthGlobal0X128 = 0
         self.feeGrowthGlobal1X128 = 0  
         self.tickSpacing = exchg_struct.tick_spacing
-        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)        
+        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)      
 
     def summary(self):
+
+        tokens = self.factory.token_from_exchange[self.name]
+        self.reserve0 = tokens.get(self.token0).token_total
+        self.reserve1 = tokens.get(self.token1).token_total  
+        
         print(f"Exchange {self.name} ({self.symbol})")
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
@@ -186,11 +189,39 @@ class UniswapV3Exchange(IExchange, LPERC20):
         assert balance1Before + amount1 <= tokens.get(self.token1).token_total, 'UniswapV3: M0' 
               
         return (amount0, amount1)
-
-    
+        
 
     def collect(self, recipient, tickLower, tickUpper, amount0Requested, amount1Requested):
-        pass
+        checkInputTypes(
+            accounts=(recipient),
+            int24=(tickLower, tickUpper),
+            uint128=(amount0Requested, amount1Requested),
+        )
+        # Add this check to prevent creating a new position if the position doesn't exist or it's empty
+        position = Position.assertPositionExists(
+            self.positions, recipient, tickLower, tickUpper
+        )
+
+        amount0 = (
+            position.tokensOwed0
+            if (amount0Requested > position.tokensOwed0)
+            else amount0Requested
+        )
+        amount1 = (
+            position.tokensOwed1
+            if (amount1Requested > position.tokensOwed1)
+            else amount1Requested
+        )
+
+        if amount0 > 0:
+            position.tokensOwed0 -= amount0
+            #self.ledger.transferToken(self, recipient, self.token0, amount0)
+        if amount1 > 0:
+            position.tokensOwed1 -= amount1
+            #self.ledger.transferToken(self, recipient, self.token1, amount1)
+
+        return (recipient, tickLower, tickUpper, amount0, amount1)   
+        
 
     def burn(self, recipient, tickLower, tickUpper, amount):
         checkInputTypes(
@@ -206,9 +237,13 @@ class UniswapV3Exchange(IExchange, LPERC20):
             ModifyPositionParams(recipient, tickLower, tickUpper, -amount)
         )
 
+        tokens = self.factory.token_from_exchange[self.name]
+        tokens.get(self.token0).transfer(recipient, amount0Int)
+        tokens.get(self.token1).transfer(recipient, amount1Int)          
+
         # Mimic conversion to uint256
         amount0 = abs(-amount0Int) & (2**256 - 1)
-        amount1 = abs(-amount1Int) & (2**256 - 1)
+        amount1 = abs(-amount1Int) & (2**256 - 1)        
 
         if amount0 > 0 or amount1 > 0:
             position.tokensOwed0 += amount0
@@ -408,6 +443,19 @@ class UniswapV3Exchange(IExchange, LPERC20):
             state.liquidity,
             state.tick,
         )
+
+    def setFeeProtocol(self, feeProtocol0, feeProtocol1):
+        checkInputTypes(uint8=(feeProtocol0, feeProtocol1))
+        assert (feeProtocol0 == 0 or (feeProtocol0 >= 4 and feeProtocol0 <= 10)) and (
+            feeProtocol1 == 0 or (feeProtocol1 >= 4 and feeProtocol1 <= 10)
+        )
+
+        feeProtocolOld = self.slot0.feeProtocol
+        feeProtocolNew = feeProtocol0 + (feeProtocol1 << 4)
+        # Health check
+        checkUInt8(feeProtocolNew)
+        self.slot0.feeProtocol = feeProtocolNew
+        return (feeProtocolOld % 16, feeProtocolOld >> 4, feeProtocol0, feeProtocol1)    
     
     def get_price(self, token): 
         pass

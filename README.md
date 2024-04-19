@@ -1,4 +1,4 @@
-# UniswapPy: Uniswap V2/V3 Analytics with Python
+# UniswapPy: Uniswap V2 / V3 Analytics with Python
 This package is a python re-factor of the both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/interfaces/pool/IUniswapV3PoolActions.sol)
 pairing codes and can be utilized for the purpose of analysing and modelling its behavior for DeFi
 
@@ -78,7 +78,7 @@ dai = ERC20("DAI", "0x09")
 exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP", 
                                    address="0x011", version = 'V3', 
                                    tick_spacing = tick_spacing, 
-                                   fee = UniV3Utils.FeeAmount.MEDIUM)
+                                   fee = fee)
 
 factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.deploy(exchg_data)

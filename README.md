@@ -1,5 +1,5 @@
-# UniswapPy: Uniswap V2/V3 Analytics with Python
-This package is a python re-factor of the both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/interfaces/pool/IUniswapV3PoolActions.sol)
+# UniswapPy: Uniswap V2 / V3 Analytics with Python
+This package is a python re-factor of the both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
 pairing codes and can be utilized for the purpose of analysing and modelling its behavior for DeFi
 
 ## Docs
@@ -16,7 +16,7 @@ or
 > pip install UniswapPy
 ```
 
-## Basic Usage: Uniswap V2
+## Uniswap V2
 
 * See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/pairingcode.ipynb) 
 for basic usage
@@ -56,7 +56,7 @@ Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
 Liquidity: 31622.776601683792 <br/><br/>
 
 
-## Basic Usage: Uniswap V3
+## Uniswap V3
 
 * See [test notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
 for basic usage
@@ -78,12 +78,12 @@ dai = ERC20("DAI", "0x09")
 exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP", 
                                    address="0x011", version = 'V3', 
                                    tick_spacing = tick_spacing, 
-                                   fee = UniV3Utils.FeeAmount.MEDIUM)
+                                   fee = fee)
 
 factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
-res = lp.mint(user, lwr_tick, upr_tick, 3161)
+lp.mint(user, lwr_tick, upr_tick, 3161)
 lp.summary()
 ```
 

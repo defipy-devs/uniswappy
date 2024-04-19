@@ -37,7 +37,8 @@ setup(name='UniswapPy',
           'uniswappy.simulate',
           'uniswappy.utils.interfaces',
           'uniswappy.utils.data',
-          'uniswappy.utils.client'
+          'uniswappy.utils.client',
+          'uniswappy.utils.tools.v3'
       ],
       install_requires=[
           'scipy >= 1.7.3'         

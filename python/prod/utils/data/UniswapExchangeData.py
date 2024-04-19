@@ -14,3 +14,4 @@ class UniswapExchangeData(ExchangeData):
     tkn1: ERC20 
     version: str = DEFAULT_VERSION
     tick_spacing: int = None   
+    fee: int = None

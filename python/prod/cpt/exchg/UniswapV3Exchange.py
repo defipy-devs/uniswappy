@@ -7,9 +7,10 @@ from ...utils.tools.v3 import Position
 from ...utils.tools.v3 import Tick
 from ...utils.tools.v3 import SqrtPriceMath
 from ...utils.tools.v3 import LiquidityMath 
-from ...utils.tools.v3 import SwapMath, TickMath
+from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
 import math
 from dataclasses import dataclass
+
 
 
 MINIMUM_LIQUIDITY = 1e-15
@@ -32,7 +33,84 @@ class ModifyPositionParams:
     tickLower: int
     tickUpper: int
     ## any change in liquidity
-    liquidityDelta: int    
+    liquidityDelta: int  
+
+@dataclass
+class SwapCache:
+    ## the protocol fee for the input token
+    feeProtocol: int
+    ## liquidity at the beginning of the swap
+    liquidityStart: int
+
+
+#from .libraries import Position, SqrtPriceMath, SafeMath
+
+
+MINIMUM_LIQUIDITY = 1e-15
+
+@dataclass
+class Slot0:
+    ## the current price
+    sqrtPriceX96: int
+    ## the current tick
+    tick: int
+    ## the current protocol fee as a percentage of the swap fee taken on withdrawal
+    ## represented as an integer denominator (1#x)%
+    feeProtocol: int
+    
+@dataclass
+class ModifyPositionParams:
+    ## the address that owns the position
+    owner: str
+    ## the lower and upper tick of the position
+    tickLower: int
+    tickUpper: int
+    ## any change in liquidity
+    liquidityDelta: int  
+
+@dataclass
+class SwapCache:
+    ## the protocol fee for the input token
+    feeProtocol: int
+    ## liquidity at the beginning of the swap
+    liquidityStart: int
+
+@dataclass
+class SwapState:
+    ## the amount remaining to be swapped in#out of the input#output asset
+    amountSpecifiedRemaining: int
+    ## the amount already swapped out#in of the output#input asset
+    amountCalculated: int
+    ## current sqrt(price)
+    sqrtPriceX96: int
+    ## the tick associated with the current price
+    tick: int
+    ## the global fee growth of the input token
+    feeGrowthGlobalX128: int
+    ## amount of input token paid as protocol fee
+    protocolFee: int
+    ## the current liquidity in range
+    liquidity: int
+
+    ## list of ticks crossed during the swap
+    ticksCrossed: list
+
+@dataclass
+class StepComputations:
+    ## the price at the beginning of the step
+    sqrtPriceStartX96: int
+    ## the next tick to swap to from the current tick in the swap direction
+    tickNext: int
+    ## whether tickNext is initialized or not
+    initialized: bool
+    ## sqrt(price) for the next tick (1#0)
+    sqrtPriceNextX96: int
+    ## how much is being swapped in in this step
+    amountIn: int
+    ## how much is being swapped out
+    amountOut: int
+    ## how much fee is being paid in
+    feeAmount: int
 
 class UniswapV3Exchange(IExchange, LPERC20):
                        
@@ -42,7 +120,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.token0 = exchg_struct.tkn0.token_name     
         self.token1 = exchg_struct.tkn1.token_name       
         self.reserve0 = 0             
-        self.reserve1 = 0       
+        self.reserve1 = 0 
+        self.fee = exchg_struct.fee
         self.fee0_arr = []
         self.fee1_arr = []
         self.aggr_fee0 = 0
@@ -59,13 +138,19 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.ticks = {}
         self.feeGrowthGlobal0X128 = 0
         self.feeGrowthGlobal1X128 = 0  
-        self.tickSpacing = exchg_struct.tick_spacing   
+        self.tickSpacing = exchg_struct.tick_spacing
         self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)        
 
     def summary(self):
         print(f"Exchange {self.name} ({self.symbol})")
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
+
+    def checkTicks(self, tickLower, tickUpper):
+        checkInputTypes(int24=(tickLower, tickUpper))
+        assert tickLower < tickUpper, "TLU"
+        assert tickLower >= TickMath.MIN_TICK, "TLM"
+        assert tickUpper <= TickMath.MAX_TICK, "TUM"    
 
     def initialize(self, sqrtPriceX96):
         checkInputTypes(uint160=(sqrtPriceX96))
@@ -78,13 +163,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tick,
             0,
         )
-
-
-    def checkTicks(self, tickLower, tickUpper):
-        checkInputTypes(int24=(tickLower, tickUpper))
-        assert tickLower < tickUpper, "TLU"
-        assert tickLower >= TickMath.MIN_TICK, "TLM"
-        assert tickUpper <= TickMath.MAX_TICK, "TUM"    
     
     def mint(self, recipient, tickLower, tickUpper, amount):  
         checkInputTypes(
@@ -152,12 +230,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
         assert amountSpecified != 0, "AS"
 
         slot0Start = self.slot0
-
+        
         if zeroForOne:
             assert (
                 sqrtPriceLimitX96 < slot0Start.sqrtPriceX96
                 and sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO
-            ), "SPL"
+            ), "SPL_"
         else:
             assert (
                 sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
@@ -170,7 +248,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             else (slot0Start.feeProtocol >> 4)
         )
 
-        cache = SwapCache(feeProtocol, self.liquidity)
+        cache = SwapCache(feeProtocol, self.total_supply)
 
         exactInput = amountSpecified > 0
 
@@ -312,19 +390,19 @@ class UniswapV3Exchange(IExchange, LPERC20):
         )
 
         ## do the transfers and collect payment
-        if zeroForOne:
-            if amount1 < 0:
-                self.ledger.transferToken(self, recipient, self.token1, abs(amount1))
-            balanceBefore = self.balances[self.token0]
-            self.ledger.transferToken(recipient, self, self.token0, abs(amount0))
-            assert balanceBefore + abs(amount0) == self.balances[self.token0], "IIA"
-        else:
-            if amount0 < 0:
-                self.ledger.transferToken(self, recipient, self.token0, abs(amount0))
+        ## if zeroForOne:
+        ##    if amount1 < 0:
+        ##        self.ledger.transferToken(self, recipient, self.token1, abs(amount1))
+        ##    balanceBefore = self.balances[self.token0]
+        ##    self.ledger.transferToken(recipient, self, self.token0, abs(amount0))
+        ##    assert balanceBefore + abs(amount0) == self.balances[self.token0], "IIA"
+        ##else:
+        ##    if amount0 < 0:
+        ##        self.ledger.transferToken(self, recipient, self.token0, abs(amount0))
 
-            balanceBefore = self.balances[self.token1]
-            self.ledger.transferToken(recipient, self, self.token1, abs(amount1))
-            assert balanceBefore + abs(amount1) == self.balances[self.token1], "IIA"
+        ##    balanceBefore = self.balances[self.token1]
+        ##    self.ledger.transferToken(recipient, self, self.token1, abs(amount1))
+        ##    assert balanceBefore + abs(amount1) == self.balances[self.token1], "IIA"    
 
         return (
             recipient,
@@ -459,4 +537,33 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Tick.clear(self.ticks, tickUpper)
         return position    
     
-    
+    def nextTick(self, tick, lte):
+        checkInputTypes(int24=(tick), bool=(lte))
+
+        keyList = list(self.ticks.keys())
+
+        # If tick doesn't exist in the mapping we fake it (easier than searching for nearest value). This is probably not the
+        # best way, but it is a simple and intuitive way to reproduce the behaviour of the logic.
+        if not self.ticks.__contains__(tick):
+            keyList += [tick]
+        sortedKeyList = sorted(keyList)
+        indexCurrentTick = sortedKeyList.index(tick)
+
+        if lte:
+            # If the current tick is initialized (not faked), we return the current tick
+            if self.ticks.__contains__(tick):
+                return tick, True
+            elif indexCurrentTick == 0:
+                # No tick to the left
+                return TickMath.MIN_TICK, False
+            else:
+                nextTick = sortedKeyList[indexCurrentTick - 1]
+        else:
+
+            if indexCurrentTick == len(sortedKeyList) - 1:
+                # No tick to the right
+                return TickMath.MAX_TICK, False
+            nextTick = sortedKeyList[indexCurrentTick + 1]
+
+        # Return tick within the boundaries
+        return nextTick, True    

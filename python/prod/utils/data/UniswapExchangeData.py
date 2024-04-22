@@ -21,6 +21,6 @@ class UniswapExchangeData(ExchangeData):
     tkn0: ERC20
     tkn1: ERC20 
     version: str = DEFAULT_VERSION
-    numeric_type: str = DEFAULT_TYPE
+    precision: str = DEFAULT_TYPE
     tick_spacing: int = None   
     fee: int = None

@@ -131,7 +131,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.collected_fee1 = 0              
         self.name =  f"{self.token0}-{self.token1}"
         self.symbol = exchg_struct.symbol
-        self.num_type = exchg_struct.numeric_type
+        self.precision = exchg_struct.precision
         self.last_liquidity_deposit = 0
         self.total_supply = 0
         self.tick_spacing = 1000
@@ -148,20 +148,20 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         print(f"Exchange {self.name} ({self.symbol})")
 
-        if (self.num_type == UniswapExchangeData.TYPE_GWEI):
+        if (self.precision == UniswapExchangeData.TYPE_GWEI):
             print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
             print(f"Liquidity: {self.total_supply} \n")
         else:  
             print(f"Reserves: {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
             print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
 
-    def dec2gwei(self, tkn_amt, decimal=None):
-        decimal = GWEI_PRECISION if decimal == None else decimal
-        return int(Decimal(str(tkn_amt))*Decimal(str(10**decimal)))
+    def dec2gwei(self, tkn_amt, precision=None):
+        precision = GWEI_PRECISION if precision == None else precision
+        return int(Decimal(str(tkn_amt))*Decimal(str(10**precision)))
     
-    def gwei2dec(self, dec_amt, decimal=None):   
-        decimal = GWEI_PRECISION if decimal == None else decimal
-        return float(Decimal(str(dec_amt))/Decimal(str(10**decimal)))  
+    def gwei2dec(self, dec_amt, precision=None):   
+        precision = GWEI_PRECISION if precision == None else precision
+        return float(Decimal(str(dec_amt))/Decimal(str(10**precision)))  
 
     def checkTicks(self, tickLower, tickUpper):
         checkInputTypes(int24=(tickLower, tickUpper))
@@ -182,6 +182,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         )
     
     def mint(self, recipient, tickLower, tickUpper, amount):  
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
         )
@@ -247,6 +250,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         
 
     def burn(self, recipient, tickLower, tickUpper, amount):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
         )
@@ -279,29 +285,62 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
-
-
     def _getSqrtPriceLimitX96(self, inputToken):
         if inputToken == 'Token0':
             return 4295128739 + 1
         else:
             return 4295128739 - 1 
 
-    def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
-        sqrtPriceLimitX96 = (
-            sqrtPriceLimit
-            if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token1')
-        )
-        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
-
     def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
             else self._getSqrtPriceLimitX96('Token0')
         )
-        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)        
+        #return swap(pool, TEST_TOKENS[0], [amount, 0], recipient, sqrtPriceLimitX96)
+        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)  
+
+    def swapExact1For0(self, recipient, amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        return self._swap('Token1', [0, amount], recipient, sqrtPriceLimitX96)     
+ 
+
+    """
+    def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        #return swap(pool, TEST_TOKENS[1], [amount, 0], recipient, sqrtPriceLimitX96)
+        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
+
+    def swap0ForExact1(self, recipient,  amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token0')
+        )
+        return self._swap('Token0', [0, amount], recipient, sqrtPriceLimitX96)          
+
+    """    
+       
 
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
         [amountIn, amountOut] = amounts
@@ -493,14 +532,17 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 amountSpecified - state.amountSpecifiedRemaining,
             )
         )
+
+        #print(f'amount0 {self.gwei2dec(amount0)}')       
+        #print(f'amount1 {self.gwei2dec(amount1)}')  
         
         tokens = self.factory.token_from_exchange[self.name]
         if zeroForOne: 
             tokens.get(self.token0).deposit(recipient, abs(amount0))
-            self._swap_tokens(abs(amount0), 0, recipient)            
+            self._swap_tokens(0, abs(amount1), recipient)            
         else: 
-            tokens.get(self.token1).deposit(recipient, abs(amount1))
-            self._swap_tokens(abs(amount0), 0, recipient)            
+            tokens.get(self.token1).deposit(recipient, abs(amount0))
+            self._swap_tokens(abs(amount1), 0, recipient)            
         
         #self._swap_tokens(amount0, amount1, recipient)
         ## do the transfers and collect payment

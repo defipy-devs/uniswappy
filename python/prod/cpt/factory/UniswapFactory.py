@@ -55,6 +55,7 @@ class UniswapFactory(IExchangeFactory):
         token1 = exchg_data.tkn1
         symbol = exchg_data.symbol
         address = exchg_data.address
+        precision = exchg_data.precision
 
         assert symbol not in self.token_from_exchange, 'UniswapV2Factory: EXCHANGE_CREATED'
             
@@ -70,6 +71,7 @@ class UniswapFactory(IExchangeFactory):
             case UniswapExchangeData.VERSION_V3: 
                 exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, 
                                                    address=address, version = UniswapExchangeData.VERSION_V3, 
+                                                   precision = precision, 
                                                    tick_spacing = exchg_data.tick_spacing, fee = exchg_data.fee)                
                 exchange = UniswapV3Exchange(factory_struct, exchg_struct) 
         

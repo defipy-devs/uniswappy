@@ -90,26 +90,6 @@ Exchange TKN-DAI (LP) <br/>
 Reserves: TKN = 9995.959683792247, DAI = 999.5959683792247 <br/>
 Liquidity: 3161.0 <br/><br/>  
 
-```
-out = lp.swapExact0For1(user, 1000, None)
-lp.summary()
-```
-
-#### OUTPUT:
-Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 10995.959683792247, DAI = 908.9382011226554 <br/>
-Liquidity: 3161.0  <br/><br/> 
-
-```
-out = lp.swapExact1For0(user, 100, None)
-lp.summary()
-```
-
-#### OUTPUT:
-Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 9632.933709511182, DAI = 1008.9382011226554 <br/>
-Liquidity: 3161.0  <br/><br/> 
-
 
 ## 0x Quant Terminal
 

@@ -100,8 +100,8 @@ lp.summary()
 
 #### OUTPUT:
 Exchange USDC-DAI (LP) <br/>
-Reserves: USDC = 9996, DAI = 1000 <br/>
-Liquidity: 3161 <br/><br/>
+Reserves: USDC = 9906, DAI = 1999  <br/>
+Liquidity: 3161 <br/><br/> 
 
 ## 0x Quant Terminal
 

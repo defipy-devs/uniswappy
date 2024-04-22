@@ -68,7 +68,8 @@ class Test_UniV3Swaps(unittest.TestCase):
 
     def setup_deploy(self, factory, tkn1, tkn2, tick_spacing, fee):
         exchg_data = UniswapExchangeData(tkn0 = tkn1, tkn1 = tkn2, symbol="LP", 
-                                           address="0x011", version = UniswapExchangeData.VERSION_V3, 
+                                           address="0x011", version = UniswapExchangeData.VERSION_V3,
+                                           precision = UniswapExchangeData.TYPE_GWEI, 
                                            tick_spacing = tick_spacing, fee = fee)
         return factory.deploy(exchg_data)
               

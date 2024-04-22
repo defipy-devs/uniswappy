@@ -84,7 +84,7 @@ exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP",
 factory = UniswapFactory("TKN pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
-lp.mint(user, lwr_tick, upr_tick, 3160*(10**18))
+out = lp.mint(user, lwr_tick, upr_tick, 3160)
 lp.summary()
 ```
 
@@ -94,7 +94,7 @@ Reserves: TKN = 9992.797406132078, DAI = 999.2797406132079 <br/>
 Liquidity: 3160.0 <br/><br/> 
 
 ```
-lp.swapExact1For0(user, 999*(10**18), None)
+lp.swapExact1For0(user, 999, None)
 lp.summary()
 ```
 

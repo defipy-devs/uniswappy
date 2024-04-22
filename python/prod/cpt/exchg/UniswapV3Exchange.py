@@ -285,24 +285,11 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
-
-
     def _getSqrtPriceLimitX96(self, inputToken):
         if inputToken == 'Token0':
             return 4295128739 + 1
         else:
             return 4295128739 - 1 
-
-    def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
-
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
-        
-        sqrtPriceLimitX96 = (
-            sqrtPriceLimit
-            if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token1')
-        )
-        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
 
     def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
 
@@ -313,7 +300,47 @@ class UniswapV3Exchange(IExchange, LPERC20):
             if sqrtPriceLimit != None
             else self._getSqrtPriceLimitX96('Token0')
         )
-        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)        
+        #return swap(pool, TEST_TOKENS[0], [amount, 0], recipient, sqrtPriceLimitX96)
+        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)  
+
+    def swapExact1For0(self, recipient, amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        return self._swap('Token1', [0, amount], recipient, sqrtPriceLimitX96)     
+ 
+
+    """
+    def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        #return swap(pool, TEST_TOKENS[1], [amount, 0], recipient, sqrtPriceLimitX96)
+        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
+
+    def swap0ForExact1(self, recipient,  amount, sqrtPriceLimit):
+
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token0')
+        )
+        return self._swap('Token0', [0, amount], recipient, sqrtPriceLimitX96)          
+
+    """    
+       
 
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
         [amountIn, amountOut] = amounts
@@ -505,14 +532,17 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 amountSpecified - state.amountSpecifiedRemaining,
             )
         )
+
+        #print(f'amount0 {self.gwei2dec(amount0)}')       
+        #print(f'amount1 {self.gwei2dec(amount1)}')  
         
         tokens = self.factory.token_from_exchange[self.name]
         if zeroForOne: 
             tokens.get(self.token0).deposit(recipient, abs(amount0))
-            self._swap_tokens(abs(amount0), 0, recipient)            
+            self._swap_tokens(0, abs(amount1), recipient)            
         else: 
-            tokens.get(self.token1).deposit(recipient, abs(amount1))
-            self._swap_tokens(abs(amount0), 0, recipient)            
+            tokens.get(self.token1).deposit(recipient, abs(amount0))
+            self._swap_tokens(abs(amount1), 0, recipient)            
         
         #self._swap_tokens(amount0, amount1, recipient)
         ## do the transfers and collect payment

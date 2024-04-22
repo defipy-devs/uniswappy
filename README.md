@@ -63,9 +63,6 @@ Liquidity: 31622.776601683792 <br/><br/>
 for basic usage
 
 ```
-from uniswappy import *
-from uniswappy.utils.tools.v3 import UniV3Utils 
-
 user = 'test_user'
 fee = UniV3Utils.FeeAmount.MEDIUM
 tick_spacing = UniV3Utils.TICK_SPACINGS[fee]
@@ -84,24 +81,35 @@ exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP",
 factory = UniswapFactory("TKN pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
-out = lp.mint(user, lwr_tick, upr_tick, 3160)
+out = lp.mint(user, lwr_tick, upr_tick, 3161)
 lp.summary()
 ```
 
 #### OUTPUT:
 Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 9992.797406132078, DAI = 999.2797406132079 <br/>
-Liquidity: 3160.0 <br/><br/> 
+Reserves: TKN = 9995.959683792247, DAI = 999.5959683792247 <br/>
+Liquidity: 3161.0 <br/><br/>  
 
 ```
-lp.swapExact1For0(user, 999, None)
+out = lp.swapExact0For1(user, 1000, None)
 lp.summary()
 ```
 
 #### OUTPUT:
 Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 9902.018197965454, DAI = 1998.2797406132079 <br/>
-Liquidity: 3160.0 <br/><br/> 
+Reserves: TKN = 10995.959683792247, DAI = 908.9382011226554 <br/>
+Liquidity: 3161.0  <br/><br/> 
+
+```
+out = lp.swapExact1For0(user, 100, None)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange TKN-DAI (LP) <br/>
+Reserves: TKN = 9632.933709511182, DAI = 1008.9382011226554 <br/>
+Liquidity: 3161.0  <br/><br/> 
+
 
 ## 0x Quant Terminal
 

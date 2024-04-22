@@ -106,6 +106,11 @@ class StepComputations:
     ## how much fee is being paid in
     feeAmount: int
 
+@dataclass
+class ProtocolFees:
+    token0: int
+    token1: int
+
 class UniswapV3Exchange(IExchange, LPERC20):
                        
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
@@ -132,6 +137,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.ticks = {}
         self.feeGrowthGlobal0X128 = 0
         self.feeGrowthGlobal1X128 = 0  
+        self.protocolFees = ProtocolFees(0, 0)
         self.tickSpacing = exchg_struct.tick_spacing
         self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)      
 
@@ -250,6 +256,50 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position.tokensOwed1 += amount1
 
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
+
+
+
+    def _getSqrtPriceLimitX96(self, inputToken):
+        if inputToken == 'Token0':
+            return 4295128739 + 1
+        else:
+            return 4295128739 - 1 
+
+    def swapExact1For0(self, amount, recipient, sqrtPriceLimit):
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
+
+    def swapExact0For1(self, amount, recipient, sqrtPriceLimit):
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token0')
+        )
+        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)        
+
+    def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
+        [amountIn, amountOut] = amounts
+        exactInput = amountOut == 0
+        amount = amountIn if exactInput else amountOut
+
+        if inputToken == 'Token0':
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, True, amount, sqrtPriceLimitX96)
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, True, -amount, sqrtPriceLimitX96)
+        else:
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, False, amount, sqrtPriceLimitX96)
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, False, -amount, sqrtPriceLimitX96)        
     
     def swap(self, recipient, zeroForOne, amountSpecified, sqrtPriceLimitX96):
         checkInputTypes(
@@ -260,7 +310,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         )
         assert amountSpecified != 0, "AS"
 
-        slot0Start = self.slot0
+        slot0Start = self.slot0        
         
         if zeroForOne:
             assert (
@@ -268,11 +318,13 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 and sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO
             ), "SPL_"
         else:
-            assert (
-                sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
-                and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
-            ), "SPL"
-
+            #x = sqrtPriceLimitX96 > slot0Start.sqrtPriceX96 and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
+            assert sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO, "SPL"
+            # assert (
+            #    sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
+            #    and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
+            # ), "SPL"
+  
         feeProtocol = (
             (slot0Start.feeProtocol % 16)
             if zeroForOne

@@ -9,9 +9,11 @@ from ...utils.tools.v3 import SqrtPriceMath
 from ...utils.tools.v3 import LiquidityMath 
 from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
 import math
+from decimal import Decimal
 from dataclasses import dataclass
 
 MINIMUM_LIQUIDITY = 1e-15
+GWEI_PRECISION = 18
 
 @dataclass
 class Slot0:
@@ -145,8 +147,21 @@ class UniswapV3Exchange(IExchange, LPERC20):
     def summary(self):
 
         print(f"Exchange {self.name} ({self.symbol})")
-        print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
-        print(f"Liquidity: {self.total_supply} \n")
+
+        if (self.num_type == UniswapExchangeData.TYPE_GWEI):
+            print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
+            print(f"Liquidity: {self.total_supply} \n")
+        else:  
+            print(f"Reserves: {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
+            print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
+
+    def dec2gwei(self, tkn_amt, decimal=None):
+        decimal = GWEI_PRECISION if decimal == None else decimal
+        return int(Decimal(str(tkn_amt))*Decimal(str(10**decimal)))
+    
+    def gwei2dec(self, dec_amt, decimal=None):   
+        decimal = GWEI_PRECISION if decimal == None else decimal
+        return float(Decimal(str(dec_amt))/Decimal(str(10**decimal)))  
 
     def checkTicks(self, tickLower, tickUpper):
         checkInputTypes(int24=(tickLower, tickUpper))

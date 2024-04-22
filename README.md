@@ -89,8 +89,8 @@ lp.summary()
 ```
 
 #### OUTPUT:
-Exchange USDC-DAI (LP) <br/>
-Reserves: USDC = 9992.797406132078, DAI = 999.2797406132079 <br/>
+Exchange TKN-DAI (LP) <br/>
+Reserves: TKN = 9992.797406132078, DAI = 999.2797406132079 <br/>
 Liquidity: 3160.0 <br/><br/> 
 
 ```
@@ -99,8 +99,8 @@ lp.summary()
 ```
 
 #### OUTPUT:
-Exchange USDC-DAI (LP) <br/>
-Reserves: USDC = 9902.018197965454, DAI = 1998.2797406132079 <br/>
+Exchange TKN-DAI (LP) <br/>
+Reserves: TKN = 9902.018197965454, DAI = 1998.2797406132079 <br/>
 Liquidity: 3160.0 <br/><br/> 
 
 ## 0x Quant Terminal

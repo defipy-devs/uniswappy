@@ -109,8 +109,8 @@ class Test_UniV3Swaps(unittest.TestCase):
 
         #swapExact0For1(lp, expandTo18Decimals(1) // 10, USER_ACCT0, None)
         #swapExact1For0(lp, expandTo18Decimals(1) // 100, USER_ACCT0, None) 
-        lp.swapExact0For1(expandTo18Decimals(1) // 10, USER_ACCT0, None)
-        lp.swapExact1For0(expandTo18Decimals(1) // 100, USER_ACCT0, None) 
+        lp.swapExact0For1(USER_ACCT0, expandTo18Decimals(1) // 10,  None)
+        lp.swapExact1For0(USER_ACCT0, expandTo18Decimals(1) // 100, None) 
 
         assert lp.protocolFees.token0 == 50000000000000
         assert lp.protocolFees.token1 == 5000000000000    
@@ -127,8 +127,8 @@ class Test_UniV3Swaps(unittest.TestCase):
 
         #swapExact0For1(lp, expandTo18Decimals(1) // 10, USER_ACCT0, None)
         #swapExact1For0(lp, expandTo18Decimals(1) // 100, USER_ACCT0, None) 
-        lp.swapExact0For1(expandTo18Decimals(1) // 10, USER_ACCT0, None)
-        lp.swapExact1For0(expandTo18Decimals(1) // 100, USER_ACCT0, None)      
+        lp.swapExact0For1(USER_ACCT0, expandTo18Decimals(1) // 10, None)
+        lp.swapExact1For0(USER_ACCT0, expandTo18Decimals(1) // 100,  None)      
 
         assert lp.protocolFees.token0 == 0
         assert lp.protocolFees.token1 == 0
@@ -141,8 +141,10 @@ class Test_UniV3Swaps(unittest.TestCase):
         lp.mint(
             USER_ACCT1, lwr_tick + tick_spacing, upr_tick - tick_spacing, expandTo18Decimals(1)
         )
-        swapExact0For1(lp, expandTo18Decimals(1) // 10, USER_ACCT0, None)
-        swapExact1For0(lp, expandTo18Decimals(1) // 100, USER_ACCT0, None)
+        #swapExact0For1(lp, expandTo18Decimals(1) // 10, USER_ACCT0, None)
+        #swapExact1For0(lp, expandTo18Decimals(1) // 100, USER_ACCT0, None)
+        lp.swapExact0For1(USER_ACCT0, expandTo18Decimals(1) // 10, None)
+        lp.swapExact1For0(USER_ACCT0, expandTo18Decimals(1) // 100, None)       
         lp.mint(USER_ACCT0, lwr_tick + tick_spacing, upr_tick - tick_spacing, 1)
 
         position = lp.positions[

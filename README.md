@@ -93,6 +93,16 @@ Exchange TKN-DAI (LP) <br/>
 Reserves: TKN = 9996, DAI = 1000 <br/>
 Liquidity: 3161 <br/><br/>
 
+```
+out = lp.swapExact1For0(user, 999, None)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange USDC-DAI (LP) <br/>
+Reserves: USDC = 9996, DAI = 1000 <br/>
+Liquidity: 3161 <br/><br/>
+
 ## 0x Quant Terminal
 
 This application utilizes the 0x API to produce a mock Uniswap pool which allows end-users to stress test

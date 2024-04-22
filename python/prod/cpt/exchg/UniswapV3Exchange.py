@@ -106,6 +106,11 @@ class StepComputations:
     ## how much fee is being paid in
     feeAmount: int
 
+@dataclass
+class ProtocolFees:
+    token0: int
+    token1: int
+
 class UniswapV3Exchange(IExchange, LPERC20):
                        
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
@@ -124,6 +129,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.collected_fee1 = 0              
         self.name =  f"{self.token0}-{self.token1}"
         self.symbol = exchg_struct.symbol
+        self.num_type = exchg_struct.numeric_type
         self.last_liquidity_deposit = 0
         self.total_supply = 0
         self.tick_spacing = 1000
@@ -132,15 +138,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.ticks = {}
         self.feeGrowthGlobal0X128 = 0
         self.feeGrowthGlobal1X128 = 0  
+        self.protocolFees = ProtocolFees(0, 0)
         self.tickSpacing = exchg_struct.tick_spacing
         self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)      
 
     def summary(self):
 
-        tokens = self.factory.token_from_exchange[self.name]
-        self.reserve0 = tokens.get(self.token0).token_total
-        self.reserve1 = tokens.get(self.token1).token_total  
-        
         print(f"Exchange {self.name} ({self.symbol})")
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")
@@ -184,7 +187,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
         
         tokens.get(self.token0).deposit(recipient, amount0)
         tokens.get(self.token1).deposit(recipient, amount1)  
-        
+
+        balanceA = tokens.get(self.token0).token_total
+        balanceB = tokens.get(self.token1).token_total
+
+        self._update(balanceA, balanceB)
+    
         assert balance0Before + amount0 <= tokens.get(self.token0).token_total, 'UniswapV3: M0' 
         assert balance1Before + amount1 <= tokens.get(self.token1).token_total, 'UniswapV3: M0' 
               
@@ -239,7 +247,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         tokens = self.factory.token_from_exchange[self.name]
         tokens.get(self.token0).transfer(recipient, amount0Int)
-        tokens.get(self.token1).transfer(recipient, amount1Int)          
+        tokens.get(self.token1).transfer(recipient, amount1Int)     
+
+        balanceA = tokens.get(self.token0).token_total
+        balanceB = tokens.get(self.token1).token_total
+
+        self._update(balanceA, balanceB)        
 
         # Mimic conversion to uint256
         amount0 = abs(-amount0Int) & (2**256 - 1)
@@ -250,6 +263,50 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position.tokensOwed1 += amount1
 
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
+
+
+
+    def _getSqrtPriceLimitX96(self, inputToken):
+        if inputToken == 'Token0':
+            return 4295128739 + 1
+        else:
+            return 4295128739 - 1 
+
+    def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token1')
+        )
+        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
+
+    def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
+        sqrtPriceLimitX96 = (
+            sqrtPriceLimit
+            if sqrtPriceLimit != None
+            else self._getSqrtPriceLimitX96('Token0')
+        )
+        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)        
+
+    def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
+        [amountIn, amountOut] = amounts
+        exactInput = amountOut == 0
+        amount = amountIn if exactInput else amountOut
+
+        if inputToken == 'Token0':
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, True, amount, sqrtPriceLimitX96)
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, True, -amount, sqrtPriceLimitX96)
+        else:
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, False, amount, sqrtPriceLimitX96)
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, False, -amount, sqrtPriceLimitX96)        
     
     def swap(self, recipient, zeroForOne, amountSpecified, sqrtPriceLimitX96):
         checkInputTypes(
@@ -260,7 +317,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         )
         assert amountSpecified != 0, "AS"
 
-        slot0Start = self.slot0
+        slot0Start = self.slot0        
         
         if zeroForOne:
             assert (
@@ -268,11 +325,13 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 and sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO
             ), "SPL_"
         else:
-            assert (
-                sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
-                and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
-            ), "SPL"
-
+            #x = sqrtPriceLimitX96 > slot0Start.sqrtPriceX96 and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
+            assert sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO, "SPL"
+            # assert (
+            #    sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
+            #    and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
+            # ), "SPL"
+  
         feeProtocol = (
             (slot0Start.feeProtocol % 16)
             if zeroForOne
@@ -419,7 +478,16 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 amountSpecified - state.amountSpecifiedRemaining,
             )
         )
-
+        
+        tokens = self.factory.token_from_exchange[self.name]
+        if zeroForOne: 
+            tokens.get(self.token0).deposit(recipient, abs(amount0))
+            self._swap_tokens(abs(amount0), 0, recipient)            
+        else: 
+            tokens.get(self.token1).deposit(recipient, abs(amount1))
+            self._swap_tokens(abs(amount0), 0, recipient)            
+        
+        #self._swap_tokens(amount0, amount1, recipient)
         ## do the transfers and collect payment
         ## if zeroForOne:
         ##    if amount1 < 0:
@@ -455,13 +523,66 @@ class UniswapV3Exchange(IExchange, LPERC20):
         # Health check
         checkUInt8(feeProtocolNew)
         self.slot0.feeProtocol = feeProtocolNew
-        return (feeProtocolOld % 16, feeProtocolOld >> 4, feeProtocol0, feeProtocol1)    
+        return (feeProtocolOld % 16, feeProtocolOld >> 4, feeProtocol0, feeProtocol1) 
+
+    def _swap_tokens(self, amountA_out, amountB_out, to_addr):
+        
+        """ _swap_tokens
+
+            Remove liquidity from both coins in the pair based on lp amount
+                
+            Parameters
+            -----------------
+            amountA_out : float
+                swap amountA out
+            amountB_out : float
+                swap amountB out               
+            to_addr : str
+               receiving user address                   
+        """         
+        
+        assert amountA_out > 0 or amountB_out > 0, 'UniswapV3: INSUFFICIENT_OUTPUT_AMOUNT'
+        assert amountA_out < self.reserve0 and amountB_out < self.reserve1, 'UniswapV3: INSUFFICIENT_LIQUIDITY'
+
+        tokens = self.factory.token_from_exchange[self.name]
+        assert tokens.get(self.token0).token_addr != to_addr, 'UniswapV3: INVALID_TO_ADDRESS'
+        assert tokens.get(self.token1).token_addr != to_addr, 'UniswapV3: INVALID_TO_ADDRESS'
+        
+        tokens.get(self.token0).transfer(to_addr, amountA_out)
+        tokens.get(self.token1).transfer(to_addr, amountB_out)    
+        
+        balanceA = tokens.get(self.token0).token_total
+        balanceB = tokens.get(self.token1).token_total
+
+        amountA_in = balanceA - (self.reserve0 - amountA_out) if balanceA > self.reserve0 - amountA_out else 0
+        amountB_in = balanceB - (self.reserve1 - amountB_out) if balanceB > self.reserve1 - amountB_out else 0
+
+        assert amountA_in > 0 or amountB_in > 0, 'UniswapV3: INSUFFICIENT_INPUT_AMOUNT'
+    
+        self._update(balanceA, balanceB)    
     
     def get_price(self, token): 
         pass
             
     def get_reserve(self, token): 
         pass
+
+    def _update(self, balanceA, balanceB):
+        
+        """ _update
+
+            Update reserve amounts for both coins in the pair
+                
+            Parameters
+            -----------------   
+            balanceA : float
+                new reserve amount of A      
+            balance1 : float
+                new reserve amount of B                   
+        """         
+        
+        self.reserve0 = balanceA
+        self.reserve1 = balanceB    
     
     def _modifyPosition(self, params):
 

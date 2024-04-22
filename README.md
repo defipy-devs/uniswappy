@@ -84,24 +84,24 @@ exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP",
 factory = UniswapFactory("TKN pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
-lp.mint(user, lwr_tick, upr_tick, 3161)
-lp.summary()
-```
-
-#### OUTPUT:
-Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 9996, DAI = 1000 <br/>
-Liquidity: 3161 <br/><br/>
-
-```
-out = lp.swapExact1For0(user, 999, None)
+lp.mint(user, lwr_tick, upr_tick, 3160*(10**18))
 lp.summary()
 ```
 
 #### OUTPUT:
 Exchange USDC-DAI (LP) <br/>
-Reserves: USDC = 9906, DAI = 1999  <br/>
-Liquidity: 3161 <br/><br/> 
+Reserves: USDC = 9992.797406132078, DAI = 999.2797406132079 <br/>
+Liquidity: 3160.0 <br/><br/> 
+
+```
+lp.swapExact1For0(user, 999*(10**18), None)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange USDC-DAI (LP) <br/>
+Reserves: USDC = 9902.018197965454, DAI = 1998.2797406132079 <br/>
+Liquidity: 3160.0 <br/><br/> 
 
 ## 0x Quant Terminal
 

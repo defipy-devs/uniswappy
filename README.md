@@ -25,8 +25,8 @@ for basic usage
 from uniswappy import *
 
 user_nm = 'user_intro'
-eth_amount = 1000
-dai_amount = 1000000
+eth_amount = 3162.277660168379
+dai_amount = 316227.7660168379
 
 dai = ERC20("DAI", "0x111")
 eth = ERC20("ETH", "0x09")
@@ -41,19 +41,8 @@ lp.summary()
 
 #### OUTPUT:
 Exchange ETH-DAI (LP) <br/>
-Reserves: ETH = 1000, DAI = 1000000 <br/>
-Liquidity: 31622.776601683792 <br/><br/>
-```
-from uniswappy.process.swap import Swap
-
-out = Swap().apply(lp, dai, user_nm, 1000)
-lp.summary()
-```
-
-#### OUTPUT:
-Exchange ETH-DAI (LP) <br/>
-Reserves: ETH = 999.00399301896, DAI = 1001000 <br/>
-Liquidity: 31622.776601683792 <br/><br/>
+Reserves: ETH = 3162.277660168379, DAI = 316227.7660168379  <br/>
+Liquidity: 31622.776601683792 <br/><br/> 
 
 
 ## Uniswap V3 (pre-release)
@@ -63,32 +52,32 @@ Liquidity: 31622.776601683792 <br/><br/>
 for basic usage
 
 ```
-user = 'test_user'
+user = 'user_intro'
 fee = UniV3Utils.FeeAmount.MEDIUM
 tick_spacing = UniV3Utils.TICK_SPACINGS[fee]
 lwr_tick = UniV3Utils.getMinTick(tick_spacing)
 upr_tick = UniV3Utils.getMaxTick(tick_spacing)
-init_price = UniV3Utils.encodePriceSqrt(1, 10)
+init_price = UniV3Utils.encodePriceSqrt(100, 1)
 
-tkn = ERC20("TKN", "0x111")
 dai = ERC20("DAI", "0x09")
+eth = ERC20("ETH", "0x111")
 
-exchg_data = UniswapExchangeData(tkn0 = tkn, tkn1 = dai, symbol="LP", 
+exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = dai, symbol="LP", 
                                    address="0x011", version = 'V3', 
                                    tick_spacing = tick_spacing, 
                                    fee = fee)
 
-factory = UniswapFactory("TKN pool factory", "0x2")
+factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.deploy(exchg_data)
 lp.initialize(init_price)
-out = lp.mint(user, lwr_tick, upr_tick, 3161)
+out = lp.mint(user, lwr_tick, upr_tick, 31622.776601683792)
 lp.summary()
 ```
 
 #### OUTPUT:
-Exchange TKN-DAI (LP) <br/>
-Reserves: TKN = 9995.959683792247, DAI = 999.5959683792247 <br/>
-Liquidity: 3161.0 <br/><br/>  
+Exchange ETH-DAI (LP) <br/>
+Reserves: ETH = 3162.277660168379, DAI = 316227.7660168379 <br/>
+Liquidity: 31622.776601683792 <br/><br/>  
 
 
 ## 0x Quant Terminal

@@ -8,6 +8,7 @@ from ...utils.tools.v3 import Tick
 from ...utils.tools.v3 import SqrtPriceMath
 from ...utils.tools.v3 import LiquidityMath 
 from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
+from uniswappy.utils.tools.v3 import UniV3Utils 
 import math
 from decimal import Decimal
 from dataclasses import dataclass
@@ -285,11 +286,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
-    def _getSqrtPriceLimitX96(self, inputToken):
-        if inputToken == 'Token0':
-            return 4295128739 + 1
-        else:
-            return 4295128739 - 1 
+
 
     def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
 
@@ -298,7 +295,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token0')
+            else UniV3Utils.getSqrtPriceLimitX96('Token0')
         )
         #return swap(pool, TEST_TOKENS[0], [amount, 0], recipient, sqrtPriceLimitX96)
         return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)  
@@ -310,7 +307,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token0')
+            else UniV3Utils.getSqrtPriceLimitX96('Token0')
         )
         return self._swap('Token0', [0, amount], recipient, sqrtPriceLimitX96)  
 
@@ -322,7 +319,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token1')
+            else UniV3Utils.getSqrtPriceLimitX96('Token1')
         )
         return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
     
@@ -333,7 +330,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else self._getSqrtPriceLimitX96('Token1')
+            else UniV3Utils.getSqrtPriceLimitX96('Token1')
         )
         return self._swap('Token1', [0, amount], recipient, sqrtPriceLimitX96)     
 

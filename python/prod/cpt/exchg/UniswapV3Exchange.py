@@ -8,7 +8,7 @@ from ...utils.tools.v3 import Tick
 from ...utils.tools.v3 import SqrtPriceMath
 from ...utils.tools.v3 import LiquidityMath 
 from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
-from uniswappy.utils.tools.v3 import UniV3Utils 
+from ...utils.tools.v3 import UniV3Utils 
 import math
 from decimal import Decimal
 from dataclasses import dataclass

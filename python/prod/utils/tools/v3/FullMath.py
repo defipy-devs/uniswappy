@@ -1,3 +1,10 @@
+# Copyright [2024] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
+
+# Modified version of original Shared file from chainflip-io under MIT licence
+# - https://github.com/chainflip-io/chainflip-uniswapV3-python
+
 from .Shared import *
 
 ## @notice Calculates ceil(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0

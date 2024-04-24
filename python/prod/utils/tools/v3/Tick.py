@@ -2,7 +2,7 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-# Original Tick file from chainflip-io under MIT licence
+# Original MIT licenced Tick file from chainflip-io 
 # - https://github.com/chainflip-io/chainflip-uniswapV3-python
 
 from . import TickMath, LiquidityMath, SafeMath

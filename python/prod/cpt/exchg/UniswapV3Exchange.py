@@ -2,7 +2,7 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-# Modified version of original UniswapPool class from chainflip-io under MIT licence
+# Modified version of original MIT licenced UniswapPool class from chainflip-io
 # - https://github.com/chainflip-io/chainflip-uniswapV3-python
 
 from ...utils.interfaces import IExchange

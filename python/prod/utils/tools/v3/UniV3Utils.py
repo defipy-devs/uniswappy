@@ -2,7 +2,7 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-# Modified version of original utils file from chainflip-io under MIT licence
+# Modified version of MIT licenced original utils file from chainflip-io 
 # - https://github.com/chainflip-io/chainflip-uniswapV3-python
 
 import sys, traceback, math, copy

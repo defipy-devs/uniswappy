@@ -268,8 +268,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         )
 
         tokens = self.factory.token_from_exchange[self.name]
-        tokens.get(self.token0).transfer(recipient, amount0Int)
-        tokens.get(self.token1).transfer(recipient, amount1Int)     
+        tokens.get(self.token0).deposit(recipient, amount0Int)
+        tokens.get(self.token1).deposit(recipient, amount1Int)     
 
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total

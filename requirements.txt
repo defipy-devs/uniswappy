@@ -5,6 +5,7 @@ scipy==1.12.0
 termcolor==2.4.0
 UniswapPy==1.1.4
 bokeh==3.3.4
+pytest
 
 # optional
 # jupyter==1.0.0

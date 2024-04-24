@@ -1,3 +1,10 @@
+# Copyright [2024] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
+
+# Original MIT licenced Shared file from chainflip-io
+# - https://github.com/chainflip-io/chainflip-uniswapV3-python
+
 from decimal import *
 from dataclasses import dataclass
 

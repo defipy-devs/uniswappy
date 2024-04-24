@@ -1,3 +1,10 @@
+# Copyright [2024] [Ian Moore]
+# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Email: defipy.devs@gmail.com
+
+# Modified version of original MIT licenced UniswapPool class from chainflip-io
+# - https://github.com/chainflip-io/chainflip-uniswapV3-python
+
 from ...utils.interfaces import IExchange
 from ...utils.data import FactoryData
 from ...utils.data import UniswapExchangeData
@@ -291,19 +298,17 @@ class UniswapV3Exchange(IExchange, LPERC20):
     def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
-        
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
             else UniV3Utils.getSqrtPriceLimitX96('Token0')
         )
-        #return swap(pool, TEST_TOKENS[0], [amount, 0], recipient, sqrtPriceLimitX96)
+
         return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)  
 
     def swap0ForExact1(self, recipient,  amount, sqrtPriceLimit):
-
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -313,9 +318,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
 
     def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
-
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -326,7 +330,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
     def swap1ForExact0(self, recipient, amount, sqrtPriceLimit):
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
-        
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -373,12 +376,10 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 and sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO
             ), "SPL_"
         else:
-            #x = sqrtPriceLimitX96 > slot0Start.sqrtPriceX96 and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
-            assert sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO, "SPL"
-            # assert (
-            #    sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
-            #    and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
-            # ), "SPL"
+            assert (
+                sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
+                and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
+            ), "SPL"
   
         feeProtocol = (
             (slot0Start.feeProtocol % 16)
@@ -526,9 +527,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 amountSpecified - state.amountSpecifiedRemaining,
             )
         )
-
-        #print(f'amount0 {self.gwei2dec(amount0)}')       
-        #print(f'amount1 {self.gwei2dec(amount1)}')  
         
         tokens = self.factory.token_from_exchange[self.name]
         if zeroForOne: 
@@ -537,22 +535,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
         else: 
             tokens.get(self.token1).deposit(recipient, abs(amount1))
             self._swap_tokens(abs(amount0), 0, recipient)            
-        
-        #self._swap_tokens(amount0, amount1, recipient)
-        ## do the transfers and collect payment
-        ## if zeroForOne:
-        ##    if amount1 < 0:
-        ##        self.ledger.transferToken(self, recipient, self.token1, abs(amount1))
-        ##    balanceBefore = self.balances[self.token0]
-        ##    self.ledger.transferToken(recipient, self, self.token0, abs(amount0))
-        ##    assert balanceBefore + abs(amount0) == self.balances[self.token0], "IIA"
-        ##else:
-        ##    if amount0 < 0:
-        ##        self.ledger.transferToken(self, recipient, self.token0, abs(amount0))
-
-        ##    balanceBefore = self.balances[self.token1]
-        ##    self.ledger.transferToken(recipient, self, self.token1, abs(amount1))
-        ##    assert balanceBefore + abs(amount1) == self.balances[self.token1], "IIA"    
 
         return (
             recipient,

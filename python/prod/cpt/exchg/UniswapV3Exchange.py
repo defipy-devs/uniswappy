@@ -331,9 +331,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         """ burn
 
-            Burn liquidity from the sender and account tokens owed for the liquidity to the position. Can be used to trigger a    
-            recalculation of fees owed to a position by calling with an amount of 0. Fees must be collected separately via a call to    
-            collect
+            Burn liquidity from the sender and account tokens owed for the liquidity to the position. Can 
+            be used to trigger a recalculation of fees owed to a position by calling with an amount of 0. 
+            Fees must be collected separately via a call to collect
                 
             Parameters
             -----------------    
@@ -411,7 +411,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 how much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                used to determine the highest price in the swap, and needs to be set when swapping on 
+                the pool directly.       
                 
             Returns
             -------
@@ -445,7 +446,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 how much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                used to determine the highest price in the swap, and needs to be set when swapping 
+                on the pool directly.       
                 
             Returns
             -------
@@ -479,7 +481,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 how much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                used to determine the highest price in the swap, and needs to be set when swapping 
+                on the pool directly.       
                 
             Returns
             -------
@@ -512,7 +515,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 how much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                used to determine the highest price in the swap, and needs to be set when swapping 
+                on the pool directly.       
                 
             Returns
             -------
@@ -536,8 +540,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         """ swap
 
-            Swap token0 for token1, or token1 for token0. The tokens are automatically transferred at the end of the 
-            swapping function.
+            Swap token0 for token1, or token1 for token0. The tokens are automatically transferred 
+            at the end of the swapping function.
                 
             Parameters
             -----------------    
@@ -546,11 +550,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
             zeroForOne : int
                 the direction of the swap, true for token0 to token1, false for token1 to token0 
             amountSpecified : int
-                the amount of the swap, which implicitly configures the swap as exact input (positive), or exact 
-                output (negative)        
+                the amount of the swap, which implicitly configures the swap as exact input 
+                (positive), or exact output (negative)        
             sqrtPriceLimitX96 : int
-                the Q64.96 sqrt price limit. If zero for one, the price cannot be less than this value after the 
-                swap. If one for zero, the price cannot be greater than this value after the swap
+                the Q64.96 sqrt price limit. If zero for one, the price cannot be less than this 
+                value after the swap. If one for zero, the price cannot be greater than this 
+                value after the swap
                 
             Returns
             -------
@@ -800,10 +805,11 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         """ nextTick
 
-            It is assumed that the keys are within [MIN_TICK , MAX_TICK], which should always be the case. We don't run the risk of  
-            overshooting tickNext (out of boundaries) as long as ticks (keys) have been initialized within the boundaries. However, if 
-            there is no initialized tick to the left or right we will return the next boundary. Then we need to return the initialized 
-            bool to indicate that we are at the boundary and it is not an initalized tick.
+            It is assumed that the keys are within [MIN_TICK , MAX_TICK], which should always be the 
+            case. We don't run the risk of overshooting tickNext (out of boundaries) as long as ticks 
+            (keys) have been initialized within the boundaries. However, if there is no initialized 
+            tick to the left or right we will return the next boundary. Then we need to return the 
+            initialized bool to indicate that we are at the boundary and it is not an initalized tick.
             
             Parameters
             -----------------    

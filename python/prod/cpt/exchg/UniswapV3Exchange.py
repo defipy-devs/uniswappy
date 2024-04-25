@@ -5,20 +5,16 @@
 # Modified version of original MIT licenced UniswapPool class from chainflip-io
 # - https://github.com/chainflip-io/chainflip-uniswapV3-python
 
-from ...utils.interfaces import IExchange
-from ...utils.data import FactoryData
-from ...utils.data import UniswapExchangeData
-from ...erc import LPERC20
-from ...utils.tools.v3.Shared import *
-from ...utils.tools.v3 import Position
-from ...utils.tools.v3 import Tick
-from ...utils.tools.v3 import SqrtPriceMath
-from ...utils.tools.v3 import LiquidityMath 
-from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath
-from ...utils.tools.v3 import UniV3Utils 
 import math
 from decimal import Decimal
 from dataclasses import dataclass
+from ...erc import LPERC20
+from ...utils.interfaces import IExchange
+from ...utils.data import FactoryData
+from ...utils.data import UniswapExchangeData
+from ...utils.tools.v3.Shared import *
+from ...utils.tools.v3 import Position, Tick, SqrtPriceMath, LiquidityMath
+from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath, UniV3Utils
 
 MINIMUM_LIQUIDITY = 1e-15
 GWEI_PRECISION = 18
@@ -122,6 +118,17 @@ class ProtocolFees:
     token1: int
 
 class UniswapV3Exchange(IExchange, LPERC20):
+
+    """ 
+        Uniswap V3 Exchange  
+
+        Parameters
+        -----------------
+        self.factory_struct : FactoryInit
+            Factory initialization data
+        self.exchg_struct : UniswapExchangeInit
+            Exchange initialization data           
+    """       
                        
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
@@ -154,6 +161,10 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
     def summary(self):
 
+        """ summary
+            Summary print-out of exchange, reserves and liquidity              
+        """         
+
         print(f"Exchange {self.name} ({self.symbol})")
 
         if (self.precision == UniswapExchangeData.TYPE_GWEI):
@@ -163,23 +174,20 @@ class UniswapV3Exchange(IExchange, LPERC20):
             print(f"Reserves: {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
             print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
 
-    def dec2gwei(self, tkn_amt, precision=None):
-        precision = GWEI_PRECISION if precision == None else precision
-        return int(Decimal(str(tkn_amt))*Decimal(str(10**precision)))
-    
-    def gwei2dec(self, dec_amt, precision=None):   
-        precision = GWEI_PRECISION if precision == None else precision
-        return float(Decimal(str(dec_amt))/Decimal(str(10**precision)))  
-
-    def checkTicks(self, tickLower, tickUpper):
-        checkInputTypes(int24=(tickLower, tickUpper))
-        assert tickLower < tickUpper, "TLU"
-        assert tickLower >= TickMath.MIN_TICK, "TLM"
-        assert tickUpper <= TickMath.MAX_TICK, "TUM"    
-
     def initialize(self, sqrtPriceX96):
+
+        """ initialize
+
+            Sets the initial price for the pool
+                
+            Parameters
+            -----------------
+            sqrtPriceX96 : float
+                the initial sqrt price of the pool as a Q64.96                     
+        """  
+        
         checkInputTypes(uint160=(sqrtPriceX96))
-        assert self.slot0.sqrtPriceX96 == 0, "AI"
+        assert self.slot0.sqrtPriceX96 == 0, "UniswapV3: AI"
 
         tick = TickMath.getTickAtSqrtRatio(sqrtPriceX96)
 
@@ -189,7 +197,33 @@ class UniswapV3Exchange(IExchange, LPERC20):
             0,
         )
     
-    def mint(self, recipient, tickLower, tickUpper, amount):  
+    def mint(self, recipient, tickLower, tickUpper, amount): 
+
+        """ mint
+
+            Adds liquidity for the given recipient/tickLower/tickUpper position. The final amounts 
+            calculated are automatically transferred from the swapper to the pool and vice verse. 
+            The amount of token0/token1 due depends on tickLower, tickUpper, the amount of liquidity, 
+            and the current price.
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            tickLower : int
+                lower tick of the position in which to add liquidity  
+            tickUpper : int
+                upper tick of the position in which to add liquidity 
+            amount : int
+                amount of liquidity to mint  
+                
+            Returns
+            -------
+            amount0 : float
+                amount of token0 that was paid to mint the given amount of liquidity.   
+            amount1 : float
+                amount of token1 that was paid to mint the given amount of liquidity.                   
+        """          
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         
@@ -221,11 +255,44 @@ class UniswapV3Exchange(IExchange, LPERC20):
     
         assert balance0Before + amount0 <= tokens.get(self.token0).token_total, 'UniswapV3: M0' 
         assert balance1Before + amount1 <= tokens.get(self.token1).token_total, 'UniswapV3: M0' 
+ 
+        amount0 = self.convert(amount0)
+        amount1 = self.convert(amount1)        
               
         return (amount0, amount1)
         
 
     def collect(self, recipient, tickLower, tickUpper, amount0Requested, amount1Requested):
+
+        """ collect
+
+            Collects tokens owed to a position. Does not recompute fees earned, which must be done either 
+            via mint or burn of any amount of liquidity. Collect must be called by the position owner. 
+            To withdraw only token0 or only token1, amount0Requested or amount1Requested may be set to zero. 
+            To withdraw all tokens owed, caller may pass any value greater than the actual tokens owed, e.g. 
+            type(uint128).max. Tokens owed may be from accumulated swap fees or burned liquidity.
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            tickLower : int
+                lower tick of the position in which to add liquidity  
+            tickUpper : int
+                lower tick of the position in which to add liquidity                 
+            amount0Requested : int
+                how much token0 should be withdrawn from the fees owed
+            amount1Requested : int
+                how much token1 should be withdrawn from the fees owed  
+                
+            Returns
+            -------
+            amount0 : float
+                amount of token0 that was paid to mint the given amount of liquidity.   
+            amount1 : float
+                amount of token1 that was paid to mint the given amount of liquidity.                   
+        """  
+        
         checkInputTypes(
             accounts=(recipient),
             int24=(tickLower, tickUpper),
@@ -253,12 +320,44 @@ class UniswapV3Exchange(IExchange, LPERC20):
         if amount1 > 0:
             position.tokensOwed1 -= amount1
             #self.ledger.transferToken(self, recipient, self.token1, amount1)
+  
+        amount0 = self.convert(amount0)
+        amount1 = self.convert(amount1)        
 
         return (recipient, tickLower, tickUpper, amount0, amount1)   
         
 
     def burn(self, recipient, tickLower, tickUpper, amount):
 
+        """ burn
+
+            Burn liquidity from the sender and account tokens owed for the liquidity to the position. Can be used to trigger a    
+            recalculation of fees owed to a position by calling with an amount of 0. Fees must be collected separately via a call to    
+            collect
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            tickLower : int
+                lower tick of the position in which to add liquidity  
+            tickUpper : int
+                lower tick of the position in which to add liquidity                 
+            amount : int
+                how much liquidity to burn
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive               
+            amount : int
+                how much liquidity to burn                  
+        """  
+        
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         
         checkInputTypes(
@@ -291,12 +390,39 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position.tokensOwed0 += amount0
             position.tokensOwed1 += amount1
 
+        amount = self.convert(amount)   
+        amount0 = self.convert(amount0)
+        amount1 = self.convert(amount1)
+             
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
 
 
     def swapExact0For1(self, recipient, amount, sqrtPriceLimit):
 
+        """ swapExact0For1
+
+            Swap exact value of token0 for token1
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            amount : int
+                how much token to swap
+            sqrtPriceLimit : int
+                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+        """         
+
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
@@ -304,69 +430,145 @@ class UniswapV3Exchange(IExchange, LPERC20):
             else UniV3Utils.getSqrtPriceLimitX96('Token0')
         )
 
-        return self._swap('Token0', [amount, 0], recipient, sqrtPriceLimitX96)  
+        return self._swap(UniV3Utils.TEST_TOKENS[0], [amount, 0], recipient, sqrtPriceLimitX96)  
 
     def swap0ForExact1(self, recipient,  amount, sqrtPriceLimit):
+
+        """ swapExact0For1
+
+            Swap token0 for exact value of token1
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            amount : int
+                how much token to swap
+            sqrtPriceLimit : int
+                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+        """           
         
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else UniV3Utils.getSqrtPriceLimitX96('Token0')
+            else UniV3Utils.getSqrtPriceLimitX96(UniV3Utils.TEST_TOKENS[0])
         )
-        return self._swap('Token0', [0, amount], recipient, sqrtPriceLimitX96)  
+        return self._swap(UniV3Utils.TEST_TOKENS[0], [0, amount], recipient, sqrtPriceLimitX96)  
 
 
     def swapExact1For0(self, recipient,  amount, sqrtPriceLimit):
+
+        """ swapExact0For1
+
+            Swap exact value of token1 for token0
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            amount : int
+                how much token to swap
+            sqrtPriceLimit : int
+                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+        """          
         
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else UniV3Utils.getSqrtPriceLimitX96('Token1')
+            else UniV3Utils.getSqrtPriceLimitX96(UniV3Utils.TEST_TOKENS[1])
         )
-        return self._swap('Token1', [amount, 0], recipient, sqrtPriceLimitX96)
+        return self._swap(UniV3Utils.TEST_TOKENS[1], [amount, 0], recipient, sqrtPriceLimitX96)
     
     def swap1ForExact0(self, recipient, amount, sqrtPriceLimit):
 
+        """ swapExact0For1
+
+            Swap token1 for exact value of token0
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            amount : int
+                how much token to swap
+            sqrtPriceLimit : int
+                used to determine the highest price in the swap, and needs to be set when swapping on the pool directly.       
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+        """         
+
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
-            else UniV3Utils.getSqrtPriceLimitX96('Token1')
+            else UniV3Utils.getSqrtPriceLimitX96(UniV3Utils.TEST_TOKENS[1])
         )
-        return self._swap('Token1', [0, amount], recipient, sqrtPriceLimitX96)     
+        return self._swap(UniV3Utils.TEST_TOKENS[1], [0, amount], recipient, sqrtPriceLimitX96)     
 
-        
-
-    def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
-        [amountIn, amountOut] = amounts
-        exactInput = amountOut == 0
-        amount = amountIn if exactInput else amountOut
-
-        if inputToken == 'Token0':
-            if exactInput:
-                checkInt128(amount)
-                return self.swap(recipient, True, amount, sqrtPriceLimitX96)
-            else:
-                checkInt128(-amount)
-                return self.swap(recipient, True, -amount, sqrtPriceLimitX96)
-        else:
-            if exactInput:
-                checkInt128(amount)
-                return self.swap(recipient, False, amount, sqrtPriceLimitX96)                  
-            else:
-                checkInt128(-amount)
-                return self.swap(recipient, False, -amount, sqrtPriceLimitX96)      
-    
     def swap(self, recipient, zeroForOne, amountSpecified, sqrtPriceLimitX96):
+
+        """ swap
+
+            Swap token0 for token1, or token1 for token0. The tokens are automatically transferred at the end of the 
+            swapping function.
+                
+            Parameters
+            -----------------    
+            recipient : str
+                address for which the liquidity will be created      
+            zeroForOne : int
+                the direction of the swap, true for token0 to token1, false for token1 to token0 
+            amountSpecified : int
+                the amount of the swap, which implicitly configures the swap as exact input (positive), or exact 
+                output (negative)        
+            sqrtPriceLimitX96 : int
+                the Q64.96 sqrt price limit. If zero for one, the price cannot be less than this value after the 
+                swap. If one for zero, the price cannot be greater than this value after the swap
+                
+            Returns
+            -------
+            recipient : str
+                address for which the liquidity will be created 
+            amount0 : int
+                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+            amount1 : int
+                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+        """ 
+        
         checkInputTypes(
             accounts=(recipient),
             bool=(zeroForOne),
             int256=(amountSpecified),
             uint160=(sqrtPriceLimitX96),
         )
-        assert amountSpecified != 0, "AS"
+        assert amountSpecified != 0, "UniswapV3: AS"
 
         slot0Start = self.slot0        
         
@@ -374,12 +576,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
             assert (
                 sqrtPriceLimitX96 < slot0Start.sqrtPriceX96
                 and sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO
-            ), "SPL_"
+            ), "UniswapV3: ZEROFORONE SPL"
         else:
             assert (
                 sqrtPriceLimitX96 > slot0Start.sqrtPriceX96
                 and sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO
-            ), "SPL"
+            ), "UniswapV3: ONEFORZERO SPL"
   
         feeProtocol = (
             (slot0Start.feeProtocol % 16)
@@ -536,16 +738,33 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tokens.get(self.token1).deposit(recipient, abs(amount1))
             self._swap_tokens(abs(amount0), 0, recipient)            
 
+        amount0 = self.convert(amount0)
+        amount1 = self.convert(amount1)
+        liquidity = self.convert(state.liquidity)
+        
         return (
             recipient,
             amount0,
             amount1,
             state.sqrtPriceX96,
-            state.liquidity,
+            liquidity,
             state.tick,
         )
 
     def setFeeProtocol(self, feeProtocol0, feeProtocol1):
+
+        """ setFeeProtocol
+
+            Set the denominator of the protocol's % share of the fees
+            
+            Parameters
+            -----------------    
+            feeProtocol0 : int
+                new protocol fee for token0 of the pool      
+            feeProtocol1 : int
+                new protocol fee for token1 of the pool                        
+        """ 
+        
         checkInputTypes(uint8=(feeProtocol0, feeProtocol1))
         assert (feeProtocol0 == 0 or (feeProtocol0 >= 4 and feeProtocol0 <= 10)) and (
             feeProtocol1 == 0 or (feeProtocol1 >= 4 and feeProtocol1 <= 10)
@@ -556,8 +775,119 @@ class UniswapV3Exchange(IExchange, LPERC20):
         # Health check
         checkUInt8(feeProtocolNew)
         self.slot0.feeProtocol = feeProtocolNew
-        return (feeProtocolOld % 16, feeProtocolOld >> 4, feeProtocol0, feeProtocol1) 
+        return (feeProtocolOld % 16, feeProtocolOld >> 4, feeProtocol0, feeProtocol1)
 
+    def checkTicks(self, tickLower, tickUpper):
+
+        """ checkTicks
+
+            Common checks for valid tick inputs
+            
+            Parameters
+            -----------------    
+            tickLower : int
+                lower tick of the position in which to add liquidity  
+            tickUpper : int
+                lower tick of the position in which to add liquidity                    
+        """ 
+        
+        checkInputTypes(int24=(tickLower, tickUpper))
+        assert tickLower < tickUpper, "UniswapV3: TLU"
+        assert tickLower >= TickMath.MIN_TICK, "UniswapV3: TLM"
+        assert tickUpper <= TickMath.MAX_TICK, "UniswapV3: TUM"        
+
+    def nextTick(self, tick, lte):
+
+        """ nextTick
+
+            It is assumed that the keys are within [MIN_TICK , MAX_TICK], which should always be the case. We don't run the risk of  
+            overshooting tickNext (out of boundaries) as long as ticks (keys) have been initialized within the boundaries. However, if 
+            there is no initialized tick to the left or right we will return the next boundary. Then we need to return the initialized 
+            bool to indicate that we are at the boundary and it is not an initalized tick.
+            
+            Parameters
+            -----------------    
+            tick : int
+                the starting tick    
+            lte : int
+                whether to search for the next initialized tick to the left (less than or equal to the starting tick)
+                
+            Returns
+            -------
+            nextTick : int
+                next tick with liquidity to be used in the swap function                      
+        """ 
+        
+        checkInputTypes(int24=(tick), bool=(lte))
+
+        keyList = list(self.ticks.keys())
+
+        # If tick doesn't exist in the mapping we fake it (easier than searching for nearest value). This is probably not the
+        # best way, but it is a simple and intuitive way to reproduce the behaviour of the logic.
+        if not self.ticks.__contains__(tick):
+            keyList += [tick]
+        sortedKeyList = sorted(keyList)
+        indexCurrentTick = sortedKeyList.index(tick)
+
+        if lte:
+            # If the current tick is initialized (not faked), we return the current tick
+            if self.ticks.__contains__(tick):
+                return tick, True
+            elif indexCurrentTick == 0:
+                # No tick to the left
+                return TickMath.MIN_TICK, False
+            else:
+                nextTick = sortedKeyList[indexCurrentTick - 1]
+        else:
+
+            if indexCurrentTick == len(sortedKeyList) - 1:
+                # No tick to the right
+                return TickMath.MAX_TICK, False
+            nextTick = sortedKeyList[indexCurrentTick + 1]
+
+        # Return tick within the boundaries
+        return nextTick, True  
+
+    def get_price(self, token): 
+        pass
+            
+    def get_reserve(self, token): 
+        pass 
+
+    def convert(self, val): 
+        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else self.gwei2dec(val)
+        return val
+    
+
+    def dec2gwei(self, tkn_amt, precision=None):
+        precision = GWEI_PRECISION if precision == None else precision
+        return int(Decimal(str(tkn_amt))*Decimal(str(10**precision)))
+    
+    def gwei2dec(self, dec_amt, precision=None):   
+        precision = GWEI_PRECISION if precision == None else precision
+        return float(Decimal(str(dec_amt))/Decimal(str(10**precision)))  
+    
+
+    def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
+        [amountIn, amountOut] = amounts
+        exactInput = amountOut == 0
+        amount = amountIn if exactInput else amountOut
+
+        if inputToken == 'Token0':
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, True, amount, sqrtPriceLimitX96)
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, True, -amount, sqrtPriceLimitX96)
+        else:
+            if exactInput:
+                checkInt128(amount)
+                return self.swap(recipient, False, amount, sqrtPriceLimitX96)                  
+            else:
+                checkInt128(-amount)
+                return self.swap(recipient, False, -amount, sqrtPriceLimitX96)      
+    
     def _swap_tokens(self, amountA_out, amountB_out, to_addr):
         
         """ _swap_tokens
@@ -594,11 +924,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
     
         self._update(balanceA, balanceB)    
     
-    def get_price(self, token): 
-        pass
-            
-    def get_reserve(self, token): 
-        pass
+
 
     def _update(self, balanceA, balanceB):
         
@@ -735,33 +1061,3 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Tick.clear(self.ticks, tickUpper)
         return position    
     
-    def nextTick(self, tick, lte):
-        checkInputTypes(int24=(tick), bool=(lte))
-
-        keyList = list(self.ticks.keys())
-
-        # If tick doesn't exist in the mapping we fake it (easier than searching for nearest value). This is probably not the
-        # best way, but it is a simple and intuitive way to reproduce the behaviour of the logic.
-        if not self.ticks.__contains__(tick):
-            keyList += [tick]
-        sortedKeyList = sorted(keyList)
-        indexCurrentTick = sortedKeyList.index(tick)
-
-        if lte:
-            # If the current tick is initialized (not faked), we return the current tick
-            if self.ticks.__contains__(tick):
-                return tick, True
-            elif indexCurrentTick == 0:
-                # No tick to the left
-                return TickMath.MIN_TICK, False
-            else:
-                nextTick = sortedKeyList[indexCurrentTick - 1]
-        else:
-
-            if indexCurrentTick == len(sortedKeyList) - 1:
-                # No tick to the right
-                return TickMath.MAX_TICK, False
-            nextTick = sortedKeyList[indexCurrentTick + 1]
-
-        # Return tick within the boundaries
-        return nextTick, True    

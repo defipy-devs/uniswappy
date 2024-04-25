@@ -14,7 +14,7 @@ MINIMUM_LIQUIDITY = 1e-15
 class UniswapExchange(IExchange, LPERC20):
     
     """ 
-        Uniswap Exchange  
+        Uniswap V2 Exchange  
 
         Parameters
         -----------------
@@ -43,6 +43,11 @@ class UniswapExchange(IExchange, LPERC20):
         self.total_supply = 0
 
     def summary(self):
+
+        """ summary
+            Summary print-out of exchange, reserves and liquidity               
+        """  
+        
         print(f"Exchange {self.name} ({self.symbol})")
         print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
         print(f"Liquidity: {self.total_supply} \n")

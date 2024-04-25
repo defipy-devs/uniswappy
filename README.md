@@ -45,9 +45,8 @@ Reserves: ETH = 3162.277660168379, DAI = 316227.7660168379  <br/>
 Liquidity: 31622.776601683792 <br/><br/> 
 
 
-## Uniswap V3 (pre-release)
+## Uniswap V3
 
-* Pre-release available only via local pip install
 * See [test notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
 for basic usage
 

@@ -124,9 +124,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         Parameters
         -----------------
-        self.factory_struct : FactoryInit
+        factory_struct : FactoryInit
             Factory initialization data
-        self.exchg_struct : UniswapExchangeInit
+        exchg_struct : UniswapExchangeInit
             Exchange initialization data           
     """       
                        
@@ -209,20 +209,20 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             tickLower : int
-                lower tick of the position in which to add liquidity  
+                Lower tick of the position in which to add liquidity  
             tickUpper : int
-                upper tick of the position in which to add liquidity 
+                Upper tick of the position in which to add liquidity 
             amount : int
-                amount of liquidity to mint  
+                Amount of liquidity to mint  
                 
             Returns
             -------
             amount0 : float
-                amount of token0 that was paid to mint the given amount of liquidity.   
+                Amount of token0 that was paid to mint the given amount of liquidity.   
             amount1 : float
-                amount of token1 that was paid to mint the given amount of liquidity.                   
+                Amount of token1 that was paid to mint the given amount of liquidity.                   
         """          
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -275,22 +275,22 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             tickLower : int
-                lower tick of the position in which to add liquidity  
+                Lower tick of the position in which to add liquidity  
             tickUpper : int
-                lower tick of the position in which to add liquidity                 
+                Lower tick of the position in which to add liquidity                 
             amount0Requested : int
-                how much token0 should be withdrawn from the fees owed
+                How much token0 should be withdrawn from the fees owed
             amount1Requested : int
-                how much token1 should be withdrawn from the fees owed  
+                How much token1 should be withdrawn from the fees owed  
                 
             Returns
             -------
             amount0 : float
-                amount of token0 that was paid to mint the given amount of liquidity.   
+                Amount of token0 that was paid to mint the given amount of liquidity.   
             amount1 : float
-                amount of token1 that was paid to mint the given amount of liquidity.                   
+                Amount of token1 that was paid to mint the given amount of liquidity.                   
         """  
         
         checkInputTypes(
@@ -314,11 +314,16 @@ class UniswapV3Exchange(IExchange, LPERC20):
             else amount1Requested
         )
 
+        tokens = self.factory.token_from_exchange[self.name]
+        assert tokens.get(self.token0) and tokens.get(self.token1), 'UniswapV3: TOKEN_UNAVAILABLE' 
+        
         if amount0 > 0:
             position.tokensOwed0 -= amount0
+            tokens.get(self.token0).deposit(recipient, amount0)
             #self.ledger.transferToken(self, recipient, self.token0, amount0)
         if amount1 > 0:
             position.tokensOwed1 -= amount1
+            tokens.get(self.token1).deposit(recipient, amount1) 
             #self.ledger.transferToken(self, recipient, self.token1, amount1)
   
         amount0 = self.convert(amount0)
@@ -338,24 +343,24 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             tickLower : int
-                lower tick of the position in which to add liquidity  
+                Lower tick of the position in which to add liquidity  
             tickUpper : int
-                lower tick of the position in which to add liquidity                 
+                Lower tick of the position in which to add liquidity                 
             amount : int
-                how much liquidity to burn
+                How much liquidity to burn
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive               
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive               
             amount : int
-                how much liquidity to burn                  
+                How much liquidity to burn                  
         """  
         
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -407,21 +412,21 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             amount : int
-                how much token to swap
+                How much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping on 
+                Used to determine the highest price in the swap, and needs to be set when swapping on 
                 the pool directly.       
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -442,21 +447,21 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             amount : int
-                how much token to swap
+                How much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping 
+                Used to determine the highest price in the swap, and needs to be set when swapping 
                 on the pool directly.       
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """           
         
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -477,21 +482,21 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             amount : int
-                how much token to swap
+                How much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping 
+                Used to determine the highest price in the swap, and needs to be set when swapping 
                 on the pool directly.       
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """          
         
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -511,21 +516,21 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             amount : int
-                how much token to swap
+                How much token to swap
             sqrtPriceLimit : int
-                used to determine the highest price in the swap, and needs to be set when swapping 
+                Used to determine the highest price in the swap, and needs to be set when swapping 
                 on the pool directly.       
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
 
         amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
@@ -546,25 +551,25 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             recipient : str
-                address for which the liquidity will be created      
+                Address for which the liquidity will be created      
             zeroForOne : int
                 the direction of the swap, true for token0 to token1, false for token1 to token0 
             amountSpecified : int
-                the amount of the swap, which implicitly configures the swap as exact input 
+                The amount of the swap, which implicitly configures the swap as exact input 
                 (positive), or exact output (negative)        
             sqrtPriceLimitX96 : int
-                the Q64.96 sqrt price limit. If zero for one, the price cannot be less than this 
+                The Q64.96 sqrt price limit. If zero for one, the price cannot be less than this 
                 value after the swap. If one for zero, the price cannot be greater than this 
                 value after the swap
                 
             Returns
             -------
             recipient : str
-                address for which the liquidity will be created 
+                Address for which the liquidity will be created 
             amount0 : int
-                delta of the balance of token0 of the pool, exact when negative, minimum when positive
+                Delta of the balance of token0 of the pool, exact when negative, minimum when positive
             amount1 : int
-                delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
+                Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """ 
         
         checkInputTypes(
@@ -765,9 +770,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             feeProtocol0 : int
-                new protocol fee for token0 of the pool      
+                New protocol fee for token0 of the pool      
             feeProtocol1 : int
-                new protocol fee for token1 of the pool                        
+                New protocol fee for token1 of the pool                        
         """ 
         
         checkInputTypes(uint8=(feeProtocol0, feeProtocol1))
@@ -791,9 +796,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             tickLower : int
-                lower tick of the position in which to add liquidity  
+                Lower tick of the position in which to add liquidity  
             tickUpper : int
-                lower tick of the position in which to add liquidity                    
+                Lower tick of the position in which to add liquidity                    
         """ 
         
         checkInputTypes(int24=(tickLower, tickUpper))
@@ -814,14 +819,14 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------    
             tick : int
-                the starting tick    
+                The starting tick    
             lte : int
-                whether to search for the next initialized tick to the left (less than or equal to the starting tick)
+                Whether to search for the next initialized tick to the left (less than or equal to the starting tick)
                 
             Returns
             -------
             nextTick : int
-                next tick with liquidity to be used in the swap function                      
+                Next tick with liquidity to be used in the swap function                      
         """ 
         
         checkInputTypes(int24=(tick), bool=(lte))
@@ -903,11 +908,11 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------
             amountA_out : float
-                swap amountA out
+                Swap amountA out
             amountB_out : float
-                swap amountB out               
+                Swap amountB out               
             to_addr : str
-               receiving user address                   
+                Receiving user address                   
         """         
         
         assert amountA_out > 0 or amountB_out > 0, 'UniswapV3: INSUFFICIENT_OUTPUT_AMOUNT'
@@ -941,9 +946,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Parameters
             -----------------   
             balanceA : float
-                new reserve amount of A      
+                New reserve amount of A      
             balance1 : float
-                new reserve amount of B                   
+                New reserve amount of B                   
         """         
         
         self.reserve0 = balanceA

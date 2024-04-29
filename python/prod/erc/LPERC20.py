@@ -10,13 +10,13 @@ class LPERC20(ERC20):
 
         Parameters
         -----------------
-        self.token_name : str
+        token_name : str
             Token name 
-        self.token_addr : str
+        token_addr : str
             Token address  
-        self.token_total : float
+        token_total : float
             Token holdings 
-        self.type : float
+        type : float
             Token type 
     """      
 

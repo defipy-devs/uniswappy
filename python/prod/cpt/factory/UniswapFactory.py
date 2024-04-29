@@ -17,13 +17,13 @@ class UniswapFactory(IExchangeFactory):
         
         Parameters
         -----------------
-        self.name : str
+        name : str
             Token name 
-        self.address : str
+        address : str
             Token 0 name  
-        self.exchange_from_token : dictionary
+        exchange_from_token : dictionary
             Map of tokens to exchanges
-        self.tokens_from_exchange : dictionary
+        tokens_from_exchange : dictionary
             Map of exchanges to pair tokens          
     """     
     

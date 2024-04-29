@@ -77,7 +77,7 @@ class MaxDrop():
 
             Returns
             -------
-            self.__pnt1 : tuple
+            __pnt1 : tuple
                 End point (x, y)            
         """         
         

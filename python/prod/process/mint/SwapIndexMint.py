@@ -13,9 +13,9 @@ class SwapIndexMint(Process):
 
         Parameters
         ----------
-        self.ivault : IndexVault
+        ivault : IndexVault
             Index vault     
-        self.opposing : boolean
+        opposing : boolean
             Boolean variable to determine whether to mint token opposing the one that was deposited                
     """     
 

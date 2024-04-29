@@ -11,7 +11,7 @@ class IndexTokenQuote():
         
         Parameters
         -----------------
-        self.quote_native_tokens : boolean
+        quote_native_tokens : boolean
             Quote LP amount of base pool, otherwise quote indexed pool      
     """        
     

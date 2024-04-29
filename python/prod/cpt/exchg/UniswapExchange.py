@@ -18,9 +18,9 @@ class UniswapExchange(IExchange, LPERC20):
 
         Parameters
         -----------------
-        self.factory_struct : FactoryInit
+        factory_struct : FactoryInit
             Factory initialization data
-        self.exchg_struct : UniswapExchangeInit
+        exchg_struct : UniswapExchangeInit
             Exchange initialization data           
     """          
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):

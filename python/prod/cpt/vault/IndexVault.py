@@ -14,15 +14,15 @@ class IndexVault(Vault):
 
         Parameters
         ----------
-        self.token_name : str
+        token_name : str
             Token name 
-        self.token_addr : str
+        token_addr : str
             Token address  
-        self.lp_providers : dictionary
+        lp_providers : dictionary
             Map of LP providers to their respective holdings
-        self.lp_tokens : dictionary
+        lp_tokens : dictionary
             Map of LPs to their ERC20 tokens and total amounts
-        self.index_tokens : dictionary
+        index_tokens : dictionary
             Map of index tokens to their ERC20 tokens and total amounts            
     """  
     

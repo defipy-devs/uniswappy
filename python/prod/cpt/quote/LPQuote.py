@@ -13,7 +13,7 @@ class LPQuote():
         
         Parameters
         -----------------
-        self.quote_opposing : boolean
+        quote_opposing : boolean
             Quote the opposing token amount by default, given LP and a token    
     """      
     

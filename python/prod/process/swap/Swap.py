@@ -13,9 +13,9 @@ class Swap(Process):
 
         Parameters
         ----------
-        self.ev : EventSelectionModel
+        ev : EventSelectionModel
             EventSelectionModel object to randomly generate buy vs sell events
-        self.tDel : TokenDeltaModel
+        tDel : TokenDeltaModel
             TokenDeltaModel to randomly generate token amounts                 
     """       
 

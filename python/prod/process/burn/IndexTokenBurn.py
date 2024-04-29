@@ -14,7 +14,7 @@ class IndexTokenBurn(Process):
 
         Parameters
         ----------
-        self.ivault : IndexVault
+        ivault : IndexVault
             Index vault
     """       
     

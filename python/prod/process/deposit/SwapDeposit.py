@@ -70,69 +70,48 @@ class SwapDeposit(Process):
                 balance0 = lp.quote(balance1, lp.reserve1, lp.reserve0)
                 deposited = balance0 + p_in*amount_in
             lp.add_liquidity(user_nm, balance0, balance1, balance0, balance1) 
+            
         elif(lp.version == UniswapExchangeData.VERSION_V3):  
             tot_liq = lp.get_liquidity()
             sqrt_P = lp.slot0.sqrtPriceX96/2**96
-
             tokens = lp.factory.token_from_exchange[lp.name] 
-            reserveA = lp.get_reserve(tokens[lp.token0])
-            reserveB = lp.get_reserve(tokens[lp.token1])
-
+            
             if(token_in.token_name == lp.token0):
-                #balance0 = abs(amount_out[1]) 
-                #liq = balance0/sqrt_P
-                balance0 = amount_in - p_in*amount_in
-                #balance0 = amount_in - p2
-
-                liq = balance0*sqrt_P
-
-                print(f'liq1: {liq}')
-                
+                balance1 = amount_in - p_in*amount_in
+                liq = balance1/sqrt_P
                 deposited = lp.mint(user_nm, lwr_tick, upr_tick, liq)
+                
             elif(token_in.token_name == lp.token1): 
-                #balance1 = abs(amount_out[1]) 
-                #liq = balance1*sqrt_P
                 balance1 = amount_in - p_in*amount_in
                 balance0 = abs(amount_out[1]) 
-                liq = balance1/sqrt_P  
-                print(f'liq2: {liq}')
-                liq = balance0*sqrt_P
-                print(f'liq2: {liq}')
-                
-                print(f'balance0: {balance0}')
-                print(f'balance1: {balance1}')
-                
+                liq = balance0*sqrt_P                
                 deposited = lp.mint(user_nm, lwr_tick, upr_tick, liq)                  
                             
         return deposited  
-
-    def calc_deposit_portion2(self, lp, token_in, dx):
-        tokens = lp.factory.token_from_exchange[lp.name] 
-        if(token_in.token_name == lp.token0):
-            reserveIn = lp.reserve0
-        else:    
-            reserveIn = lp.reserve1     
-
-        dx = dx*10**18
-
-        return (math.sqrt(reserveIn*((dx*3988000) + (reserveIn*3988009))) - reserveIn*1997)/1994
     
     def calc_deposit_portion(self, lp, token_in, dx):
 
-        tokens = lp.factory.token_from_exchange[lp.name] 
-        if(token_in.token_name == lp.token0):
-            tkn_supply = lp.get_reserve(tokens[lp.token0])
-        else:    
-            tkn_supply = lp.get_reserve(tokens[lp.token1])
-
-        gamma = 997
-
+        tkn_supply = self.get_tkn_supply(lp, token_in)
         a = 997*(dx**2)/(1000*tkn_supply)
         b = dx*(1997/1000)
         c = -dx
 
         alpha = -(b - math.sqrt(b*b - 4*a*c)) / (2*a)
         return alpha 
+
+    def get_tkn_supply(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token0):
+                tkn_supply = lp.get_reserve(tokens[lp.token0])
+            else:    
+                tkn_supply = lp.get_reserve(tokens[lp.token1])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token0):
+                tkn_supply = lp.get_reserve(tokens[lp.token0])
+            else:    
+                tkn_supply = lp.get_reserve(tokens[lp.token1])
+        return tkn_supply        
         
     def get_trading_token(self, lp, token):
         

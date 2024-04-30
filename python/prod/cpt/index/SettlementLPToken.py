@@ -3,6 +3,7 @@
 # Email: defipy.devs@gmail.com
 
 import numpy as np
+from ...utils.data import UniswapExchangeData
 
 class SettlementLPToken():
     
@@ -38,15 +39,7 @@ class SettlementLPToken():
     
     def calc_lp_settlement(self, lp, token_in, itkn_amt):
 
-        tokens = lp.factory.token_from_exchange[lp.name]
-
-        if(token_in.token_name == lp.token1):
-            x = lp.get_reserve(tokens[lp.token0])
-            y = lp.get_reserve(tokens[lp.token1])
-        else: 
-            x = lp.get_reserve(tokens[lp.token1])
-            y = lp.get_reserve(tokens[lp.token0])
-
+        (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
         if(L == 0): 
             return 0
@@ -60,5 +53,23 @@ class SettlementLPToken():
             c = itkn_amt*x;
 
             dL = (b*a2 - a2*np.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
-            return dL      
+            return dL  
+
+    def get_reserves(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token1):
+                x = lp.get_reserve(tokens[lp.token0])
+                y = lp.get_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_reserve(tokens[lp.token1])
+                y = lp.get_reserve(tokens[lp.token0])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token1):
+                x = lp.get_virtual_reserve(tokens[lp.token0])
+                y = lp.get_virtual_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_virtual_reserve(tokens[lp.token1])
+                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        return (x, y)  
             

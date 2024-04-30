@@ -48,7 +48,6 @@ class RemoveLiquidity(Process):
         """          
         
         amount_in = self.tDel.delta() if amount_in == None else amount_in
-
         tokens = lp.factory.token_from_exchange[lp.name]  
 
         if(lp.version == UniswapExchangeData.VERSION_V2):

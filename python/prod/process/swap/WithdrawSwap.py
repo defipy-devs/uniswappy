@@ -7,6 +7,7 @@ from .Swap import Swap
 from ..liquidity import RemoveLiquidity
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
+from ...utils.data import UniswapExchangeData
 import math
 
 class WithdrawSwap(Process):
@@ -26,7 +27,7 @@ class WithdrawSwap(Process):
         self.ev = EventSelectionModel() if ev  == None else ev
         self.tDel = TokenDeltaModel(50) if tDel == None else tDel
             
-    def apply(self, lp, token_out, user_nm, amount_out):    
+    def apply(self, lp, token_out, user_nm, amount_out, lwr_tick = None, upr_tick = None):    
         
         """ apply
 
@@ -52,28 +53,55 @@ class WithdrawSwap(Process):
         
         amount_out = tDel.delta() if amount_out == None else amount_out
     
-        # Step 1: withdrawal
-        p_out = self.calc_withdraw_portion(lp, token_out, amount_out)
-        removeLiq = RemoveLiquidity()
-        res = removeLiq.apply(lp, token_out, user_nm, p_out*amount_out)
+        
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            # Step 1: withdrawal
+            p_out = self.calc_withdraw_portion(lp, token_out, amount_out)
+            removeLiq = RemoveLiquidity()
+            res = removeLiq.apply(lp, token_out, user_nm, p_out*amount_out)
+    
+            # Step 2: swap
+            trading_token = self.get_trading_token(lp, token_out)
+            out = Swap().apply(lp, trading_token, user_nm, res[trading_token.token_name])  
+            withdrawn = out + p_out*amount_out 
+            #withdrawn = p_out*amount_out 
 
-        # Step 2: swap
-        trading_token = self.get_trading_token(lp, token_out)
-        out = Swap().apply(lp, trading_token, user_nm, res[trading_token.token_name])  
-        withdrawn = out + p_out*amount_out 
+        elif(lp.version == UniswapExchangeData.VERSION_V3): 
+
+            p_out = self.calc_withdraw_portion(lp, token_out, amount_out)
+
+            """
+            sqrt_P = lp.slot0.sqrtPriceX96/2**96  
+            trading_token = self.get_trading_token(lp, token_out)
+            if(token_out.token_name == lp.token0):
+                liq = amount_out*sqrt_P
+                (_, _, _, _, amount0, amount1) = lp.burn(user_nm, lwr_tick, upr_tick, liq)
+                out = Swap().apply(lp, trading_token, user_nm, amount0) 
+            
+            elif(token_out.token_name == lp.token1): 
+                print(f'p_out {p_out}')
+                liq = p_out*amount_out/sqrt_P
+                (_, _, _, _, amount0, amount1) = lp.burn(user_nm, lwr_tick, upr_tick, liq)    
+                out = Swap().apply(lp, trading_token, user_nm, amount0) 
+            """
+             # Step 1: withdrawal
+            removeLiq = RemoveLiquidity()
+            res = removeLiq.apply(lp, token_out, user_nm, p_out*amount_out, lwr_tick, upr_tick)
+        
+            # Step 2: swap
+            trading_token = self.get_trading_token(lp, token_out)
+            out = Swap().apply(lp, trading_token, user_nm, res[trading_token.token_name]) 
+            withdrawn = abs(out[1])  + p_out*amount_out 
+
+            #withdrawn = p_out*amount_out 
+
+        #print(f'swap amt: {res[trading_token.token_name]}')
+            
         return withdrawn 
  
     def calc_lp_settlement(self, lp, token_in, itkn_amt):
 
-        tokens = lp.factory.token_from_exchange[lp.name]
-
-        if(token_in.token_name == lp.token1):
-            x = lp.get_reserve(tokens[lp.token0])
-            y = lp.get_reserve(tokens[lp.token1])
-        else: 
-            x = lp.get_reserve(tokens[lp.token1])
-            y = lp.get_reserve(tokens[lp.token0])
-
+        (x, y) = self.get_reserves(lp, token_in)               
         L = lp.get_liquidity()
         gamma = 997
 
@@ -88,15 +116,7 @@ class WithdrawSwap(Process):
 
     def calc_withdraw_portion(self, lp, token_in, amt):
 
-        tokens = lp.factory.token_from_exchange[lp.name]
-
-        if(token_in.token_name == lp.token1):
-            x = lp.get_reserve(tokens[lp.token0])
-            y = lp.get_reserve(tokens[lp.token1])
-        else: 
-            x = lp.get_reserve(tokens[lp.token1])
-            y = lp.get_reserve(tokens[lp.token0])
-
+        (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
         gamma = 997/1000
 
@@ -105,7 +125,25 @@ class WithdrawSwap(Process):
         dy = dL*y/L
         aswap = (gamma*dx)*(y-dy)/(x-dx+gamma*dx)
 
-        return dy/amt      
+        return dy/amt 
+
+    def get_reserves(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token1):
+                x = lp.get_reserve(tokens[lp.token0])
+                y = lp.get_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_reserve(tokens[lp.token1])
+                y = lp.get_reserve(tokens[lp.token0])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token1):
+                x = lp.get_virtual_reserve(tokens[lp.token0])
+                y = lp.get_virtual_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_virtual_reserve(tokens[lp.token1])
+                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        return (x, y)        
 
     def get_trading_token(self, lp, token):
         

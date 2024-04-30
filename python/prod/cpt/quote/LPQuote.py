@@ -4,7 +4,6 @@
 
 from ..index import RebaseIndexToken
 from ..index import SettlementLPToken
-import math
 
 class LPQuote():
     

@@ -41,14 +41,16 @@ class RebaseIndexToken():
     
     def calc_tkn_settlement(self, lp, token_in, dL):
 
-        if(token_in.token_name == lp.token1):
-            x = lp.reserve0
-            y = lp.reserve1
-        else: 
-            x = lp.reserve1
-            y = lp.reserve0
+        tokens = lp.factory.token_from_exchange[lp.name]
 
-        L = lp.total_supply
+        if(token_in.token_name == lp.token1):
+            x = lp.get_reserve(tokens[lp.token0])
+            y = lp.get_reserve(tokens[lp.token1])
+        else: 
+            x = lp.get_reserve(tokens[lp.token1])
+            y = lp.get_reserve(tokens[lp.token0])
+
+        L = lp.get_liquidity()
         a0 = dL*x/L
         a1 = dL*y/L
         gamma = 997/1000

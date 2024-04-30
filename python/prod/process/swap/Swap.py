@@ -5,6 +5,7 @@
 from ..Process import Process
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
+from ...utils.data import UniswapExchangeData
 import math
 
 class Swap(Process):
@@ -23,7 +24,7 @@ class Swap(Process):
         self.ev = EventSelectionModel() if ev  == None else ev
         self.tDel = TokenDeltaModel(50) if tDel == None else tDel
             
-    def apply(self, lp, token_in, user_nm, amount_in):    
+    def apply(self, lp, token_in, user_nm, amount_in, sqrt_price_limit = None):    
         
         """ apply
 
@@ -47,7 +48,18 @@ class Swap(Process):
         """          
         
         amount_in = tDel.delta() if amount_in == None else amount_in
-        amount_out = math.floor(lp.get_amount_out(amount_in, token_in))
-        amount_out_expected = lp.swap_exact_tokens_for_tokens(amount_in, amount_out, token_in, to_addr=user_nm)
+        
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            amount_out = math.floor(lp.get_amount_out(amount_in, token_in))
+            amount_out_expected = lp.swap_exact_tokens_for_tokens(amount_in, amount_out, token_in, to_addr=user_nm)
+            
+        elif(lp.version == UniswapExchangeData.VERSION_V3):
+            tokens = lp.factory.token_from_exchange[lp.name]
+            if(token_in.token_name == lp.token0):
+                amount_out_expected = lp.swapExact0For1(user_nm, amount_in, sqrt_price_limit)
+            else: 
+                amount_out_expected = lp.swapExact1For0(user_nm, amount_in, sqrt_price_limit)
+            
+        
         return amount_out_expected        
         

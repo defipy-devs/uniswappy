@@ -25,6 +25,7 @@ class UniswapExchange(IExchange, LPERC20):
     """          
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
+        self.version = exchg_struct.version
         self.factory = factory_struct
         self.token0 = exchg_struct.tkn0.token_name     
         self.token1 = exchg_struct.tkn1.token_name       
@@ -582,6 +583,15 @@ class UniswapExchange(IExchange, LPERC20):
                 return self.reserve0/self.reserve1
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
+
+    def get_liquidity(self):  
+        
+        """ get_liquidity
+
+            Get liquidity of exchange pool         
+        """          
+
+        return self.total_supply       
             
     def get_reserve(self, token):  
         

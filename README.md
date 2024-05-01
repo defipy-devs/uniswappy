@@ -24,25 +24,35 @@ for basic usage
 ```
 from uniswappy import *
 
-user_nm = 'user_intro'
-eth_amount = 3162.277660168379
-dai_amount = 316227.7660168379
+user_nm = 'user'
+eth_amount = 1000
+tkn_amount = 100000
 
-dai = ERC20("DAI", "0x111")
+tkn = ERC20("TKN", "0x111")
 eth = ERC20("ETH", "0x09")
-exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = dai, symbol="LP", 
-address="0x011")
+exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = tkn, symbol="LP", address="0x011")
 
 factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.deploy(exchg_data)
-lp.add_liquidity("user0", eth_amount, dai_amount, eth_amount, dai_amount)
+
+Join().apply(lp, user_nm, eth_amount, tkn_amount)
 lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH-DAI (LP) <br/>
-Reserves: ETH = 3162.277660168379, DAI = 316227.7660168379  <br/>
-Liquidity: 31622.776601683792 <br/><br/> 
+Exchange ETH-TKN (LP) <br/>
+Reserves: ETH = 1000, TKN = 100000 <br/>
+Liquidity: 10000.0 <br/><br/> 
+
+```
+out = Swap().apply(lp, tkn, user_nm, 1000)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange ETH-TKN (LP) <br/>
+Reserves: 990.1284196560293, TKN = 101000 <br/>
+Liquidity: 10000.0 <br/><br/> 
 
 
 ## Uniswap V3
@@ -51,32 +61,41 @@ Liquidity: 31622.776601683792 <br/><br/>
 for basic usage
 
 ```
-user = 'user_intro'
-fee = UniV3Utils.FeeAmount.MEDIUM
-tick_spacing = UniV3Utils.TICK_SPACINGS[fee]
-lwr_tick = UniV3Utils.getMinTick(tick_spacing)
-upr_tick = UniV3Utils.getMaxTick(tick_spacing)
-init_price = UniV3Utils.encodePriceSqrt(100, 1)
+from uniswappy import *
 
-dai = ERC20("DAI", "0x09")
-eth = ERC20("ETH", "0x111")
+user_nm = 'user'
+eth_amount = 1000
+tkn_amount = 100000
 
-exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = dai, symbol="LP", 
+eth = ERC20("ETH", "0x09")
+tkn = ERC20("TKN", "0x111")
+
+exchg_data = UniswapExchangeData(tkn0 = eth, tkn1 = tkn, symbol="LP", 
                                    address="0x011", version = 'V3', 
                                    tick_spacing = tick_spacing, 
                                    fee = fee)
 
 factory = UniswapFactory("ETH pool factory", "0x2")
 lp = factory.deploy(exchg_data)
-lp.initialize(init_price)
-out = lp.mint(user, lwr_tick, upr_tick, 31622.776601683792)
+
+out_v3 = Join().apply(lp, user_nm, eth_amount, tkn_amount, lwr_tick, upr_tick)
 lp.summary()
 ```
 
 #### OUTPUT:
-Exchange ETH-DAI (LP) <br/>
-Reserves: ETH = 3162.277660168379, DAI = 316227.7660168379 <br/>
-Liquidity: 31622.776601683792 <br/><br/>  
+Exchange ETH-TKN (LP) <br/>
+Reserves: ETH = 1000, TKN = 100000 <br/>
+Liquidity: 10000.0 <br/><br/> 
+
+```
+out = Swap().apply(lp, tkn, user_nm, 1000)
+lp.summary()
+```
+
+#### OUTPUT:
+Exchange ETH-TKN (LP) <br/>
+Reserves: ETH = 990.1284196560293, TKN = 101000 <br/>
+Liquidity: 10000.0 <br/><br/> 
 
 
 ## 0x Quant Terminal

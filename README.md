@@ -18,7 +18,7 @@ or
 
 ## Uniswap V2
 
-* See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
+* See [test notebook](https://github.com/icmoore/uniswappy/blob/main/notebooks/tutorials/uniswap_v2.ipynb) 
 for basic usage
 
 ```

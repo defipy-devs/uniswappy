@@ -157,7 +157,7 @@ def getNextSqrtPriceFromOutput(sqrtPX96, liquidity, amountOut, zeroForOne):
 ### @return amount0 Amount of token0 required to cover a position of size liquidity between the two passed prices
 def getAmount0Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity, roundUp):
 
-    print('Delta X')
+    #print('Delta X')
     
     checkInputTypes(
         uint160=(sqrtRatioAX96, sqrtRatioBX96), uint128=liquidity, bool=roundUp
@@ -187,7 +187,7 @@ def getAmount0Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity, roundUp):
 ### @return amount1 Amount of token1 required to cover a position of size liquidity between the two passed prices
 def getAmount1Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity, roundUp):
 
-    print('Delta Y')
+    #print('Delta Y')
     
     checkInputTypes(
         uint160=(sqrtRatioAX96, sqrtRatioBX96), uint128=liquidity, bool=roundUp

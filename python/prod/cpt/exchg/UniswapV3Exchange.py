@@ -271,6 +271,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         amount0Requested = amount0Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount0Requested)
         amount1Requested = amount1Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount1Requested)
+
+        print(f'amount0Requested {amount0Requested}')
+        print(f'amount1Requested {amount1Requested}')
         
         checkInputTypes(
             accounts=(recipient),

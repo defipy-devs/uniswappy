@@ -54,7 +54,7 @@ class SwapDeposit(Process):
         
         amount_in = tDel.delta() if amount_in == None else amount_in    
 
-        # Step 1: swap
+        # Step 1: swap        
         p_in = self.calc_deposit_portion(lp, token_in, amount_in)
         amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
         trading_token = self.get_trading_token(lp, token_in)
@@ -75,17 +75,23 @@ class SwapDeposit(Process):
             tot_liq = lp.get_liquidity()
             sqrt_P = lp.slot0.sqrtPriceX96/2**96
             tokens = lp.factory.token_from_exchange[lp.name] 
-            
+
+            """
+            remainder = amount_in - p_in*amount_in
+            out = AddLiquidity().apply(lp, token_in, user_nm, remainder, lwr_tick, upr_tick)
+            deposited = out[token_in.token_name] + p_in*amount_in
+            """
             if(token_in.token_name == lp.token0):
-                balance1 = amount_in - p_in*amount_in
-                liq = balance1/sqrt_P
-                deposited = lp.mint(user_nm, lwr_tick, upr_tick, liq)
-                
+                balance1 = abs(amount_out[2]) 
+                liq = balance1/sqrt_P 
+                deposited = liq/sqrt_P + p_in*amount_in
+                                
             elif(token_in.token_name == lp.token1): 
-                balance1 = amount_in - p_in*amount_in
                 balance0 = abs(amount_out[1]) 
-                liq = balance0*sqrt_P                
-                deposited = lp.mint(user_nm, lwr_tick, upr_tick, liq)                  
+                liq = balance0*sqrt_P 
+                deposited = liq*sqrt_P + p_in*amount_in
+                
+            lp.mint(user_nm, lwr_tick, upr_tick, liq)  
                             
         return deposited  
     
@@ -108,9 +114,9 @@ class SwapDeposit(Process):
                 tkn_supply = lp.get_reserve(tokens[lp.token1])
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_reserve(tokens[lp.token0])
+                tkn_supply = lp.get_virtual_reserve(tokens[lp.token0])
             else:    
-                tkn_supply = lp.get_reserve(tokens[lp.token1])
+                tkn_supply = lp.get_virtual_reserve(tokens[lp.token1])
         return tkn_supply        
         
     def get_trading_token(self, lp, token):

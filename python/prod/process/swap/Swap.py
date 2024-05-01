@@ -39,7 +39,11 @@ class Swap(Process):
             user_nm : str
                 account name
             amount_in : float
-               token amount to be swap 
+                token amount to be swap 
+            lwr_tick : int
+                lower tick of the position in which to add liquidity   
+            upr_tick : int
+                upper tick of the position in which to add liquidity                
                 
             Returns
             -------

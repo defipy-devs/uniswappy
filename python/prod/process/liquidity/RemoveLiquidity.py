@@ -39,7 +39,11 @@ class RemoveLiquidity(Process):
             user_nm : str
                 account name
             amount_in : float
-               token amount to be add to liquidity 
+                token amount to be add to liquidity 
+            lwr_tick : int
+                lower tick of the position in which to add liquidity   
+            upr_tick : int
+                upper tick of the position in which to add liquidity                
                 
             Returns
             -------

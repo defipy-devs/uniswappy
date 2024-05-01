@@ -44,7 +44,11 @@ class SwapDeposit(Process):
             user_nm : str
                 account name
             amount_in : float
-               token amount to be swap 
+                token amount to be swap 
+            lwr_tick : int
+                lower tick of the position in which to add liquidity   
+            upr_tick : int
+                upper tick of the position in which to add liquidity   
                 
             Returns
             -------
@@ -55,7 +59,7 @@ class SwapDeposit(Process):
         amount_in = tDel.delta() if amount_in == None else amount_in    
 
         # Step 1: swap        
-        p_in = self.calc_deposit_portion(lp, token_in, amount_in)
+        p_in = self._calc_deposit_portion(lp, token_in, amount_in)
         amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
         trading_token = self.get_trading_token(lp, token_in)
 
@@ -76,11 +80,6 @@ class SwapDeposit(Process):
             sqrt_P = lp.slot0.sqrtPriceX96/2**96
             tokens = lp.factory.token_from_exchange[lp.name] 
 
-            """
-            remainder = amount_in - p_in*amount_in
-            out = AddLiquidity().apply(lp, token_in, user_nm, remainder, lwr_tick, upr_tick)
-            deposited = out[token_in.token_name] + p_in*amount_in
-            """
             if(token_in.token_name == lp.token0):
                 balance1 = abs(amount_out[2]) 
                 liq = balance1/sqrt_P 
@@ -94,31 +93,7 @@ class SwapDeposit(Process):
             lp.mint(user_nm, lwr_tick, upr_tick, liq)  
                             
         return deposited  
-    
-    def calc_deposit_portion(self, lp, token_in, dx):
 
-        tkn_supply = self.get_tkn_supply(lp, token_in)
-        a = 997*(dx**2)/(1000*tkn_supply)
-        b = dx*(1997/1000)
-        c = -dx
-
-        alpha = -(b - math.sqrt(b*b - 4*a*c)) / (2*a)
-        return alpha 
-
-    def get_tkn_supply(self, lp, token_in):
-        tokens = lp.factory.token_from_exchange[lp.name]
-        if(lp.version == UniswapExchangeData.VERSION_V2):
-            if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_reserve(tokens[lp.token0])
-            else:    
-                tkn_supply = lp.get_reserve(tokens[lp.token1])
-        elif(lp.version == UniswapExchangeData.VERSION_V3):   
-            if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token0])
-            else:    
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token1])
-        return tkn_supply        
-        
     def get_trading_token(self, lp, token):
         
         """ get_trading_token
@@ -141,4 +116,30 @@ class SwapDeposit(Process):
         tokens = lp.factory.token_from_exchange[lp.name]
         trading_token = tokens[lp.token1] if token.token_name == lp.token0 else tokens[lp.token0]
         return trading_token       
+            
+    
+    def _calc_deposit_portion(self, lp, token_in, dx):
+
+        tkn_supply = self._get_tkn_supply(lp, token_in)
+        a = 997*(dx**2)/(1000*tkn_supply)
+        b = dx*(1997/1000)
+        c = -dx
+
+        alpha = -(b - math.sqrt(b*b - 4*a*c)) / (2*a)
+        return alpha 
+
+    def _get_tkn_supply(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token0):
+                tkn_supply = lp.get_reserve(tokens[lp.token0])
+            else:    
+                tkn_supply = lp.get_reserve(tokens[lp.token1])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token0):
+                tkn_supply = lp.get_virtual_reserve(tokens[lp.token0])
+            else:    
+                tkn_supply = lp.get_virtual_reserve(tokens[lp.token1])
+        return tkn_supply        
         
+

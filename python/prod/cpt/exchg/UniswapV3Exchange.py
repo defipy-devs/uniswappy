@@ -46,35 +46,6 @@ class SwapCache:
     ## liquidity at the beginning of the swap
     liquidityStart: int
 
-MINIMUM_LIQUIDITY = 1e-15
-
-@dataclass
-class Slot0:
-    ## the current price
-    sqrtPriceX96: int
-    ## the current tick
-    tick: int
-    ## the current protocol fee as a percentage of the swap fee taken on withdrawal
-    ## represented as an integer denominator (1#x)%
-    feeProtocol: int
-    
-@dataclass
-class ModifyPositionParams:
-    ## the address that owns the position
-    owner: str
-    ## the lower and upper tick of the position
-    tickLower: int
-    tickUpper: int
-    ## any change in liquidity
-    liquidityDelta: int  
-
-@dataclass
-class SwapCache:
-    ## the protocol fee for the input token
-    feeProtocol: int
-    ## liquidity at the beginning of the swap
-    liquidityStart: int
-
 @dataclass
 class SwapState:
     ## the amount remaining to be swapped in#out of the input#output asset
@@ -132,6 +103,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                        
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
+        self.version = exchg_struct.version
         self.factory = factory_struct
         self.token0 = exchg_struct.tkn0.token_name     
         self.token1 = exchg_struct.tkn1.token_name       
@@ -164,14 +136,18 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """ summary
             Summary print-out of exchange, reserves and liquidity              
         """         
-
+        
+        tokens = self.factory.token_from_exchange[self.name] 
+        
         print(f"Exchange {self.name} ({self.symbol})")
 
         if (self.precision == UniswapExchangeData.TYPE_GWEI):
-            print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
+            print(f"Real Reserves:   {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
+            print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
             print(f"Liquidity: {self.total_supply} \n")
         else:  
-            print(f"Reserves: {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
+            print(f"Real Reserves:   {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
+            #print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
             print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
 
     def initialize(self, sqrtPriceX96):
@@ -291,7 +267,13 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Amount of token0 that was paid to mint the given amount of liquidity.   
             amount1 : float
                 Amount of token1 that was paid to mint the given amount of liquidity.                   
-        """  
+        """ 
+
+        amount0Requested = amount0Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount0Requested)
+        amount1Requested = amount1Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount1Requested)
+
+        print(f'amount0Requested {amount0Requested}')
+        print(f'amount1Requested {amount1Requested}')
         
         checkInputTypes(
             accounts=(recipient),
@@ -862,8 +844,55 @@ class UniswapV3Exchange(IExchange, LPERC20):
     def get_price(self, token): 
         pass
             
-    def get_reserve(self, token): 
-        pass 
+    def get_liquidity(self):  
+        
+        """ get_liquidity
+
+            Get liquidity of exchange pool         
+        """          
+
+        return self.gwei2dec(self.total_supply)        
+            
+    def get_reserve(self, token):  
+        
+        """ get_reserve
+
+            Get reserve amount of select token in the exchange pair
+                
+            Parameters
+            -----------------
+            token : ERC20
+                ERC20 token                
+        """         
+        
+        if(token.token_name == self.token0):
+            return self.gwei2dec(self.reserve0) 
+        elif(token.token_name == self.token1):
+            return self.gwei2dec(self.reserve1)
+        else:
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
+
+    def get_virtual_reserve(self, token):  
+        
+        """ get_virtual_reserve
+
+            Get virtual reserve amount of select token in the exchange pair
+                
+            Parameters
+            -----------------
+            token : ERC20
+                ERC20 token                
+        """         
+        
+        sqrt_P = self.slot0.sqrtPriceX96/2**96
+        liq = self.get_liquidity()
+        
+        if(token.token_name == self.token0):
+            return liq/sqrt_P
+        elif(token.token_name == self.token1):
+            return liq*sqrt_P
+        else:
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'           
 
     def convert(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else self.gwei2dec(val)
@@ -874,9 +903,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         precision = GWEI_PRECISION if precision == None else precision
         return int(Decimal(str(tkn_amt))*Decimal(str(10**precision)))
     
-    def gwei2dec(self, dec_amt, precision=None):   
+    def gwei2dec(self, tkn_amt, precision=None):   
         precision = GWEI_PRECISION if precision == None else precision
-        return float(Decimal(str(dec_amt))/Decimal(str(10**precision)))  
+        return float(Decimal(str(tkn_amt))/Decimal(str(10**precision)))  
     
 
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):

@@ -4,6 +4,7 @@
 
 from ...erc import ERC20
 from ...process.swap import WithdrawSwap
+from ...utils.data import UniswapExchangeData
 
 class RebaseIndexToken():
     
@@ -40,15 +41,9 @@ class RebaseIndexToken():
         return self.calc_tkn_settlement(lp, tkn, liq_amt)
     
     def calc_tkn_settlement(self, lp, token_in, dL):
-
-        if(token_in.token_name == lp.token1):
-            x = lp.reserve0
-            y = lp.reserve1
-        else: 
-            x = lp.reserve1
-            y = lp.reserve0
-
-        L = lp.total_supply
+            
+        (x, y) = self.get_reserves(lp, token_in)
+        L = lp.get_liquidity()
         a0 = dL*x/L
         a1 = dL*y/L
         gamma = 997/1000
@@ -57,5 +52,23 @@ class RebaseIndexToken():
         dy2 = gamma*a0*(y - a1)/(x - a0 + gamma*a0)
         itkn_amt = dy1 + dy2
 
-        return itkn_amt if itkn_amt > 0 else 0     
+        return itkn_amt if itkn_amt > 0 else 0  
+
+    def get_reserves(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token1):
+                x = lp.get_reserve(tokens[lp.token0])
+                y = lp.get_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_reserve(tokens[lp.token1])
+                y = lp.get_reserve(tokens[lp.token0])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token1):
+                x = lp.get_virtual_reserve(tokens[lp.token0])
+                y = lp.get_virtual_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_virtual_reserve(tokens[lp.token1])
+                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        return (x, y)          
             

@@ -2,7 +2,8 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-import math
+import numpy as np
+from ...utils.data import UniswapExchangeData
 
 class SettlementLPToken():
     
@@ -38,14 +39,8 @@ class SettlementLPToken():
     
     def calc_lp_settlement(self, lp, token_in, itkn_amt):
 
-        if(token_in.token_name == lp.token1):
-            x = lp.reserve0
-            y = lp.reserve1
-        else: 
-            x = lp.reserve1
-            y = lp.reserve0
-
-        L = lp.total_supply
+        (x, y) = self.get_reserves(lp, token_in)
+        L = lp.get_liquidity()
         if(L == 0): 
             return 0
         else:
@@ -57,6 +52,24 @@ class SettlementLPToken():
             b = (1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma)/(1000*L);
             c = itkn_amt*x;
 
-            dL = (b*a2 - a2*math.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
-            return dL      
+            dL = (b*a2 - a2*np.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
+            return dL  
+
+    def get_reserves(self, lp, token_in):
+        tokens = lp.factory.token_from_exchange[lp.name]
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token_in.token_name == lp.token1):
+                x = lp.get_reserve(tokens[lp.token0])
+                y = lp.get_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_reserve(tokens[lp.token1])
+                y = lp.get_reserve(tokens[lp.token0])
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            if(token_in.token_name == lp.token1):
+                x = lp.get_virtual_reserve(tokens[lp.token0])
+                y = lp.get_virtual_reserve(tokens[lp.token1])
+            else: 
+                x = lp.get_virtual_reserve(tokens[lp.token1])
+                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        return (x, y)  
             

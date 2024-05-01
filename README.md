@@ -94,7 +94,7 @@ lp.summary()
 
 #### OUTPUT:
 Exchange ETH-TKN (LP) <br/>
-Reserves: ETH = 990.1284196560293, TKN = 101000 <br/>
+Real Reserves: ETH = 990.1284196560293, TKN = 101000 <br/>
 Liquidity: 10000.0 <br/><br/> 
 
 

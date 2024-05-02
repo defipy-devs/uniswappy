@@ -5,6 +5,7 @@
 from ..simulate import SolveDeltas
 from ..process.deposit import SwapDeposit
 from ..process.swap import WithdrawSwap
+from ..utils.data import UniswapExchangeData
 import numpy as np
 
 X0 = 1
@@ -65,7 +66,7 @@ class CorrectReserves:
         
         return self.swap_dy    
     
-    def apply(self, p): 
+    def apply(self, p, lwr_tick = None, upr_tick = None): 
         
         """ apply
 
@@ -82,7 +83,7 @@ class CorrectReserves:
         while(do_update and c <= MAX_ATTEMPTS):
             c=+1
             try: 
-                self._update(p)
+                self._update(p, lwr_tick, upr_tick)
                 do_update = False 
             except:
                 p = p + np.random.normal(0, 0.1)  
@@ -118,14 +119,32 @@ class CorrectReserves:
         
         return self.lp.factory.token_from_exchange[self.lp.name][self.lp.token1]        
                 
-    def _update(self, p):  
+    def _update(self, p, lwr_tick, upr_tick):  
         tkn_x = self.get_x_tkn()
         tkn_y = self.get_y_tkn()
-        
-        self.swap_dx, self.swap_dy = self.sDel.calc(p, self.x0, self.fac)   
+        self.swap_dx, self.swap_dy = self.sDel.calc(p, self.x0, self.fac)
+        """  
         if(self.swap_dx >= 0):
             expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))
             expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
         elif(self.swap_dy >= 0):
             expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
-            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))   
+            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx)) 
+        """
+        if(self.lp.version == UniswapExchangeData.VERSION_V2):
+            if(self.swap_dx >= 0):
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
+            elif(self.swap_dy >= 0):
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx)) 
+               
+        elif(self.lp.version == UniswapExchangeData.VERSION_V3):
+            if(self.swap_dx >= 0):
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx), lwr_tick, upr_tick)
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy), lwr_tick, upr_tick)
+            elif(self.swap_dy >= 0):
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy), lwr_tick, upr_tick)
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx), lwr_tick, upr_tick) 
+              
+         

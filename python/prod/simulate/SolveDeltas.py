@@ -9,10 +9,12 @@ warnings.filterwarnings("ignore")
 class SolveDeltas():
     
     def __init__(self, lp):
-        self.x = lp.reserve0
-        self.y = lp.reserve1
         self.tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
-        self.tkn_y = lp.factory.token_from_exchange[lp.name][lp.token1]      
+        self.tkn_y = lp.factory.token_from_exchange[lp.name][lp.token1]  
+        #self.x = lp.get_reserve(self.tkn_x)
+        #self.y = lp.get_reserve(self.tkn_y) 
+        self.x = lp.reserve0
+        self.y = lp.reserve1 
         self.p = lp.get_price(self.tkn_x)
         self.p_prev = lp.get_price(self.tkn_x)
         self.lp = lp
@@ -35,8 +37,8 @@ class SolveDeltas():
         self.p = p
         self.p_prev = self.lp.get_price(self.tkn_x) 
         self.dp = p - self.p_prev
-        self.x = self.lp.reserve0
-        self.y = self.lp.reserve1
+        self.x = lp.reserve0
+        self.y = lp.reserve1  
         fac = 0.1 if fac == None else fac
         dx0 = 0.5 if x0 == None else x0/p
         dy0 = 0.5 if x0 == None else x0

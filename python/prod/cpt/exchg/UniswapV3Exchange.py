@@ -841,8 +841,31 @@ class UniswapV3Exchange(IExchange, LPERC20):
         # Return tick within the boundaries
         return nextTick, True  
 
-    def get_price(self, token): 
-        pass
+    def get_price(self, token):  
+        
+        """ get_price
+
+            Get price of select token in the exchange pair
+                
+            Parameters
+            -----------------
+            token : ERC20
+                ERC20 token                
+        """          
+        sqrt_P = self.slot0.sqrtPriceX96/2**96
+        
+        if(token.token_name == self.token0):
+            if(self.reserve0 == 0):
+                return None 
+            else:
+                return sqrt_P**2 
+        elif(token.token_name == self.token1):
+            if(self.reserve1 == 0):
+                return None
+            else:
+                return 1/sqrt_P**2 
+        else:
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'       
             
     def get_liquidity(self):  
         

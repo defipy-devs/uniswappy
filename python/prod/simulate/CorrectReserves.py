@@ -128,8 +128,4 @@ class CorrectReserves:
             expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
         elif(self.swap_dy >= 0):
             expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
-            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))                   
-            
-
-        
-        
+            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))   

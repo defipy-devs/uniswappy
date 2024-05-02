@@ -123,14 +123,7 @@ class CorrectReserves:
         tkn_x = self.get_x_tkn()
         tkn_y = self.get_y_tkn()
         self.swap_dx, self.swap_dy = self.sDel.calc(p, self.x0, self.fac)
-        """  
-        if(self.swap_dx >= 0):
-            expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))
-            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
-        elif(self.swap_dy >= 0):
-            expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
-            expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx)) 
-        """
+
         if(self.lp.version == UniswapExchangeData.VERSION_V2):
             if(self.swap_dx >= 0):
                 expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))

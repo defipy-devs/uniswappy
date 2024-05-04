@@ -11,8 +11,6 @@ class SolveDeltas():
     def __init__(self, lp):
         self.tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
         self.tkn_y = lp.factory.token_from_exchange[lp.name][lp.token1]      
-        #self.x = lp.reserve0
-        #self.y = lp.reserve1
         self.x = lp.get_reserve(self.tkn_x)
         self.y = lp.get_reserve(self.tkn_y)       
         self.p = lp.get_price(self.tkn_x)

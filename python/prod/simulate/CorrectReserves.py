@@ -17,8 +17,7 @@ class CorrectReserves:
     
     """ 
         Applies SolveDeltas to Correct x/y reserve amounts so that price reflects desired input price; 
-        in the case for the BUIDL week event, it would be the most recent market price returned from 
-        the 0x API 
+        in the marjority of cases, the input price would be the most recent outside market price 
         
         Parameters
         -----------------
@@ -89,7 +88,7 @@ class CorrectReserves:
                 p = p + np.random.normal(0, 0.1)  
                 do_update = True 
                 
-        assert c != MAX_ATTEMPTS, 'UniswapV2: RESERVE_CORRECTION_FAILURE'   
+        assert c != MAX_ATTEMPTS, 'Uniswap: RESERVE_CORRECTION_FAILURE'   
         
     def get_x_tkn(self): 
         

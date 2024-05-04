@@ -39,6 +39,7 @@ setup(name='UniswapPy',
           'uniswappy.utils.interfaces',
           'uniswappy.utils.data',
           'uniswappy.utils.client',
+          'uniswappy.utils.tools',
           'uniswappy.utils.tools.v3'
       ],
       install_requires=[

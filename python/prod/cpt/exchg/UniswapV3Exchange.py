@@ -121,7 +121,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.precision = exchg_struct.precision
         self.last_liquidity_deposit = 0
         self.total_supply = 0
-        self.tick_spacing = 1000
         self.slot0 = Slot0(0, 0, 0)
         self.positions = {}
         self.ticks = {}
@@ -143,12 +142,10 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         if (self.precision == UniswapExchangeData.TYPE_GWEI):
             print(f"Real Reserves:   {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
-            print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
-            print(f"Liquidity: {self.total_supply} \n")
+            print(f"Gross Liquidity: {self.total_supply} \n")
         else:  
             print(f"Real Reserves:   {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
-            #print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
-            print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
+            print(f"Gross Liquidity: {self.gwei2dec(self.total_supply)} \n")            
 
     def initialize(self, sqrtPriceX96):
 
@@ -865,7 +862,33 @@ class UniswapV3Exchange(IExchange, LPERC20):
             else:
                 return 1/sqrt_P**2 
         else:
-            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'       
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'   
+
+    def get_tick_price(self, pos = 0, human_price = None, ` = None):  
+
+        """ get_tick_price
+
+            Get tick price of select token in the exchange pair             
+        """          
+               
+        Q96 = 2**96
+        sqrtPriceX96 = self.slot0.sqrtPriceX96
+        human_price = (sqrtPriceX96/Q96)**2 if human_price == None else human_price
+        tick_p = math.floor(math.log(human_price)/math.log(1.0001))
+
+        tick_space = self.tickSpacing if tick_space == None else tick_space
+        if pos == -1:
+            tick_p = tick_p - tick_space
+        elif pos == 1:
+            tick_p = tick_p + tick_space
+
+        R = tick_p % self.tickSpacing
+        if R > int(self.tickSpacing/2):
+            tick_p += self.tickSpacing-R
+        else:
+            tick_p -= R        
+ 
+        return tick_p         
             
     def get_liquidity(self):  
         
@@ -929,7 +952,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
     def gwei2dec(self, tkn_amt, precision=None):   
         precision = GWEI_PRECISION if precision == None else precision
         return float(Decimal(str(tkn_amt))/Decimal(str(10**precision)))  
-    
+
+    def price_to_sqrtp(p):
+        return int(math.sqrt(p) * 2**96)    
+
+    def sqrtp_toPrice(sqrtp):
+        return sqrtp/2**99  
 
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
         [amountIn, amountOut] = amounts

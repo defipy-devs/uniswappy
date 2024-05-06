@@ -631,8 +631,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 state.amountSpecifiedRemaining,
                 self.fee,
             )
-            
-            print(f'new price {state.sqrtPriceX96}')
+
             if exactInput:
                 state.amountSpecifiedRemaining -= step.amountIn + step.feeAmount
                 state.amountCalculated = SafeMath.subInts(

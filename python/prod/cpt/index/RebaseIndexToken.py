@@ -3,7 +3,6 @@
 # Email: defipy.devs@gmail.com
 
 from ...erc import ERC20
-from ...process.swap import WithdrawSwap
 from ...utils.data import UniswapExchangeData
 
 class RebaseIndexToken():
@@ -56,19 +55,11 @@ class RebaseIndexToken():
 
     def get_reserves(self, lp, token_in):
         tokens = lp.factory.token_from_exchange[lp.name]
-        if(lp.version == UniswapExchangeData.VERSION_V2):
-            if(token_in.token_name == lp.token1):
-                x = lp.get_reserve(tokens[lp.token0])
-                y = lp.get_reserve(tokens[lp.token1])
-            else: 
-                x = lp.get_reserve(tokens[lp.token1])
-                y = lp.get_reserve(tokens[lp.token0])
-        elif(lp.version == UniswapExchangeData.VERSION_V3):   
-            if(token_in.token_name == lp.token1):
-                x = lp.get_virtual_reserve(tokens[lp.token0])
-                y = lp.get_virtual_reserve(tokens[lp.token1])
-            else: 
-                x = lp.get_virtual_reserve(tokens[lp.token1])
-                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        if(token_in.token_name == lp.token1):
+            x = lp.get_reserve(tokens[lp.token0])
+            y = lp.get_reserve(tokens[lp.token1])
+        else: 
+            x = lp.get_reserve(tokens[lp.token1])
+            y = lp.get_reserve(tokens[lp.token0])
         return (x, y)          
             

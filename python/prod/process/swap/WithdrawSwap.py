@@ -8,6 +8,7 @@ from ..liquidity import RemoveLiquidity
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
+from ...cpt.index import SettlementLPToken
 import math
 
 class WithdrawSwap(Process):
@@ -60,7 +61,7 @@ class WithdrawSwap(Process):
         
         if(lp.version == UniswapExchangeData.VERSION_V2):
             # Step 1: withdrawal
-            p_out = self._calc_withdraw_portion(lp, token_out, amount_out)
+            p_out = self._calc_withdraw_portion(lp, token_out, amount_out, lwr_tick, upr_tick)
             removeLiq = RemoveLiquidity()
             res = removeLiq.apply(lp, token_out, user_nm, p_out*amount_out)
     
@@ -72,7 +73,7 @@ class WithdrawSwap(Process):
 
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
 
-            p_out = self._calc_withdraw_portion(lp, token_out, amount_out)
+            p_out = self._calc_withdraw_portion(lp, token_out, amount_out, lwr_tick, upr_tick)
             
              # Step 1: withdrawal
             removeLiq = RemoveLiquidity()
@@ -109,28 +110,13 @@ class WithdrawSwap(Process):
         trading_token = tokens[lp.token1] if token.token_name == lp.token0 else tokens[lp.token0]
         return trading_token        
  
-    def _calc_lp_settlement(self, lp, token_in, itkn_amt):
-
-        (x, y) = self._get_reserves(lp, token_in)               
-        L = lp.get_liquidity()
-        gamma = 997
-
-        a1 = x*y/L
-        a2 = L
-        a = a1/a2
-        b = (1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma)/(1000*L);
-        c = itkn_amt*x;
-
-        dL = (b*a2 - a2*math.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
-        return dL
-
-    def _calc_withdraw_portion(self, lp, token_in, amt):
+    def _calc_withdraw_portion(self, lp, token_in, amt, lwr_tick, upr_tick):
 
         (x, y) = self._get_reserves(lp, token_in)
         L = lp.get_liquidity()
         gamma = 997/1000
 
-        dL = self._calc_lp_settlement(lp, token_in, amt) 
+        dL = SettlementLPToken().apply(lp, token_in, amt, lwr_tick, upr_tick)
         dx = dL*x/L
         dy = dL*y/L
         aswap = (gamma*dx)*(y-dy)/(x-dx+gamma*dx)

@@ -137,9 +137,9 @@ class SwapDeposit(Process):
                 tkn_supply = lp.get_reserve(tokens[lp.token1])
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token0])
+                tkn_supply = lp.get_reserve(tokens[lp.token0])
             else:    
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token1])
+                tkn_supply = lp.get_reserve(tokens[lp.token1])
         return tkn_supply        
         
 

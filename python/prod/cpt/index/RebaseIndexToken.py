@@ -3,8 +3,8 @@
 # Email: defipy.devs@gmail.com
 
 from ...erc import ERC20
-from ...process.swap import WithdrawSwap
 from ...utils.data import UniswapExchangeData
+from ...utils.tools.v3 import TickMath
 
 class RebaseIndexToken():
     
@@ -14,9 +14,9 @@ class RebaseIndexToken():
 
     
     def __init__(self):
-        self.fac = ERC20("DAI", "0x09")
+        pass
      
-    def apply(self, lp, tkn, liq_amt): 
+    def apply(self, lp, tkn, liq_amt, lwr_tick = None, upr_tick = None): 
        
         """ apply
 
@@ -37,10 +37,14 @@ class RebaseIndexToken():
                 Reserve token amount, given liquidity amount
                    
         """        
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            settlement = self.calc_univ2_tkn_settlement(lp, tkn, liq_amt)
+        elif(lp.version == UniswapExchangeData.VERSION_V3):   
+            settlement = self.calc_univ3_tkn_settlement(lp, tkn, liq_amt, lwr_tick, upr_tick)
         
-        return self.calc_tkn_settlement(lp, tkn, liq_amt)
+        return settlement
     
-    def calc_tkn_settlement(self, lp, token_in, dL):
+    def calc_univ2_tkn_settlement(self, lp, token_in, dL):
             
         (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
@@ -54,21 +58,40 @@ class RebaseIndexToken():
 
         return itkn_amt if itkn_amt > 0 else 0  
 
+    def calc_univ3_tkn_settlement(self, lp, token_in, dL, lwr_tick, upr_tick):
+                
+        L = lp.get_liquidity()
+        if(token_in.token_name == lp.token0):
+            sqrtp_cur = lp.slot0.sqrtPriceX96/2**96
+            sqrtp_pa = TickMath.getSqrtRatioAtTick(lwr_tick)/2**96
+            sqrtp_pb = TickMath.getSqrtRatioAtTick(upr_tick)/2**96 
+            dPy = (sqrtp_cur - sqrtp_pa)
+            dPx = (1/sqrtp_cur - 1/sqrtp_pb)          
+        elif(token_in.token_name == lp.token1):
+            sqrtp_cur = 2**96/lp.slot0.sqrtPriceX96
+            sqrtp_pa = 2**96/TickMath.getSqrtRatioAtTick(lwr_tick)
+            sqrtp_pb = 2**96/TickMath.getSqrtRatioAtTick(upr_tick)
+            dPx = (1/sqrtp_cur - 1/sqrtp_pa)
+            dPy = (sqrtp_cur - sqrtp_pb)
+    
+        dAmt = dL*dPx
+        
+        L_diff = (L - dL) 
+        sqrtp_next = sqrtp_cur + (997*dAmt)/(L_diff*1000) 
+        dy1 = dAmt
+        dy2 = L_diff * (1/sqrtp_cur - 1/sqrtp_next)
+        itkn_amt = dy1 + dy2
+
+        return itkn_amt if itkn_amt > 0 else 0 
+    
+
     def get_reserves(self, lp, token_in):
         tokens = lp.factory.token_from_exchange[lp.name]
-        if(lp.version == UniswapExchangeData.VERSION_V2):
-            if(token_in.token_name == lp.token1):
-                x = lp.get_reserve(tokens[lp.token0])
-                y = lp.get_reserve(tokens[lp.token1])
-            else: 
-                x = lp.get_reserve(tokens[lp.token1])
-                y = lp.get_reserve(tokens[lp.token0])
-        elif(lp.version == UniswapExchangeData.VERSION_V3):   
-            if(token_in.token_name == lp.token1):
-                x = lp.get_virtual_reserve(tokens[lp.token0])
-                y = lp.get_virtual_reserve(tokens[lp.token1])
-            else: 
-                x = lp.get_virtual_reserve(tokens[lp.token1])
-                y = lp.get_virtual_reserve(tokens[lp.token0]) 
+        if(token_in.token_name == lp.token1):
+            x = lp.get_reserve(tokens[lp.token0])
+            y = lp.get_reserve(tokens[lp.token1])
+        else: 
+            x = lp.get_reserve(tokens[lp.token1])
+            y = lp.get_reserve(tokens[lp.token0])
         return (x, y)          
             

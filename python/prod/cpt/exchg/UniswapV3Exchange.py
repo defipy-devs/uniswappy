@@ -15,6 +15,7 @@ from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3.Shared import *
 from ...utils.tools.v3 import Position, Tick, SqrtPriceMath, LiquidityMath
 from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath, UniV3Utils
+from ...utils.tools.v3 import UniV3Helper
 
 MINIMUM_LIQUIDITY = 1e-15
 GWEI_PRECISION = 18
@@ -121,7 +122,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.precision = exchg_struct.precision
         self.last_liquidity_deposit = 0
         self.total_supply = 0
-        self.tick_spacing = 1000
         self.slot0 = Slot0(0, 0, 0)
         self.positions = {}
         self.ticks = {}
@@ -143,12 +143,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         if (self.precision == UniswapExchangeData.TYPE_GWEI):
             print(f"Real Reserves:   {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
-            print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
-            print(f"Liquidity: {self.total_supply} \n")
+            print(f"Gross Liquidity: {self.total_supply} \n")
         else:  
-            print(f"Real Reserves:   {self.token0} = {self.gwei2dec(self.reserve0)}, {self.token1} = {self.gwei2dec(self.reserve1)}")
-            #print(f"Virual Reserves: {self.token0} = {self.get_virtual_reserve(tokens[self.token0])}, {self.token1} = {self.get_virtual_reserve(tokens[self.token1])}")
-            print(f"Liquidity: {self.gwei2dec(self.total_supply)} \n")            
+            res0 = UniV3Helper().gwei2dec(self.reserve0)
+            res1 = UniV3Helper().gwei2dec(self.reserve1)
+            print(f"Real Reserves:   {self.token0} = {res0}, {self.token1} = {res1}")
+            print(f"Gross Liquidity: {UniV3Helper().gwei2dec(self.total_supply)} \n")            
 
     def initialize(self, sqrtPriceX96):
 
@@ -200,8 +200,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount1 : float
                 Amount of token1 that was paid to mint the given amount of liquidity.                   
         """          
-
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = self._convert_to_machine(amount)
         
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
@@ -232,8 +231,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         assert balance0Before + amount0 <= tokens.get(self.token0).token_total, 'UniswapV3: M0' 
         assert balance1Before + amount1 <= tokens.get(self.token1).token_total, 'UniswapV3: M0' 
  
-        amount0 = self.convert(amount0)
-        amount1 = self.convert(amount1)        
+        amount0 = self._convert_to_human(amount0)
+        amount1 = self._convert_to_human(amount1)        
               
         return (amount0, amount1)
         
@@ -269,11 +268,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Amount of token1 that was paid to mint the given amount of liquidity.                   
         """ 
 
-        amount0Requested = amount0Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount0Requested)
-        amount1Requested = amount1Requested if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount1Requested)
-
-        print(f'amount0Requested {amount0Requested}')
-        print(f'amount1Requested {amount1Requested}')
+        amount0Requested = self._convert_to_machine(amount0Requested)
+        amount1Requested = self._convert_to_machine(amount1Requested)
         
         checkInputTypes(
             accounts=(recipient),
@@ -308,8 +304,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tokens.get(self.token1).deposit(recipient, amount1) 
             #self.ledger.transferToken(self, recipient, self.token1, amount1)
   
-        amount0 = self.convert(amount0)
-        amount1 = self.convert(amount1)        
+        amount0 = self._convert_to_human(amount0)
+        amount1 = self._convert_to_human(amount1)        
 
         return (recipient, tickLower, tickUpper, amount0, amount1)   
         
@@ -344,8 +340,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 How much liquidity to burn                  
         """  
-        
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = self._convert_to_machine(amount)
         
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
@@ -377,9 +372,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position.tokensOwed0 += amount0
             position.tokensOwed1 += amount1
 
-        amount = self.convert(amount)   
-        amount0 = self.convert(amount0)
-        amount1 = self.convert(amount1)
+        amount = self._convert_to_human(amount)   
+        amount0 = self._convert_to_human(amount0)
+        amount1 = self._convert_to_human(amount1)
              
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
@@ -410,8 +405,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount1 : int
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
-
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = self._convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -446,7 +440,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """           
         
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = self._convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -481,7 +475,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """          
         
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -515,7 +509,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
 
-        amount = amount if self.precision == UniswapExchangeData.TYPE_GWEI else self.dec2gwei(amount)
+        amount = self._convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -634,6 +628,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 state.amountSpecifiedRemaining,
                 self.fee,
             )
+
             if exactInput:
                 state.amountSpecifiedRemaining -= step.amountIn + step.feeAmount
                 state.amountCalculated = SafeMath.subInts(
@@ -730,9 +725,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tokens.get(self.token1).deposit(recipient, abs(amount1))
             self._swap_tokens(abs(amount0), 0, recipient)            
 
-        amount0 = self.convert(amount0)
-        amount1 = self.convert(amount1)
-        liquidity = self.convert(state.liquidity)
+        amount0 = self._convert_to_human(amount0)
+        amount1 = self._convert_to_human(amount1)
+        liquidity = self._convert_to_human(state.liquidity)
         
         return (
             recipient,
@@ -841,9 +836,32 @@ class UniswapV3Exchange(IExchange, LPERC20):
         # Return tick within the boundaries
         return nextTick, True  
 
-    def get_price(self, token): 
-        pass
-            
+    def get_price(self, token):  
+        
+        """ get_price
+
+            Get price of select token in the exchange pair
+                
+            Parameters
+            -----------------
+            token : ERC20
+                ERC20 token                
+        """          
+        sqrt_P = self.slot0.sqrtPriceX96/2**96
+        
+        if(token.token_name == self.token0):
+            if(self.reserve0 == 0):
+                return None 
+            else:
+                return sqrt_P**2 
+        elif(token.token_name == self.token1):
+            if(self.reserve1 == 0):
+                return None
+            else:
+                return 1/sqrt_P**2 
+        else:
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'   
+                  
     def get_liquidity(self):  
         
         """ get_liquidity
@@ -851,7 +869,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Get liquidity of exchange pool         
         """          
 
-        return self.gwei2dec(self.total_supply)        
+        return UniV3Helper().gwei2dec(self.total_supply)        
             
     def get_reserve(self, token):  
         
@@ -866,9 +884,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """         
         
         if(token.token_name == self.token0):
-            return self.gwei2dec(self.reserve0) 
+            return UniV3Helper().gwei2dec(self.reserve0) 
         elif(token.token_name == self.token1):
-            return self.gwei2dec(self.reserve1)
+            return UniV3Helper().gwei2dec(self.reserve1)
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
 
@@ -894,20 +912,14 @@ class UniswapV3Exchange(IExchange, LPERC20):
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'           
 
-    def convert(self, val): 
-        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else self.gwei2dec(val)
+    def _convert_to_human(self, val): 
+        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)
         return val
-    
 
-    def dec2gwei(self, tkn_amt, precision=None):
-        precision = GWEI_PRECISION if precision == None else precision
-        return int(Decimal(str(tkn_amt))*Decimal(str(10**precision)))
+    def _convert_to_machine(self, val): 
+        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
+        return val        
     
-    def gwei2dec(self, tkn_amt, precision=None):   
-        precision = GWEI_PRECISION if precision == None else precision
-        return float(Decimal(str(tkn_amt))/Decimal(str(10**precision)))  
-    
-
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
         [amountIn, amountOut] = amounts
         exactInput = amountOut == 0

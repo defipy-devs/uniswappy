@@ -2,14 +2,16 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
+import math
+from scipy import optimize
 from ..Process import Process
 from ..liquidity import AddLiquidity
 from ..swap import Swap
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
-import math
-
+from ...utils.tools.v3 import UniV3Helper
+from ...utils.tools.v3 import TickMath
 
 class SwapDeposit(Process):
     
@@ -57,14 +59,16 @@ class SwapDeposit(Process):
         """          
         
         amount_in = tDel.delta() if amount_in == None else amount_in    
-
-        # Step 1: swap        
-        p_in = self._calc_deposit_portion(lp, token_in, amount_in)
-        amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
         trading_token = self.get_trading_token(lp, token_in)
 
         # Step 2: deposit   
         if(lp.version == UniswapExchangeData.VERSION_V2):
+
+            # Step 1: swap 
+            p_in = self._calc_univ2_deposit_portion(lp, token_in, amount_in)
+            amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
+
+            # Step 2: deposit   
             if(token_in.token_name == lp.token1):
                 balance0 = amount_out 
                 balance1 = lp.quote(balance0, lp.reserve0, lp.reserve1)
@@ -76,18 +80,23 @@ class SwapDeposit(Process):
             lp.add_liquidity(user_nm, balance0, balance1, balance0, balance1) 
             
         elif(lp.version == UniswapExchangeData.VERSION_V3):  
-            tot_liq = lp.get_liquidity()
+
+            # Step 1: swap 
+            p_in = self._calc_univ3_deposit_portion(lp, token_in, amount_in, lwr_tick, upr_tick)
+            amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
+            
             sqrt_P = lp.slot0.sqrtPriceX96/2**96
             tokens = lp.factory.token_from_exchange[lp.name] 
 
+            # Step 2: deposit 
             if(token_in.token_name == lp.token0):
                 balance1 = abs(amount_out[2]) 
-                liq = balance1/sqrt_P 
+                liq = UniV3Helper().calc_Ly(sqrt_P, balance1, lwr_tick, upr_tick)
                 deposited = liq/sqrt_P + p_in*amount_in
                                 
             elif(token_in.token_name == lp.token1): 
                 balance0 = abs(amount_out[1]) 
-                liq = balance0*sqrt_P 
+                liq = UniV3Helper().calc_Lx(sqrt_P, balance0, lwr_tick, upr_tick)
                 deposited = liq*sqrt_P + p_in*amount_in
                 
             lp.mint(user_nm, lwr_tick, upr_tick, liq)  
@@ -116,9 +125,40 @@ class SwapDeposit(Process):
         tokens = lp.factory.token_from_exchange[lp.name]
         trading_token = tokens[lp.token1] if token.token_name == lp.token0 else tokens[lp.token0]
         return trading_token       
-            
+
+
+    def _calc_univ3_deposit_portion(self, lp, tkn, amt_tkn_in, lwr_tick, upr_tick):
+        bnds = [(0.35, 0.65)]
+        opt_tol = 1e-8
+        res = optimize.minimize(self._obj_func, x0 = 0.5, bounds=bnds, 
+                                args=(amt_tkn_in, lp, tkn, lwr_tick, upr_tick), 
+                                method='Nelder-Mead', tol=opt_tol)
+        return res.x[0]
     
-    def _calc_deposit_portion(self, lp, token_in, dx):
+    def _obj_func(self, alpha, amt_tkn_in, lp, token_in, lwr_tick, upr_tick):
+        opt_tol = 1e-8         
+        swap_in = amt_tkn_in*alpha
+        amt_tkn0, sqrtp_cur  = UniV3Helper().quote(lp, token_in, swap_in, lwr_tick, upr_tick)
+        sqrtp_pa = TickMath.getSqrtRatioAtTick(lwr_tick)/2**96
+        sqrtp_pb = TickMath.getSqrtRatioAtTick(upr_tick)/2**96    
+        
+        if(token_in.token_name == lp.token0):
+            sqrtp_cur = 1/sqrtp_cur
+            
+        dPy = (sqrtp_cur - sqrtp_pa)
+        dPx = (1/sqrtp_cur - 1/sqrtp_pb) 
+        
+        if(token_in.token_name == lp.token0):
+            dL = amt_tkn0/dPy 
+            amt_deposit = dL*dPx
+        elif(token_in.token_name == lp.token1): 
+            dL = amt_tkn0/dPx 
+            amt_deposit = dL*dPy
+        
+        diff = amt_tkn_in - (swap_in + amt_deposit) 
+        return abs(diff)+opt_tol
+    
+    def _calc_univ2_deposit_portion(self, lp, token_in, dx):
 
         tkn_supply = self._get_tkn_supply(lp, token_in)
         a = 997*(dx**2)/(1000*tkn_supply)
@@ -137,9 +177,9 @@ class SwapDeposit(Process):
                 tkn_supply = lp.get_reserve(tokens[lp.token1])
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token0])
+                tkn_supply = lp.get_reserve(tokens[lp.token0])
             else:    
-                tkn_supply = lp.get_virtual_reserve(tokens[lp.token1])
+                tkn_supply = lp.get_reserve(tokens[lp.token1])
         return tkn_supply        
         
 

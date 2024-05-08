@@ -4,6 +4,7 @@
 
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import UniV3Utils
+from ...utils.tools.v3 import UniV3Helper
 import math
 
 class Join():
@@ -44,9 +45,12 @@ class Join():
             out = lp.add_liquidity(user_nm, amount0, amount1, amount0, amount1)
             
         elif(lp.version == UniswapExchangeData.VERSION_V3):
-            k = math.sqrt(amount0*amount1)
-            init_liquidity = UniV3Utils.encodePriceSqrt(amount1, amount0)
-            lp.initialize(init_liquidity)
-            out = lp.mint(user_nm, lwr_tick, upr_tick, k)
+            init_price = UniV3Utils.encodePriceSqrt(amount1, amount0)
+            sqrtP = init_price/2**96
+            Ly = UniV3Helper().calc_Ly(sqrtP, amount1, lwr_tick, upr_tick)
+            Lx = UniV3Helper().calc_Lx(sqrtP, amount0, lwr_tick, upr_tick)
+            L_mint = min(Ly, Lx)    
+            lp.initialize(init_price)
+            out = lp.mint(user_nm, lwr_tick, upr_tick, L_mint)
              
         return out  

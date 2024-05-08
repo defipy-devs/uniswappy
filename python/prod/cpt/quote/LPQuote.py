@@ -168,7 +168,7 @@ class LPQuote():
     
         return amt_out if self.quote_opposing else amount_in 
     
-    def get_amount_from_lp(self, lp, tkn, amount_lp_in):
+    def get_amount_from_lp(self, lp, tkn, amount_lp_in, lwr_tick = None, upr_tick = None):
         
         """ get_amount_from_lp
 
@@ -190,14 +190,14 @@ class LPQuote():
         """           
         
         if(amount_lp_in > 0):
-            itkn_amt = RebaseIndexToken().apply(lp, tkn, amount_lp_in)
+            itkn_amt = RebaseIndexToken().apply(lp, tkn, amount_lp_in, lwr_tick, upr_tick)
             amt_out = self.get_amount(lp, tkn, itkn_amt) if self.quote_opposing else itkn_amt
         else:
             amt_out = 0
         return amt_out   
     
     
-    def get_lp_from_amount(self, lp, tkn, amount_in):
+    def get_lp_from_amount(self, lp, tkn, amount_in, lwr_tick = None, upr_tick = None):
         
         """ get_lp_from_amount
 
@@ -219,7 +219,7 @@ class LPQuote():
         """         
         
         if(amount_in > 0):
-            lp_amt = SettlementLPToken().apply(lp, tkn, amount_in)
+            lp_amt = SettlementLPToken().apply(lp, tkn, amount_in, lwr_tick, upr_tick)
         else:
             lp_amt = 0
         return lp_amt   

@@ -570,7 +570,7 @@ class UniswapExchange(IExchange, LPERC20):
             token : ERC20
                 ERC20 token                
         """          
-        
+
         if(token.token_name == self.token0):
             if(self.reserve0 == 0):
                 return None 

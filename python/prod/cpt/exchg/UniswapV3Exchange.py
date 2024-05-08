@@ -374,7 +374,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
         amount = self._convert_to_human(amount)   
         amount0 = self._convert_to_human(amount0)
-        amount1 = self.convert_to_human(amount1)
+        amount1 = self._convert_to_human(amount1)
              
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 

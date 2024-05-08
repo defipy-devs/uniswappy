@@ -6,6 +6,7 @@ from ..Process import Process
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
+from ...utils.tools.v3 import UniV3Helper
 
 class AddLiquidity(Process):
      
@@ -80,15 +81,13 @@ class AddLiquidity(Process):
 
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
 
-            tot_liq = lp.get_liquidity()
             sqrt_P = lp.slot0.sqrtPriceX96/2**96
-
             if(token_in.token_name == lp.token0):
-                liq = amount_in*sqrt_P
-                (balance0, balance1)  = lp.mint(user_nm, lwr_tick, upr_tick, liq)
+                Lx = UniV3Helper().calc_Lx(sqrt_P, amount_in, lwr_tick, upr_tick)
+                (balance0, balance1)  = lp.mint(user_nm, lwr_tick, upr_tick, Lx)
             elif(token_in.token_name == lp.token1): 
-                liq = amount_in/sqrt_P
-                (balance0, balance1) = lp.mint(user_nm, lwr_tick, upr_tick, liq)  
+                Ly = UniV3Helper().calc_Ly(sqrt_P, amount_in, lwr_tick, upr_tick)
+                (balance0, balance1) = lp.mint(user_nm, lwr_tick, upr_tick, Ly)  
 
         return {lp.token0:balance0, lp.token1:balance1}    
     

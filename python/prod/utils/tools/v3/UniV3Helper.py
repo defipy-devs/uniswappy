@@ -65,6 +65,9 @@ class UniV3Helper():
     def price_to_tick(self, p):
         return math.floor(math.log(p, 1.0001))    
 
+    def tick_to_price(self, tick):
+        return 1.0001**tick   
+
     def price_to_sqrtp(self, p):
         return int(math.sqrt(p) * Q96)    
 

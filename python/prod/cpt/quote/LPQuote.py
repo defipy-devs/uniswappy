@@ -4,6 +4,8 @@
 
 from ..index import RebaseIndexToken
 from ..index import SettlementLPToken
+from ...utils.data import UniswapExchangeData
+from ...utils.tools.v3 import UniV3Helper
 
 class LPQuote():
     
@@ -140,7 +142,7 @@ class LPQuote():
         return amt_out         
         
         
-    def get_amount(self, lp, tkn, amount_in):
+    def get_amount(self, lp, tkn, amount_in, lwr_tick = None, upr_tick = None):
         
         """ get_amount
 
@@ -160,11 +162,15 @@ class LPQuote():
             amt_out: float
                 Amount of reserve for opposing token 
         """            
-                
-        if(tkn.token_name == lp.token0):
-            amt_out = (amount_in * lp.reserve1) / lp.reserve0
-        else:
-            amt_out = (amount_in * lp.reserve0) / lp.reserve1
+
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(tkn.token_name == lp.token0):
+                amt_out = (amount_in * lp.reserve1) / lp.reserve0
+            else:
+                amt_out = (amount_in * lp.reserve0) / lp.reserve1
+        elif(lp.version == UniswapExchangeData.VERSION_V3): 
+            quote_out = UniV3Helper().quote(lp, tkn, amount_in, lwr_tick, upr_tick)
+            amt_out = quote_out[0]
     
         return amt_out if self.quote_opposing else amount_in 
     
@@ -191,7 +197,7 @@ class LPQuote():
         
         if(amount_lp_in > 0):
             itkn_amt = RebaseIndexToken().apply(lp, tkn, amount_lp_in, lwr_tick, upr_tick)
-            amt_out = self.get_amount(lp, tkn, itkn_amt) if self.quote_opposing else itkn_amt
+            amt_out = self.get_amount(lp, tkn, itkn_amt, lwr_tick, upr_tick) if self.quote_opposing else itkn_amt
         else:
             amt_out = 0
         return amt_out   

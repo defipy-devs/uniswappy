@@ -82,7 +82,7 @@ class WithdrawSwap(Process):
             # Step 2: swap
             trading_token = self.get_trading_token(lp, token_out)
             out = Swap().apply(lp, trading_token, user_nm, res[trading_token.token_name]) 
-            withdrawn = abs(out[1])  + p_out*amount_out 
+            withdrawn = abs(out)  + p_out*amount_out 
 
         return withdrawn 
 

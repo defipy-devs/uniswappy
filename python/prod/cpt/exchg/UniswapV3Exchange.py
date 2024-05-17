@@ -1039,6 +1039,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 self.total_supply = LiquidityMath.addDelta(
                     self.total_supply, params.liquidityDelta
                 )
+                self.last_liquidity_deposit = self._convert_to_human(params.liquidityDelta)
             else:
                 ## current tick is above the passed range; liquidity can only become in range by crossing from right to
                 ## left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it

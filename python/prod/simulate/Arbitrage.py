@@ -23,7 +23,7 @@ class Arbitrage():
         self.y_tot = 0
         self.x_tot = 0        
            
-    def apply(self, price_benchmark, user_nm, amt_in = None):
+    def apply(self, price_benchmark, user_nm, amt_in = None, lwr_tick = None, upr_tick = None):
         tokens = self.lp.factory.token_from_exchange[self.lp.name]
         
         x_tkn = tokens[self.lp.token0]
@@ -33,7 +33,8 @@ class Arbitrage():
         amt_y_sell = 0; amt_x_buy = 0
         
         #p_x = self.lp.get_price(x_tkn)
-        p_x = LPQuote().get_price(self.lp, x_tkn)
+        #p_x = LPQuote().get_price(self.lp, x_tkn)
+        p_x = self.lp.get_price(x_tkn)
         num_states = len(self.mstate.states)
         held_x_amt = self.mstate.get_current_state('dHeld') 
         
@@ -43,19 +44,21 @@ class Arbitrage():
                 amt = self.gen_random_amt() if amt_in == None else self.FRAC*amt_in
                 amt_x_sell += amt
                 amt_y_buy += Swap().apply(self.lp, x_tkn, user_nm, amt)
-                p_x = LPQuote().get_price(self.lp, x_tkn)
+                #p_x = LPQuote().get_price(self.lp, x_tkn)
+                p_x = self.lp.get_price(x_tkn)
                 #print('p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))
 
         elif(p_x != None and p_x <= price_benchmark and num_states > 3):
             while(p_x <= price_benchmark):  
                 amt = self.gen_random_amt() if amt_in == None else self.FRAC*amt_in
-                amt = LPQuote().get_amount(self.lp, x_tkn, amt)
+                amt = LPQuote().get_amount(self.lp, x_tkn, amt, lwr_tick, upr_tick)
                 if(amt+amt_y_sell > self.threshold*held_x_amt): 
                     break
                 else:  
                     amt_y_sell += amt
                     amt_x_buy += Swap().apply(self.lp, y_tkn, user_nm, amt)
-                    p_x = LPQuote().get_price(self.lp, x_tkn)
+                    #p_x = LPQuote().get_price(self.lp, x_tkn)
+                    p_x = self.lp.get_price(x_tkn)
                 #print('p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))    
          
         self.net_x = amt_x_buy - amt_x_sell

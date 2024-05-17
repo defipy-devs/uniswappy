@@ -24,7 +24,7 @@ class SwapIndexMint(Process):
         self.opposing = False if opposing  == None else opposing
         self.mint_amt = 0
             
-    def apply(self, lp_tkn, token, user_nm, amt):    
+    def apply(self, lp_tkn, token, user_nm, amt, lwr_tick = None, upr_tick = None):    
         
         """ apply
 
@@ -47,13 +47,14 @@ class SwapIndexMint(Process):
                 token swap amounts                
         """           
         
-        lp_amt0 = lp_tkn.liquidity_providers[user_nm]
-        out = SwapDeposit().apply(lp_tkn, token, user_nm, amt)
-        lp_amt1 = lp_tkn.liquidity_providers[user_nm]
-        lp_amt = lp_amt1 - lp_amt0
+        lp_amt0 = lp_tkn.total_supply
+        out = SwapDeposit().apply(lp_tkn, token, user_nm, amt, lwr_tick, upr_tick)
+        lp_amt1 = lp_tkn.total_supply
+        lp_amt = lp_tkn.last_liquidity_deposit
+
         mint_token = token if not self.opposing else self.get_trading_token(lp_tkn, token)
         self.ivault.deposit_lp_tkn(user_nm, lp_tkn, lp_amt)
-        self.ivault.rebase_index_tkn(lp_tkn, mint_token) 
+        self.ivault.rebase_index_tkn(lp_tkn, mint_token, lwr_tick, upr_tick) 
      
     def get_trading_token(self, lp, token):
         

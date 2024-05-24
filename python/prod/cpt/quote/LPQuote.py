@@ -20,6 +20,7 @@ class LPQuote():
     
     def __init__(self, quote_opposing = True):
         self.quote_opposing = quote_opposing
+        self.price_tkn = True
         
     def get_opposing_token(self, lp, tkn):
         
@@ -43,7 +44,7 @@ class LPQuote():
         opposing_tkn_nm = lp.token1 if(tkn.token_name == lp.token0) else lp.token0
         return lp.factory.token_from_exchange[lp.name][opposing_tkn_nm]
 
-    def get_reserve(self, lp, token):  
+    def get_reserve(self, lp, token, lwr_tick = None, upr_tick = None):  
         
         """ get_reserve
 
@@ -61,21 +62,36 @@ class LPQuote():
             reserve: float
                 Reserve amount from token asset     
         """             
-        
-        if(token.token_name == lp.token0):        
-            reserve_out = lp.reserve0 
-        elif(token.token_name == lp.token1):
-            reserve_out = lp.reserve1     
+        if(lp.version == UniswapExchangeData.VERSION_V2):
+            if(token.token_name == lp.token0):        
+                reserve_out = lp.reserve0 
+            elif(token.token_name == lp.token1):
+                reserve_out = lp.reserve1   
 
-        if token.type == 'index':
-            self.quote_opposing = False
-            parent_lp = token.parent_lp
-            parent_token = token.parent_tkn
-            reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out)     
+            if token.type == 'index':
+                self.quote_opposing = False
+                parent_lp = token.parent_lp
+                parent_token = token.parent_tkn
+                reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out)  
+        
+        elif(lp.version == UniswapExchangeData.VERSION_V3):
+
+            if(lp.total_supply == 0):
+                reserve_out = 0
+            else:    
+                reserve_out = lp.get_virtual_reserve(token) 
+                if token.type == 'index':
+                    self.quote_opposing = False
+                    parent_lp = token.parent_lp
+                    parent_token = token.parent_tkn
+                    p = parent_lp.get_price(parent_token)
+                    lwr_tick = UniV3Helper().get_tick_price(parent_lp, -1, p, 1000)
+                    upr_tick = UniV3Helper().get_tick_price(parent_lp, 1, p, 1000)
+                    reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out, lwr_tick, upr_tick)          
 
         return reserve_out
 
-    def get_price(self, lp, tkn, price_tkn = True):  
+    def get_price(self, lp, tkn, lwr_tick = None, upr_tick = None):  
         
         """ get_price
 
@@ -97,19 +113,19 @@ class LPQuote():
         opposing_tkn = self.get_opposing_token(lp, tkn)
 
         if(tkn.token_name == lp.token0):
-            reserve0 = self.get_reserve(lp, tkn)
-            reserve1 = self.get_reserve(lp, opposing_tkn)
+            reserve0 = self.get_reserve(lp, tkn, lwr_tick, upr_tick)
+            reserve1 = self.get_reserve(lp, opposing_tkn, lwr_tick, upr_tick)
             if(reserve0 == 0):
                 return 0 
             else:
-                return reserve1/reserve0 if price_tkn else lp.get_price(tkn)
+                return reserve1/reserve0 if self.price_tkn else lp.get_price(tkn)
         elif(tkn.token_name == lp.token1):    
-            reserve1 = self.get_reserve(lp, tkn)
-            reserve0 = self.get_reserve(lp, opposing_tkn)        
+            reserve1 = self.get_reserve(lp, tkn, lwr_tick, upr_tick)
+            reserve0 = self.get_reserve(lp, opposing_tkn, lwr_tick, upr_tick)        
             if(reserve1 == 0):
                 return 0
             else:
-                return reserve0/reserve1 if price_tkn else lp.get_price(tkn)
+                return reserve0/reserve1 if self.price_tkn else lp.get_price(tkn)
         else:
             print('ERROR: wrong input token')              
         

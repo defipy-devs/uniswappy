@@ -36,6 +36,10 @@ class CorrectReserves:
         self.fac = FAC if fac == None else fac
         self.swap_dx = 0
         self.swap_dy = 0
+        self.user_nm = USER_NM
+
+    def set_user(self, user_nm): 
+        self.user_nm = user_nm    
     
     def get_swap_dx(self): 
         
@@ -125,18 +129,24 @@ class CorrectReserves:
 
         if(self.lp.version == UniswapExchangeData.VERSION_V2):
             if(self.swap_dx >= 0):
-                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx))
-                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, self.user_nm, abs(self.swap_dx))
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, self.user_nm, abs(self.swap_dy))
             elif(self.swap_dy >= 0):
-                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy))
-                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx)) 
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, self.user_nm, abs(self.swap_dy))
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, self.user_nm, abs(self.swap_dx)) 
                
         elif(self.lp.version == UniswapExchangeData.VERSION_V3):
             if(self.swap_dx >= 0):
-                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx), lwr_tick, upr_tick)
-                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy), lwr_tick, upr_tick)
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_x, self.user_nm, abs(self.swap_dx), lwr_tick, upr_tick)
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_y, self.user_nm, abs(self.swap_dy), lwr_tick, upr_tick)
             elif(self.swap_dy >= 0):
-                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, USER_NM, abs(self.swap_dy), lwr_tick, upr_tick)
-                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, USER_NM, abs(self.swap_dx), lwr_tick, upr_tick) 
+                expected_amount_dep = SwapDeposit().apply(self.lp, tkn_y, self.user_nm, abs(self.swap_dy), lwr_tick, upr_tick)
+                expected_amount_out = WithdrawSwap().apply(self.lp, tkn_x, self.user_nm, abs(self.swap_dx), lwr_tick, upr_tick)
+
+
+    def get_ticks(self, tkn_x):
+        lwr_tick = UniV3Helper().get_tick_price(self.lp, -1, lp.get_price(tkn_x), 1000)
+        upr_tick = UniV3Helper().get_tick_price(self.lp, 1, lp.get_price(tkn_x), 1000)
+        return lwr_tick, upr_tick
               
          

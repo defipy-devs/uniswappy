@@ -35,10 +35,10 @@ class UniV3Helper():
         return L * (1/sqrtp_cur - 1/sqrtp_next), sqrtp_next    
 
 
-    #def get_tick_price(self, human_price):  
+    #def get_price_tick(self, human_price):  
     #    return math.floor(math.log((human_price)**2)/math.log(1.0001))   
     
-    def get_tick_price(self, lp, pos = 0, human_price = None, tick_space = None):  
+    def get_price_tick(self, lp, pos = 0, human_price = None, tick_space = None):  
 
         """ get_tick_price
             Get tick price of select token in the exchange pair             

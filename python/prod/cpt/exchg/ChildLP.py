@@ -37,8 +37,8 @@ class ChildLP():
             parent_lp = tkn.parent_lp
             parent_token = tkn.parent_tkn
             p = parent_lp.get_price(parent_token)
-            lwr_tick = UniV3Helper().get_tick_price(parent_lp, -1, p, self.tick_space)
-            upr_tick = UniV3Helper().get_tick_price(parent_lp, 1, p, self.tick_space)
+            lwr_tick = UniV3Helper().get_price_tick(parent_lp, -1, p, self.tick_space)
+            upr_tick = UniV3Helper().get_price_tick(parent_lp, 1, p, self.tick_space)
             reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(reserve), lwr_tick, upr_tick)
             virtual_reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(virtual_reserve), lwr_tick, upr_tick)
 

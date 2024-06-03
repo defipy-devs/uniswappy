@@ -85,8 +85,8 @@ class LPQuote():
                     parent_lp = token.parent_lp
                     parent_token = token.parent_tkn
                     p = parent_lp.get_price(parent_token)
-                    lwr_tick = UniV3Helper().get_tick_price(parent_lp, -1, p, 1000)
-                    upr_tick = UniV3Helper().get_tick_price(parent_lp, 1, p, 1000)
+                    lwr_tick = UniV3Helper().get_price_tick(parent_lp, -1, p, 1000)
+                    upr_tick = UniV3Helper().get_price_tick(parent_lp, 1, p, 1000)
                     reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out, lwr_tick, upr_tick)          
 
         return reserve_out
@@ -184,10 +184,8 @@ class LPQuote():
 
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(tkn.token_name == lp.token0):
-                #amt_out = (amount_in * lp.reserve1) / lp.reserve0
                 amt_out = lp.get_amount_out0(amount_in)
             else:
-                #amt_out = (amount_in * lp.reserve0) / lp.reserve1
                 amt_out = lp.get_amount_out1(amount_in)
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
             quote_out = UniV3Helper().quote(lp, tkn, amount_in, lwr_tick, upr_tick)

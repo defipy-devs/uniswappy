@@ -8,9 +8,11 @@ import math
 
 class TreeAmountQuote():
     
-    def __init__(self, quote_native_token = True, exchg_price = 1):
+    def __init__(self, lwr_tick = None, upr_tick = None, quote_native_token = True, exchg_price = 1):
         self.exchg_price = exchg_price if exchg_price != 1 else exchg_price
         self.quote_native_token = quote_native_token 
+        self.lwr_tick = lwr_tick
+        self.upr_tick = upr_tick
 
     def get_tot_x(self, lp, amt0, amt1):
         tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
@@ -32,7 +34,7 @@ class TreeAmountQuote():
             amt_in_x = LPQuote(not x_tkn).get_amount(base_lp, tkn, amt)
         elif(tkn.type == 'index'):
             x_tkn = self.base_x_asset_nm(lp) == tkn.parent_tkn.token_name
-            amt_in_x = LPQuote(not x_tkn).get_amount_from_lp(tkn.parent_lp, tkn.parent_tkn, amt)
+            amt_in_x = LPQuote(not x_tkn).get_amount_from_lp(tkn.parent_lp, tkn.parent_tkn, amt, self.lwr_tick, self.upr_tick)
 
         return amt_in_x
 
@@ -41,10 +43,10 @@ class TreeAmountQuote():
         if(tkn.type == 'standard'):
             y_tkn = self.base_y_asset_nm(lp) == tkn.token_name
             base_lp = self.get_base_lp(lp, tkn)
-            amt_in_y = LPQuote(not y_tkn).get_amount(base_lp, tkn, amt)
+            amt_in_y = LPQuote(not y_tkn).get_amount(base_lp, tkn, amt, self.lwr_tick, self.upr_tick)
         elif(tkn.type == 'index'):
             y_tkn = self.base_y_asset_nm(lp) == tkn.parent_tkn.token_name
-            amt_in_y = LPQuote(not y_tkn).get_amount_from_lp(tkn.parent_lp, tkn.parent_tkn, amt)
+            amt_in_y = LPQuote(not y_tkn).get_amount_from_lp(tkn.parent_lp, tkn.parent_tkn, amt, self.lwr_tick, self.upr_tick)
             
         return amt_in_y  
     
@@ -54,7 +56,7 @@ class TreeAmountQuote():
         parent_x_tkn = tkn_x.parent_tkn if tkn_x.type == 'index' else tkn_x
 
         if(parent_x_tkn.token_name != parent_lp_x_tkn.token_name):
-            x_amt = LPQuote().get_amount(parent_lp, parent_x_tkn, x_amt) 
+            x_amt = LPQuote().get_amount(parent_lp, parent_x_tkn, x_am, self.lwr_tick, self.upr_tickt) 
 
         return x_amt
 
@@ -64,34 +66,10 @@ class TreeAmountQuote():
         parent_y_tkn = tkn_y.parent_tkn if tkn_y.type == 'index' else tkn_y
 
         if(parent_y_tkn.token_name != parent_lp_y_tkn.token_name):
-            y_amt = LPQuote().get_amount(parent_lp, parent_y_tkn, y_amt) 
+            y_amt = LPQuote().get_amount(parent_lp, parent_y_tkn, y_amt, self.lwr_tick, self.upr_tick) 
 
         return y_amt    
     
-    def calc_lp_settlement(self, lp, token_in, itkn_amt):
-
-        if(token_in.token_name == lp.token1):
-            x = lp.reserve0
-            y = lp.reserve1
-        else: 
-            x = lp.reserve1
-            y = lp.reserve0
-
-        L = lp.total_supply
-        if(L == 0): 
-            return 0
-        else:
-            gamma = 997
-
-            a1 = x*y/L
-            a2 = L
-            a = a1/a2
-            b = (1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma)/(1000*L);
-            c = itkn_amt*x;
-
-            dL = (b*a2 - a2*math.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
-            return dL    
-
     def base_x_asset_nm(self, lp):
         tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0]
         if(tkn_x.type == 'index'):

@@ -177,13 +177,18 @@ class LPQuote():
             -----------------
             amt_out: float
                 Amount of reserve for opposing token 
-        """            
+        """       
+
+        if (amount_in == 0):
+            return 0
 
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(tkn.token_name == lp.token0):
-                amt_out = (amount_in * lp.reserve1) / lp.reserve0
+                #amt_out = (amount_in * lp.reserve1) / lp.reserve0
+                amt_out = lp.get_amount_out0(amount_in)
             else:
-                amt_out = (amount_in * lp.reserve0) / lp.reserve1
+                #amt_out = (amount_in * lp.reserve0) / lp.reserve1
+                amt_out = lp.get_amount_out1(amount_in)
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
             quote_out = UniV3Helper().quote(lp, tkn, amount_in, lwr_tick, upr_tick)
             amt_out = quote_out[0]

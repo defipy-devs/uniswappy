@@ -138,9 +138,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """         
         
         tokens = self.factory.token_from_exchange[self.name] 
-        
+        x_tkn = tokens[self.token0]
+        y_tkn = tokens[self.token1]          
         print(f"Exchange {self.name} ({self.symbol})")
-
         if (self.precision == UniswapExchangeData.TYPE_GWEI):
             print(f"Real Reserves:   {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
             print(f"Gross Liquidity: {self.total_supply} \n")
@@ -728,6 +728,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         amount0 = self._convert_to_human(amount0)
         amount1 = self._convert_to_human(amount1)
         liquidity = self._convert_to_human(state.liquidity)
+        self._update_fees()
         
         return (
             recipient,
@@ -918,7 +919,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
 
     def _convert_to_machine(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
-        return val        
+        return val   
+
+    def _update_fees(self): 
+        liquidity = UniV3Helper().gwei2dec(self.total_supply)
+        self.collected_fee0 = liquidity*self.feeGrowthGlobal0X128/2**128
+        self.collected_fee1 = liquidity*self.feeGrowthGlobal1X128/2**128
     
     def _swap(self, inputToken, amounts, recipient, sqrtPriceLimitX96):
         [amountIn, amountOut] = amounts

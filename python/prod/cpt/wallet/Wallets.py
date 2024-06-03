@@ -45,10 +45,10 @@ class Wallets():
                 self.tokens[tkn.token_name]['total_amount'] -= amt
                 self.tokens[tkn.token_name]['last_deposit'] = -amt
             else:
-                print('ERROR: not enough amount in {} account'.format(_to))
+                print('WALLET ERROR: not enough amount in {} account'.format(_to))
                 removed = False
         else:
-            print('ERROR: token not in vault')
+            print('WALLET ERROR: token not in vault')
             removed = False
             
         return removed  

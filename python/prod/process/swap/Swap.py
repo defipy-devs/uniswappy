@@ -60,10 +60,11 @@ class Swap(Process):
         elif(lp.version == UniswapExchangeData.VERSION_V3):
             tokens = lp.factory.token_from_exchange[lp.name]
             if(token_in.token_name == lp.token0):
-                amount_out_expected = lp.swapExact0For1(user_nm, amount_in, sqrt_price_limit)
+                amount_out = lp.swapExact0For1(user_nm, amount_in, sqrt_price_limit)
+                amount_out_expected = abs(amount_out[2])
             else: 
-                amount_out_expected = lp.swapExact1For0(user_nm, amount_in, sqrt_price_limit)
+                amount_out = lp.swapExact1For0(user_nm, amount_in, sqrt_price_limit)
+                amount_out_expected = abs(amount_out[1])
             
-        
         return amount_out_expected        
         

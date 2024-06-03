@@ -90,12 +90,12 @@ class SwapDeposit(Process):
 
             # Step 2: deposit 
             if(token_in.token_name == lp.token0):
-                balance1 = abs(amount_out[2]) 
+                balance1 = abs(amount_out) 
                 liq = UniV3Helper().calc_Ly(sqrt_P, balance1, lwr_tick, upr_tick)
                 deposited = liq/sqrt_P + p_in*amount_in
                                 
             elif(token_in.token_name == lp.token1): 
-                balance0 = abs(amount_out[1]) 
+                balance0 = abs(amount_out) 
                 liq = UniV3Helper().calc_Lx(sqrt_P, balance0, lwr_tick, upr_tick)
                 deposited = liq*sqrt_P + p_in*amount_in
                 

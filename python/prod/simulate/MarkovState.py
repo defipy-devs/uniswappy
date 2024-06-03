@@ -61,7 +61,8 @@ class MarkovState():
 
         P_stochastic = np.array([ [0, 1, 0, 0],
                            [0, self.rBeta(19,81), self.rBeta(4,1), self.rBeta(1,99)],
-                           [0, self.rBeta(1,4, mn = 0.05, mx = 0.4), self.rBeta(4,1, mn = 0.6, mx = 0.95), 0],
+                           #[0, self.rBeta(1,4, mn = 0.05, mx = 0.4), self.rBeta(4,1, mn = 0.6, mx = 0.95), 0],
+                           [0, self.rBeta(1,4, mn = 0.2, mx = 0.3), self.rBeta(4,1, mn = 0.7, mx = 0.8), 0],
                            [0, 0, 0, 1]])
 
         P_deterministic = np.array([ [0, 1, 0, 0],

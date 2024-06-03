@@ -6,8 +6,10 @@ from .LPQuote import LPQuote
 
 class LPTokenQuote():
     
-    def __init__(self, quote_child = True):
-        self.quote_child = quote_child  
+    def __init__(self, lwr_tick = None, upr_tick = None, quote_child = True):
+        self.quote_child = quote_child 
+        self.lwr_tick = lwr_tick
+        self.upr_tick = upr_tick         
  
     def get_x(self, lp, amt_tkn_x): 
         tkn_x = lp.factory.token_from_exchange[lp.name][lp.token0] 
@@ -16,15 +18,15 @@ class LPTokenQuote():
         parent_x_tkn = tkn_x.parent_tkn if tkn_x.type == 'index' else tkn_x
 
         if(parent_x_tkn.token_name != parent_lp_x_tkn.token_name):
-            amt_tkn_x = LPQuote().get_amount(parent_lp, parent_lp_x_tkn, amt_tkn_x)     
+            amt_tkn_x = LPQuote().get_amount(parent_lp, parent_lp_x_tkn, amt_tkn_x, self.lwr_tick, self.upr_tick)     
 
         if(tkn_x.type == 'standard'):
-            amt_x = LPQuote(False).get_amount(parent_lp, parent_x_tkn, amt_tkn_x)
-            lp_amt = LPQuote().get_lp_from_amount(lp, parent_x_tkn, amt_x)
+            amt_x = LPQuote(False).get_amount(parent_lp, parent_x_tkn, amt_tkn_x, self.lwr_tick, self.upr_tick)
+            lp_amt = LPQuote().get_lp_from_amount(lp, parent_x_tkn, amt_x, self.lwr_tick, self.upr_tick)
         else: 
-            amt_x = LPQuote(False).get_amount(parent_lp, parent_x_tkn, amt_tkn_x) 
-            amt_x_lp = LPQuote().get_lp_from_amount(parent_lp, parent_x_tkn, amt_x)
-            lp_amt = LPQuote().get_lp_from_amount(lp, parent_x_tkn, amt_x_lp)
+            amt_x = LPQuote(False).get_amount(parent_lp, parent_x_tkn, amt_tkn_x, self.lwr_tick, self.upr_tick) 
+            amt_x_lp = LPQuote().get_lp_from_amount(parent_lp, parent_x_tkn, amt_x, self.lwr_tick, self.upr_tick)
+            lp_amt = LPQuote().get_lp_from_amount(lp, parent_x_tkn, amt_x_lp, self.lwr_tick, self.upr_tick)
 
         return lp_amt 
         

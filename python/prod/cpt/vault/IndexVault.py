@@ -34,7 +34,7 @@ class IndexVault(Vault):
         self.lp_tokens = {}
         self.index_tokens = {}
       
-    def rebase_index_tkn(self, lp_token, token = None):
+    def rebase_index_tkn(self, lp_token, token = None, lwr_tick = None, upr_tick = None):
         
         """ rebase_index_tkn
 
@@ -49,12 +49,12 @@ class IndexVault(Vault):
         """         
         
         if(token != None):
-            self.__rebase_index_tkn(lp_token, token)
-            self.update_accounts(lp_token, token)
+            self.__rebase_index_tkn(lp_token, token, lwr_tick, upr_tick)
+            self.update_accounts(lp_token, token, lwr_tick, upr_tick)
         else:  
             tokens = lp_token.factory.exchange_to_tokens[lp_token.name]
-            self.__rebase_index_tkn(lp_token, tokens[lp_token.token0])
-            self.__rebase_index_tkn(lp_token, tokens[lp_token.token1])
+            self.__rebase_index_tkn(lp_token, tokens[lp_token.token0], lwr_tick, upr_tick)
+            self.__rebase_index_tkn(lp_token, tokens[lp_token.token1], lwr_tick, upr_tick)
             self.update_accounts(lp_token, tokens[lp_token.token0])
             self.update_accounts(lp_token, tokens[lp_token.token1])  
             self.update_index_tkn(lp_token, token)    
@@ -161,7 +161,7 @@ class IndexVault(Vault):
         return {lp_tkn.token0: amount0, lp_tkn.token1: amount1} if removed else res
 
             
-    def get_tkn_pair_amount(self, lp_tkn, token, liq):
+    def get_tkn_pair_amount(self, lp_tkn, token, liq, lwr_tick = None, upr_tick = None):
         
         """ get_tkn_pair_amount
 
@@ -181,7 +181,7 @@ class IndexVault(Vault):
             amt : float
                 amount of specified token from pairing                 
         """          
-        amt = RebaseIndexToken().apply(lp_tkn, token, liq)
+        amt = RebaseIndexToken().apply(lp_tkn, token, liq, lwr_tick, upr_tick)
         return amt
     
     def get_token_type(self, token):
@@ -203,7 +203,7 @@ class IndexVault(Vault):
         
         return token.__class__.__name__   
     
-    def update_accounts(self, lp_tkn, tkn): 
+    def update_accounts(self, lp_tkn, tkn, lwr_tick, upr_tick): 
 
         """ update_accounts
 
@@ -226,7 +226,7 @@ class IndexVault(Vault):
         exchange = lp_tkn.token_name
         index_tokens[tkn.token_name] = 'i'+tkn.token_name
         
-        self.update_index_tkn(lp_tkn, tkn)
+        self.update_index_tkn(lp_tkn, tkn, lwr_tick, upr_tick)
         
         new_total = 0
         tkn_nm = tkn.token_name
@@ -234,7 +234,7 @@ class IndexVault(Vault):
             amt = self.lp_providers[account][exchange]['amount']
             exch_tkn = lp_tkn.factory.token_from_exchange[lp_tkn.name][tkn_nm]
             self.lp_providers[account][index_tokens[tkn_nm]] = {}
-            self.lp_providers[account][index_tokens[tkn_nm]]['amount'] = self.get_tkn_pair_amount(lp_tkn, exch_tkn, amt)             
+            self.lp_providers[account][index_tokens[tkn_nm]]['amount'] = self.get_tkn_pair_amount(lp_tkn, exch_tkn, amt, lwr_tick, upr_tick)             
                   
     def update_account(self, lp_tkn, tkn, _from): 
         
@@ -309,7 +309,7 @@ class IndexVault(Vault):
             is_tkn_account = True if tkn_nm == 'i'+token.token_name and not is_tkn_account else is_tkn_account
         return is_tkn_account    
     
-    def __rebase_index_tkn(self, lp_token, token):
+    def __rebase_index_tkn(self, lp_token, token, lwr_tick, upr_tick):
         
         """ __rebase_index_tkn
 
@@ -326,15 +326,15 @@ class IndexVault(Vault):
         mint_tkn_name = 'i'+token.token_name
         liq = self.lp_tokens[lp_token.token_name]['total_amount']
         last_liq = self.lp_tokens[lp_token.token_name]['last_deposit']
-        delta_amt = self.get_tkn_pair_amount(lp_token, token, last_liq)
-        amt = self.get_tkn_pair_amount(lp_token, token, liq)
+        delta_amt = self.get_tkn_pair_amount(lp_token, token, last_liq, lwr_tick, upr_tick)
+        amt = self.get_tkn_pair_amount(lp_token, token, liq, lwr_tick, upr_tick)
         tkn = ERC20(mint_tkn_name, None)
         tkn.deposit(None, amt) 
         
         if mint_tkn_name not in self.index_tokens:    
             self.index_tokens[mint_tkn_name] = {}
             self.index_tokens[mint_tkn_name]['token'] = tkn 
-            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq) 
+            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq, lwr_tick, upr_tick) 
             self.index_tokens[mint_tkn_name]['total_lp'] = liq
             self.index_tokens[mint_tkn_name]['last_deposit'] = tkn.token_total
             self.index_tokens[mint_tkn_name]['last_lp_deposit'] = amt
@@ -343,19 +343,19 @@ class IndexVault(Vault):
         else:          
             prev_total = self.index_tokens[mint_tkn_name]['total']
             self.index_tokens[mint_tkn_name]['token'] = tkn 
-            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq) 
+            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq, lwr_tick, upr_tick) 
             self.index_tokens[mint_tkn_name]['total_lp'] = liq
             self.index_tokens[mint_tkn_name]['last_deposit'] = delta_amt
             self.index_tokens[mint_tkn_name]['last_lp_deposit'] = last_liq
                
             
-    def update_index_tkn(self, lp_token, token):   
+    def update_index_tkn(self, lp_token, token, lwr_tick, upr_tick):   
         mint_tkn_name = 'i'+token.token_name
         if mint_tkn_name in self.index_tokens:  
             liq = self.lp_tokens[lp_token.token_name]['total_amount']
             last_liq = self.lp_tokens[lp_token.token_name]['last_deposit']
-            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq)  
-            self.index_tokens[mint_tkn_name]['last_deposit'] = self.get_tkn_pair_amount(lp_token, token, last_liq)  
+            self.index_tokens[mint_tkn_name]['total'] = self.get_tkn_pair_amount(lp_token, token, liq, lwr_tick, upr_tick)  
+            self.index_tokens[mint_tkn_name]['last_deposit'] = self.get_tkn_pair_amount(lp_token, token, last_liq, lwr_tick, upr_tick)  
             self.index_tokens[mint_tkn_name]['total_lp'] = liq  
             self.index_tokens[mint_tkn_name]['last_lp_deposit'] = last_liq             
             

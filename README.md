@@ -132,7 +132,8 @@ Finance](https://medium.com/@icmoore/simulating-a-liquidity-pool-for-decentraliz
  * **Randomized Events**: Token amount and time delta models to simulate 
 possible trading behavior
  * **Analytical Tools**: Basic yeild calculators and risk tools to assist 
-in analyzing outcomes
+in analyzing outcomes; see 
+article [How to Simulate a Uniswap V3 Order Book in Python](https://medium.com/datadriveninvestor/how-to-simulate-a-uniswap-v3-order-book-in-python-149480d12305)
  
  
 

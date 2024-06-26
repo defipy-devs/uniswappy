@@ -18,8 +18,9 @@ class LPQuote():
             Quote the opposing token amount by default, given LP and a token    
     """      
     
-    def __init__(self, quote_opposing = True):
+    def __init__(self, quote_opposing = True, include_fee = False):
         self.quote_opposing = quote_opposing
+        self.include_fee = include_fee
         self.price_tkn = True
         
     def get_opposing_token(self, lp, tkn):
@@ -84,11 +85,12 @@ class LPQuote():
                     self.quote_opposing = False
                     parent_lp = token.parent_lp
                     parent_token = token.parent_tkn
-                    p = parent_lp.get_price(parent_token)
+                    parent_lp_tkn_x = parent_lp.factory.token_from_exchange[parent_lp.name][parent_lp.token0]
+                    p = parent_lp.get_price(parent_lp_tkn_x)
                     lwr_tick = UniV3Helper().get_price_tick(parent_lp, -1, p, 1000)
                     upr_tick = UniV3Helper().get_price_tick(parent_lp, 1, p, 1000)
-                    reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out, lwr_tick, upr_tick)          
-
+                    reserve_out = self.get_amount_from_lp(parent_lp, parent_token, reserve_out, lwr_tick, upr_tick)         
+                    
         return reserve_out
 
     def get_price(self, lp, tkn, lwr_tick = None, upr_tick = None):  
@@ -183,10 +185,18 @@ class LPQuote():
             return 0
 
         if(lp.version == UniswapExchangeData.VERSION_V2):
-            if(tkn.token_name == lp.token0):
-                amt_out = lp.get_amount_out0(amount_in)
+
+            if(self.include_fee):
+                if(tkn.token_name == lp.token0):
+                    amt_out = lp.get_amount_out0(amount_in)
+                else:
+                    amt_out = lp.get_amount_out1(amount_in)
             else:
-                amt_out = lp.get_amount_out1(amount_in)
+                if(tkn.token_name == lp.token0):
+                    amt_out = (amount_in * lp.reserve1) / lp.reserve0
+                else:
+                    amt_out = (amount_in * lp.reserve0) / lp.reserve1
+
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
             quote_out = UniV3Helper().quote(lp, tkn, amount_in, lwr_tick, upr_tick)
             amt_out = quote_out[0]

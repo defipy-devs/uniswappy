@@ -32,16 +32,20 @@ class ChildLP():
 
     def _get_reserves(self, tkn):
         reserve = self.lp.get_reserve(tkn)
-        virtual_reserve = self.lp.get_virtual_reserve(tkn)
-        if tkn.type == 'index':
-            parent_lp = tkn.parent_lp
-            parent_token = tkn.parent_tkn
-            p = parent_lp.get_price(parent_token)
-            lwr_tick = UniV3Helper().get_price_tick(parent_lp, -1, p, self.tick_space)
-            upr_tick = UniV3Helper().get_price_tick(parent_lp, 1, p, self.tick_space)
-            reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(reserve), lwr_tick, upr_tick)
-            virtual_reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(virtual_reserve), lwr_tick, upr_tick)
-
+        if(reserve == 0):
+            virtual_reserve = 0
+        else:      
+            virtual_reserve = self.lp.get_virtual_reserve(tkn)
+            if tkn.type == 'index':
+                parent_lp = tkn.parent_lp
+                parent_token = tkn.parent_tkn
+                parent_lp_tkn_x = parent_lp.factory.token_from_exchange[parent_lp.name][parent_lp.token0]
+                p = parent_lp.get_price(parent_lp_tkn_x)
+                lwr_tick = UniV3Helper().get_price_tick(parent_lp, -1, p, 1000)
+                upr_tick = UniV3Helper().get_price_tick(parent_lp, 1, p, 1000)
+                reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(reserve), lwr_tick, upr_tick)
+                virtual_reserve = LPQuote(False).get_amount_from_lp(parent_lp, parent_token, int(virtual_reserve), lwr_tick, upr_tick)
+            
         return reserve, virtual_reserve
 
     def get_price(self, tkn):  
@@ -61,6 +65,14 @@ class ChildLP():
             return self.reserve0 
         elif(tkn.token_name == self.y_tkn.token_name):
             return self.reserve1 
+
+    def get_base_tkn(self, tkn):
+        if tkn.type == 'index':
+            base_lp = tkn.parent_lp
+            base_token = tkn.parent_tkn
+            return base_token
+        else:
+            return tkn
 
     def get_real_reserve(self, tkn):  
         return self.lp.get_reserve(tkn)

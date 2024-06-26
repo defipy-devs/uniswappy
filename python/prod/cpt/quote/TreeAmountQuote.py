@@ -56,7 +56,7 @@ class TreeAmountQuote():
         parent_x_tkn = tkn_x.parent_tkn if tkn_x.type == 'index' else tkn_x
 
         if(parent_x_tkn.token_name != parent_lp_x_tkn.token_name):
-            x_amt = LPQuote().get_amount(parent_lp, parent_x_tkn, x_am, self.lwr_tick, self.upr_tickt) 
+            x_amt = LPQuote().get_amount(parent_lp, parent_x_tkn, x_amt, self.lwr_tick, self.upr_tick) 
 
         return x_amt
 

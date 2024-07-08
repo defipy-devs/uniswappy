@@ -2,8 +2,6 @@
 This package contains python re-factors of both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
 pairing codes, and can be utilized for the purpose of analysing and modelling its behavior for DeFi. 
 
-If you find this package helpful, please leave a ⭐!
-
 ## Docs
 Visit [docs](https://defipy.org) for full documentation with walk-through 
 tutorials
@@ -136,6 +134,8 @@ possible trading behavior
  * **Analytical Tools**: Basic yeild calculators and risk tools to assist 
 in analyzing outcomes; see 
 article [How to Simulate a Uniswap V3 Order Book in Python](https://medium.com/datadriveninvestor/how-to-simulate-a-uniswap-v3-order-book-in-python-149480d12305)
+
+If you find this package helpful, please leave a ⭐!
  
  
 

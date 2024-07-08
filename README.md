@@ -1,6 +1,8 @@
 # UniswapPy: Uniswap V2 / V3 Analytics with Python
 This package contains python re-factors of both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
-pairing codes, and can be utilized for the purpose of analysing and modelling its behavior for DeFi. If you find this package helpful, please leave a ⭐!
+pairing codes, and can be utilized for the purpose of analysing and modelling its behavior for DeFi. 
+
+If you find this package helpful, please leave a ⭐!
 
 ## Docs
 Visit [docs](https://defipy.org) for full documentation with walk-through 

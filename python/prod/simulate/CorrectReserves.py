@@ -89,7 +89,7 @@ class CorrectReserves:
                 self._update(p, lwr_tick, upr_tick)
                 do_update = False 
             except:
-                p = p + np.random.normal(0, 0.1)  
+                p = p + np.random.normal(0, 0.001)  
                 do_update = True 
                 
         assert c != MAX_ATTEMPTS, 'Uniswap: RESERVE_CORRECTION_FAILURE'   

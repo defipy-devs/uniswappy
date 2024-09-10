@@ -17,13 +17,13 @@ class TokenDeltaModel():
     def apply(self, n = 1):
         
         if(n == 1):
-            rval = self.delta(self, self.__max_trade)
+            rval = self.delta(self.__max_trade)
             return min(rval, self.__max_trade)  
         else:
     
             res = []
             for k in range(n):
-                rval = self.delta(self, self.__max_trade)
+                rval = self.delta(self.__max_trade)
                 res.append(min(rval,self.__max_trade))
                 
             return res  

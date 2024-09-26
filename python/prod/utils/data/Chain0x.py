@@ -4,6 +4,12 @@
 
 from dataclasses import dataclass
 from ...math.model import TokenDeltaModel
+import os
+from dotenv import load_dotenv
+
+# Specify the path to the .env file
+dotenv_path = os.path.join(os.path.dirname(__file__), '../../../../../.env')
+load_dotenv(dotenv_path)
 
 DEFAULT_CHAIN_NM = "api.0x.org"
 DEFAULT_BUY_TKN_NM = "WETH"
@@ -17,7 +23,7 @@ DEFAULT_INIT_INVESTMENT = 1
 DEFAULT_GAMMA_SHAPE = 1
 DEFAULT_GAMMA_SCALE = 1
 DEFAULT_MAX_TRADE_PERCENT = 0.003
-DEFAULT_API_KEY = "6cbf2275-5cee-4659-8d67-5491399a9c5e"
+DEFAULT_API_KEY = os.getenv("PREMIUM_API_KEY")
 DEFAULT_API_SELL_AMOUNT = '10000000'
 
 @dataclass

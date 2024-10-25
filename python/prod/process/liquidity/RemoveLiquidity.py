@@ -55,7 +55,6 @@ class RemoveLiquidity(Process):
         tokens = lp.factory.token_from_exchange[lp.name]  
 
         if(lp.version == UniswapExchangeData.VERSION_V2):
-
             res0 = lp.get_reserve(tokens[lp.token0])
             res1 = lp.get_reserve(tokens[lp.token1])
             tot_liq = lp.get_liquidity()

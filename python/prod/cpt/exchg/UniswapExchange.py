@@ -7,9 +7,13 @@ from ...erc import LPERC20
 from ...utils.interfaces import IExchange 
 from ...utils.data import UniswapExchangeData
 from ...utils.data import FactoryData
+from ...utils.tools.v3 import FullMath
+from ...utils.tools.v3 import UniV3Helper
 import math
+from decimal import Decimal
 
-MINIMUM_LIQUIDITY = 1e-15
+#MINIMUM_LIQUIDITY = 1e-15
+MINIMUM_LIQUIDITY = 1000
 
 class UniswapExchange(IExchange, LPERC20):
     
@@ -26,6 +30,7 @@ class UniswapExchange(IExchange, LPERC20):
     def __init__(self, factory_struct: FactoryData, exchg_struct: UniswapExchangeData):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
         self.version = exchg_struct.version
+        self.precision = exchg_struct.precision
         self.factory = factory_struct
         self.token0 = exchg_struct.tkn0.token_name     
         self.token1 = exchg_struct.tkn1.token_name       
@@ -48,10 +53,17 @@ class UniswapExchange(IExchange, LPERC20):
         """ summary
             Summary print-out of exchange, reserves and liquidity               
         """  
+
+        reserve0 = self._convert_to_human(self.reserve0)
+        reserve1 = self._convert_to_human(self.reserve1)
+        total_supply = self._convert_to_human(self.total_supply)
         
         print(f"Exchange {self.name} ({self.symbol})")
-        print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
-        print(f"Liquidity: {self.total_supply} \n")
+        print(f"Reserves: {self.token0} = {reserve0}, {self.token1} = {reserve1}")
+        print(f"Liquidity: {total_supply} \n")    
+        
+        #print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
+        #print(f"Liquidity: {self.total_supply} \n")
 
     def add_liquidity(self, _from_addr, amountADesired, amountBDesired, amountAMin, amountBMin):
         
@@ -71,14 +83,19 @@ class UniswapExchange(IExchange, LPERC20):
                 Minimum amount of A  
             amountBMin : float
                 Minimum amount of B                 
-        """           
-        
+        """  
+
+        amountADesired = self._convert_to_machine(amountADesired)
+        amountBDesired = self._convert_to_machine(amountBDesired)
+        amountAMin = self._convert_to_machine(amountAMin)
+        amountBMin = self._convert_to_machine(amountBMin)
+
         tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0) and tokens.get(self.token1), 'UniswapV2: TOKEN_UNAVAILABLE' 
         amountA, amountB = self._add_liquidity(amountADesired, amountBDesired, amountAMin, amountBMin)
-
-        tokens.get(self.token0).deposit(_from_addr, amountA)
-        tokens.get(self.token1).deposit(_from_addr, amountB)
+        
+        tokens.get(self.token0).deposit(_from_addr, int(amountA))
+        tokens.get(self.token1).deposit(_from_addr, int(amountB))
 
         self.mint(_from_addr, amountA, amountB)
         return amountA, amountB
@@ -116,18 +133,20 @@ class UniswapExchange(IExchange, LPERC20):
             amountB = amountBDesired
         else:
             amountBOptimal = self.quote(amountADesired, self.reserve0, self.reserve1)
-            if amountBOptimal <= amountBDesired:                
-                assert round(amountBOptimal,5) >= round(amountBMin,5), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
+            if amountBOptimal <= amountBDesired:                    
+                assert round(int(amountBOptimal),-25) >= round(int(amountBMin),-25), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
                 amountA = amountADesired
                 amountB = amountBOptimal
             else:
-                amountAOptimal = self.quote(amountBDesired, self.reserve1, self.reserve0)
-                assert round(amountAOptimal,5) <= round(amountADesired,5)
-                assert round(amountAOptimal,5) >= round(amountAMin,5), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
+                amountAOptimal = self.quote(amountBDesired, self.reserve1, self.reserve0)                
+                assert round(int(amountAOptimal),-20) <= round(int(amountADesired),-20)
+                assert round(int(amountAOptimal),-20) >= round(int(amountAMin),-20), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
                 amountA = amountAOptimal
                 amountB = amountBDesired
 
-        return amountA, amountB
+        return amountA, amountB   
+
+    
 
     def get_amounts(self, to_addr, liquidity):
         
@@ -159,9 +178,12 @@ class UniswapExchange(IExchange, LPERC20):
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
-        amountA = liquidity * balanceA / self.total_supply     
-        amountB = liquidity * balanceB / self.total_supply    
-
+        # amountA = liquidity * balanceA / self.total_supply     
+        # amountB = liquidity * balanceB / self.total_supply   
+        
+        amountA = FullMath.divRoundingUp(liquidity * balanceA, self.total_supply)
+        amountB = FullMath.divRoundingUp(liquidity * balanceB, self.total_supply)
+        
         return amountA, amountB    
     
     def remove_liquidity(self, to_addr, liquidity, amountAMin, amountBMin):
@@ -187,8 +209,12 @@ class UniswapExchange(IExchange, LPERC20):
                 removed liquidity from reserve0    
             amountB : float
                 removed liquidity from reserve1                    
-        """         
-        
+        """   
+
+        liquidity = self._convert_to_machine(liquidity)
+        amountAMin = self._convert_to_machine(amountAMin)
+        amountBMin = self._convert_to_machine(amountBMin)
+
         tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0) and tokens.get(self.token1), 'UniswapV2: TOKEN_UNAVAILABLE' 
 
@@ -198,13 +224,16 @@ class UniswapExchange(IExchange, LPERC20):
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
-        amountA = liquidity * balanceA / self.total_supply    
-        amountB = liquidity * balanceB / self.total_supply  
+        # amountA = liquidity * balanceA / self.total_supply    
+        # amountB = liquidity * balanceB / self.total_supply  
+
+        amountA = FullMath.divRoundingUp(liquidity * balanceA, self.total_supply)
+        amountB = FullMath.divRoundingUp(liquidity * balanceB, self.total_supply)
         
-        assert (round(amountA,5) >= round(amountAMin,5)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
+        assert (round(int(amountA),-10) >= round(int(amountAMin),-10)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
         assert amountA > 0 and amountB > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED'
-        assert round(amountA,5) >= round(amountAMin,5), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
-        assert round(amountB,5) >= round(amountBMin,5), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
+        assert round(int(amountA),-10) >= round(int(amountAMin),-10), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
+        assert round(int(amountB),-10) >= round(int(amountBMin),-10), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
         
         self.burn(to_addr, liquidity, amountA, amountB)
         return amountA, amountB
@@ -230,10 +259,14 @@ class UniswapExchange(IExchange, LPERC20):
             -------
             amount_out_expected : float
                 amount expected from the swap                    
-        """          
-        
+        """   
         amount_out_expected = self.get_amount_out(amountIn, token_in)
+
         assert amount_out_expected >= amountOutMin, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT'
+
+        amount_out_expected = self._convert_to_machine(amount_out_expected)
+        amountIn = self._convert_to_machine(amountIn)
+        amountOutMin = self._convert_to_machine(amountOutMin)        
 
         tokens = self.factory.token_from_exchange[self.name]
         if(token_in.token_name == self.token0):
@@ -261,7 +294,11 @@ class UniswapExchange(IExchange, LPERC20):
                 est. amount from reserve0 to be burned
             amountB : float
                 est. amount from reserve1 to be burned               
-        """          
+        """  
+
+        #liquidity = self._convert_to_machine(liquidity)
+        #amountA = self._convert_to_machine(amountA)
+        #amountB = self._convert_to_machine(amountB)
         
         self._burn(to_addr, liquidity)
 
@@ -306,7 +343,7 @@ class UniswapExchange(IExchange, LPERC20):
                 desired amount of A      
             _amountB : float
                 desired amount of B                   
-        """          
+        """  
         
         tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0) and tokens.get(self.token1), 'UniswapV2: TOKEN_UNAVAILABLE' 
@@ -314,21 +351,25 @@ class UniswapExchange(IExchange, LPERC20):
         balanceA = tokens.get(self.token0).token_total
         balanceB = tokens.get(self.token1).token_total
 
+
         amountA = balanceA - self.reserve0
         amountB = balanceB - self.reserve1
         
-        assert round(amountA,3) == round(_amountA,3)
-        assert round(amountB,3) == round(_amountB,3)
+        assert round(int(amountA),-10) == round(int(_amountA),-10)
+        assert round(int(amountB),-10) == round(int(_amountB),-10) 
 
         if self.total_supply != 0:
             liquidity = min(
-                amountA * self.total_supply / self.reserve0,
-                amountB * self.total_supply / self.reserve1
+                FullMath.divRoundingUp(amountA * self.total_supply, self.reserve0),
+                FullMath.divRoundingUp(amountB * self.total_supply, self.reserve1)
+                # amountA * self.total_supply / self.reserve0,
+                # amountB * self.total_supply / self.reserve1
             )
         else:
-            liquidity = math.sqrt(amountA * amountB) - MINIMUM_LIQUIDITY
+            # liquidity = math.sqrt(amountA * amountB) - MINIMUM_LIQUIDITY
+            liquidity = math.isqrt(amountA * amountB) - MINIMUM_LIQUIDITY
             self._mint("0", MINIMUM_LIQUIDITY)
-
+            
         assert liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED'
         
         self._update(balanceA, balanceB)
@@ -348,8 +389,8 @@ class UniswapExchange(IExchange, LPERC20):
                 new reserve amount of B                   
         """         
         
-        self.reserve0 = balanceA
-        self.reserve1 = balanceB
+        self.reserve0 = int(balanceA)  
+        self.reserve1 = int(balanceB)
 
     def _mint(self, to_addr, value):
         
@@ -407,7 +448,7 @@ class UniswapExchange(IExchange, LPERC20):
                 swap amountB out               
             to_addr : str
                receiving user address                   
-        """         
+        """      
         
         assert amountA_out > 0 or amountB_out > 0, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT'
         assert amountA_out < self.reserve0 and amountB_out < self.reserve1, 'UniswapV2: INSUFFICIENT_LIQUIDITY'
@@ -437,7 +478,8 @@ class UniswapExchange(IExchange, LPERC20):
         #assert  lside  ==  rside , 'UniswapV2: K'
     
         self._update(balanceA, balanceB)
-        self._tally_fees(amountA_in * 3 / 1000, amountB_in * 3 / 1000)           
+        self._tally_fees(FullMath.divRoundingUp(amountA_in * 3, 1000), FullMath.divRoundingUp(amountB_in * 3, 1000))        
+        # self._tally_fees(amountA_in * 3 / 1000, amountB_in * 3 / 1000)           
  
     def quote(self, amountA, reserveA, reserveB):
         
@@ -453,11 +495,18 @@ class UniswapExchange(IExchange, LPERC20):
                 total amount of asset A in LP              
             reserveB : float
                 total amount of asset B in LP                    
-        """          
+        """  
+
+        amountA = self._convert_to_machine(amountA)
+        reserveA = self._convert_to_machine(reserveA)
+        reserveB = self._convert_to_machine(reserveB)
         
         assert amountA > 0, 'UniswapV2Library: INSUFFICIENT_AMOUNT'
         assert reserveA > 0 and reserveB > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
-        return (amountA * reserveB) / reserveA;        
+        quote_out = FullMath.divRoundingUp(amountA * reserveB, reserveA)   
+        
+        return self._convert_to_human(quote_out)
+        # return (amountA * reserveB) / reserveA;        
 
     def get_amount_out(self, amount_in, token_in):
 
@@ -476,7 +525,7 @@ class UniswapExchange(IExchange, LPERC20):
             -------
             amount out : float
                 amount of opposing asset                       
-        """         
+        """ 
         
         if(token_in.token_name == self.token0):    
             return self.get_amount_out0(amount_in) 
@@ -501,14 +550,17 @@ class UniswapExchange(IExchange, LPERC20):
             amount_out out : float
                 reserve1 * reserve0       
         """
+
+        amount_in = self._convert_to_machine(amount_in)
         
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
         amount_in_with_fee = amount_in * 997  
-        amount_out = (amount_in * 997  * self.reserve1) / (self.reserve0 * 1000 + amount_in_with_fee)
+        # amount_out = (amount_in * 997  * self.reserve1) / (self.reserve0 * 1000 + amount_in_with_fee)
+        amount_out =  FullMath.divRoundingUp(amount_in * 997  * self.reserve1, self.reserve0 * 1000 + amount_in_with_fee)
 
-        return amount_out
+        return self._convert_to_human(amount_out) 
     
     def get_amount_out1(self, amount_in):
         
@@ -526,14 +578,17 @@ class UniswapExchange(IExchange, LPERC20):
             amount_out out : float
                 reserve1 * reserve0       
         """        
+
+        amount_in = self._convert_to_machine(amount_in)
         
         assert amount_in > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
         amount_in_with_fee = amount_in * 997    
-        amount_out = (amount_in_with_fee * self.reserve0) / (self.reserve1 * 1000 + amount_in_with_fee)
+        # amount_out = (amount_in_with_fee * self.reserve0) / (self.reserve1 * 1000 + amount_in_with_fee)
+        amount_out = FullMath.divRoundingUp(amount_in_with_fee * self.reserve0, self.reserve1 * 1000 + amount_in_with_fee)
 
-        return amount_out 
+        return self._convert_to_human(amount_out)  
 
     def update_reserves(self, user_nm, amountA_update = None, amountB_update = None):
         
@@ -549,7 +604,7 @@ class UniswapExchange(IExchange, LPERC20):
                 update amount of asset A             
             amountB_update : float
                 update amount of asset B      
-        """          
+        """   
         
         amountA_update = amountA_update if amount0_update != None else self.reserve0
         amountB_update = amountB_update if amountB_update != None else self.reserve1
@@ -580,7 +635,8 @@ class UniswapExchange(IExchange, LPERC20):
             if(self.reserve1 == 0):
                 return None
             else:
-                return self.reserve0/self.reserve1
+                # return self.reserve0/self.reserve1
+                return FullMath.divRoundingUp(self.reserve0, self.reserve1)
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
 
@@ -591,7 +647,7 @@ class UniswapExchange(IExchange, LPERC20):
             Get liquidity of exchange pool         
         """          
 
-        return self.total_supply       
+        return self._convert_to_human(self.total_supply)       
             
     def get_reserve(self, token):  
         
@@ -606,8 +662,18 @@ class UniswapExchange(IExchange, LPERC20):
         """         
         
         if(token.token_name == self.token0):
-            return self.reserve0 
+            return self._convert_to_human(self.reserve0)
         elif(token.token_name == self.token1):
-            return self.reserve1 
+            return self._convert_to_human(self.reserve1) 
         else:
-            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'                
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'  
+
+    def _convert_to_human(self, val): 
+        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)
+        return val
+
+    def _convert_to_machine(self, val): 
+        val = int(val) if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
+        return val   
+    
+        

@@ -72,7 +72,8 @@ class UniV3Helper():
         return int(math.sqrt(p) * Q96)    
 
     def sqrtp_to_price(self, sqrtp):
-        return sqrtp/2**99  
+        #return sqrtp/(2**99)  
+        return sqrtp/Q96  
 
     def dec2gwei(self, tkn_amt, precision=None):
         precision = GWEI_PRECISION if precision == None else precision

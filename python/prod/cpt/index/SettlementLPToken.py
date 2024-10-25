@@ -6,7 +6,8 @@ import numpy as np
 import math
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import TickMath
-
+from ...utils.tools.v3 import UniV3Helper
+from ...utils.tools.v3 import FullMath
 
 class SettlementLPToken():
     
@@ -48,6 +49,11 @@ class SettlementLPToken():
 
         (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
+
+        x = self._convert_to_machine(x, lp)
+        y = self._convert_to_machine(y, lp)
+        L = self._convert_to_machine(L, lp)
+        
         if(L == 0): 
             return 0
         else:
@@ -56,10 +62,14 @@ class SettlementLPToken():
             a1 = x*y/L
             a2 = L
             a = a1/a2
-            b = (1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma)/(1000*L);
+            #b = (1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma)/(1000*L);
+            b = FullMath.divRoundingUp(1000*itkn_amt*x - itkn_amt*gamma*x + 1000*x*y + x*y*gamma, 1000*L)
             c = itkn_amt*x;
 
-            dL = (b*a2 - a2*np.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
+            #dL = (b*a2 - a2*np.sqrt(b*b - 4*a1*c/a2)) / (2*a1);
+            print(b*b - 4*a1*c)
+            xx = FullMath.divRoundingUp(b*b - 4*a1*c,a2)
+            dL = FullMath.divRoundingUp(b*a2 - a2*math.isqrt(xx), 2*a1)
             return dL  
 
     def calc_univ3_lp_settlement(self, lp, token_in, itkn_amt, lwr_tick, upr_tick):
@@ -97,4 +107,8 @@ class SettlementLPToken():
             y = lp.get_reserve(tokens[lp.token0])
 
         return (x, y)  
+
+    def _convert_to_machine(self, val, lp): 
+        val = int(val) if lp.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
+        return val           
             

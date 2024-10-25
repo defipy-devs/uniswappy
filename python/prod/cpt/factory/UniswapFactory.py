@@ -66,7 +66,7 @@ class UniswapFactory(IExchangeFactory):
 
         match exchg_data.version:
             case UniswapExchangeData.VERSION_V2:
-                exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, address=address)
+                exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, precision = precision, address=address)
                 exchange = UniswapExchange(factory_struct, exchg_struct) 
             case UniswapExchangeData.VERSION_V3: 
                 exchg_struct = UniswapExchangeData(tkn0 = token0, tkn1 = token1, symbol=symbol, 

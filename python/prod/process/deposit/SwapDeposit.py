@@ -62,8 +62,8 @@ class SwapDeposit(Process):
         trading_token = self.get_trading_token(lp, token_in)
 
         # Step 2: deposit   
-        if(lp.version == UniswapExchangeData.VERSION_V2):
-
+        if(lp.version == UniswapExchangeData.VERSION_V2):  
+        
             # Step 1: swap 
             p_in = self._calc_univ2_deposit_portion(lp, token_in, amount_in)
             amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)

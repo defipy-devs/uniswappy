@@ -41,7 +41,7 @@ class Join():
                 join output               
         """ 
 
-        if(lp.version == UniswapExchangeData.VERSION_V2):
+        if(lp.version == UniswapExchangeData.VERSION_V2):       
             out = lp.add_liquidity(user_nm, amount0, amount1, amount0, amount1)
             
         elif(lp.version == UniswapExchangeData.VERSION_V3):

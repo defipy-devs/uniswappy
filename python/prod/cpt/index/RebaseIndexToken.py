@@ -51,20 +51,17 @@ class RebaseIndexToken():
         (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
 
-        x = self._convert_to_machine(x, lp)
-        y = self._convert_to_machine(y, lp)
-        L = self._convert_to_machine(L, lp)
-        
-        #a0 = dL*x/L
-        #a1 = dL*y/L
-        #gamma = 997/1000
+        x = lp.convert_to_machine(x)
+        y = lp.convert_to_machine(y)
+        L = lp.convert_to_machine(L)
+        dL = lp.convert_to_machine(dL)
 
         a0 = FullMath.divRoundingUp(dL*x, L)
         a1 = FullMath.divRoundingUp(dL*y, L)
+        gamma = 997
 
         dy1 = a1
-        #dy2 = gamma*a0*(y - a1)/(x - a0 + gamma*a0)
-        dy2 = FullMath.divRoundingUp(gamma*a0*(y - a1), x - a0 + gamma*a0)
+        dy2 = FullMath.divRoundingUp(gamma*a0*(y - a1), 1000*x - 1000*a0 + gamma*a0)
         itkn_amt = dy1 + dy2
 
         return itkn_amt if itkn_amt > 0 else 0  
@@ -106,8 +103,5 @@ class RebaseIndexToken():
             x = lp.get_reserve(tokens[lp.token1])
             y = lp.get_reserve(tokens[lp.token0])
         return (x, y)   
-
-    def _convert_to_machine(self, val, lp): 
-        val = int(val) if lp.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
-        return val          
+        
             

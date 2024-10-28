@@ -78,10 +78,12 @@ class JoinTree(Process):
         
         SwapIndexMint(iVault).apply(parent_lp, parent_tkn, user_nm, parent_tkn_amt)
         mint_itkn_deposit = iVault.index_tokens[itkn_nm]['last_lp_deposit']
-        opposite_tkn = x_tkn.token_name == parent_tkn.token_name
+        mint_itkn_deposit = child_lp.convert_to_human(mint_itkn_deposit)
+        opposite_tkn = x_tkn.token_name != parent_tkn.token_name
         tkn_amount1 = LPQuote(opposite_tkn).get_amount_from_lp(parent_lp, parent_tkn, mint_itkn_deposit) 
         price_itkn = tkn_amount1/mint_itkn_deposit 
         #AddLiquidity(price_itkn).apply(child_lp, y_tkn, user_nm, mint_itkn_deposit)  
+        
         return AddLiquidity(price_itkn).apply(child_lp, y_tkn, user_nm, mint_itkn_deposit)    
 
     def _synthetic(self, child_lp, user_nm, iVault, parent_tkn_amt, lwr_tick, upr_tick):  
@@ -98,6 +100,7 @@ class JoinTree(Process):
         
         SwapIndexMint(iVault).apply(parent_lp, parent_tkn, user_nm, parent_tkn_amt)
         mint_itkn_deposit = iVault.index_tokens[itkn_nm]['last_lp_deposit']
+        mint_itkn_deposit = child_lp.convert_to_human(mint_itkn_deposit)
         tkn_amount1 = LPQuote(False).get_amount_from_lp(parent_lp, parent_tkn, mint_itkn_deposit) 
         
         itkn1_deposit = 0.5*mint_itkn_deposit

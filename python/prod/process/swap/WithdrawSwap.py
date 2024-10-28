@@ -9,6 +9,7 @@ from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
 from ...cpt.index import SettlementLPToken
+from ...utils.tools.v3 import FullMath
 import math
 
 class WithdrawSwap(Process):
@@ -57,12 +58,11 @@ class WithdrawSwap(Process):
         """          
         
         amount_out = tDel.delta() if amount_out == None else amount_out
-    
-        
+      
         if(lp.version == UniswapExchangeData.VERSION_V2):            
             # Step 1: withdrawal
             p_out = self._calc_withdraw_portion(lp, token_out, amount_out, lwr_tick, upr_tick)
-            removeLiq = RemoveLiquidity()
+            removeLiq = RemoveLiquidity()   
             res = removeLiq.apply(lp, token_out, user_nm, p_out*amount_out)
     
             # Step 2: swap
@@ -113,13 +113,14 @@ class WithdrawSwap(Process):
     def _calc_withdraw_portion(self, lp, token_in, amt, lwr_tick, upr_tick):
 
         (x, y) = self._get_reserves(lp, token_in)
-        L = lp.get_liquidity()
-        gamma = 997/1000
 
+        L = lp.total_supply
+        gamma = 997
         dL = SettlementLPToken().apply(lp, token_in, amt, lwr_tick, upr_tick)
-        dx = dL*x/L
-        dy = dL*y/L
-        aswap = (gamma*dx)*(y-dy)/(x-dx+gamma*dx)
+        amt = lp.convert_to_machine(amt)
+        dx = FullMath.divRoundingUp(dL*x,L)
+        dy = FullMath.divRoundingUp(dL*y,L)
+        aswap = (gamma*dx)*(y-dy)/(1000*x-1000*dx+gamma*dx)        
 
         return dy/amt 
 
@@ -127,11 +128,12 @@ class WithdrawSwap(Process):
         tokens = lp.factory.token_from_exchange[lp.name]
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(token_in.token_name == lp.token1):
-                x = lp.get_reserve(tokens[lp.token0])
-                y = lp.get_reserve(tokens[lp.token1])
+                x = lp.reserve0
+                y = lp.reserve1
             else: 
-                x = lp.get_reserve(tokens[lp.token1])
-                y = lp.get_reserve(tokens[lp.token0])
+                x = lp.reserve1
+                y = lp.reserve0
+
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token1):
                 x = lp.get_virtual_reserve(tokens[lp.token0])

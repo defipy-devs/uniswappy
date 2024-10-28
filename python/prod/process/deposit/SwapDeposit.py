@@ -12,6 +12,7 @@ from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import UniV3Helper
 from ...utils.tools.v3 import TickMath
+from ...utils.tools.v3 import FullMath
 
 class SwapDeposit(Process):
     
@@ -159,22 +160,25 @@ class SwapDeposit(Process):
         return abs(diff)+opt_tol
     
     def _calc_univ2_deposit_portion(self, lp, token_in, dx):
-
+        
+        dx = lp.convert_to_machine(dx)
         tkn_supply = self._get_tkn_supply(lp, token_in)
-        a = 997*(dx**2)/(1000*tkn_supply)
-        b = dx*(1997/1000)
+                
+        a = FullMath.divRoundingUp(997*(dx**2), 1000*tkn_supply)
+        b = FullMath.divRoundingUp(dx*1997, 1000)
         c = -dx
-
-        alpha = -(b - math.sqrt(b*b - 4*a*c)) / (2*a)
-        return alpha 
+        
+        radicand = b*b - 4*a*c
+        alpha = -(b - math.isqrt(radicand)) / (2*a)
+        return alpha  
 
     def _get_tkn_supply(self, lp, token_in):
         tokens = lp.factory.token_from_exchange[lp.name]
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_reserve(tokens[lp.token0])
+                tkn_supply = lp.reserve0
             else:    
-                tkn_supply = lp.get_reserve(tokens[lp.token1])
+                tkn_supply = lp.reserve1
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token0):
                 tkn_supply = lp.get_reserve(tokens[lp.token0])

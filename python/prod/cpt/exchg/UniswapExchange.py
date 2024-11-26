@@ -9,6 +9,7 @@ from ...utils.data import UniswapExchangeData
 from ...utils.data import FactoryData
 from ...utils.tools.v3 import FullMath
 from ...utils.tools.v3 import UniV3Helper
+from ...utils.tools import SaferMath
 import math
 from decimal import Decimal
 
@@ -179,8 +180,8 @@ class UniswapExchange(IExchange, LPERC20):
         # amountA = liquidity * balanceA / self.total_supply     
         # amountB = liquidity * balanceB / self.total_supply   
         
-        amountA = FullMath.divRoundingUp(liquidity * balanceA, self.total_supply)
-        amountB = FullMath.divRoundingUp(liquidity * balanceB, self.total_supply)
+        amountA = SaferMath().mul_div_round(liquidity, balanceA, self.total_supply)
+        amountB = SaferMath().mul_div_round(liquidity, balanceB, self.total_supply)
         
         return amountA, amountB    
     
@@ -225,8 +226,8 @@ class UniswapExchange(IExchange, LPERC20):
         # amountA = liquidity * balanceA / self.total_supply    
         # amountB = liquidity * balanceB / self.total_supply  
 
-        amountA = FullMath.divRoundingUp(liquidity * balanceA, self.total_supply)
-        amountB = FullMath.divRoundingUp(liquidity * balanceB, self.total_supply)
+        amountA = SaferMath().mul_div_round(liquidity, balanceA, self.total_supply)
+        amountB = SaferMath().mul_div_round(liquidity, balanceB, self.total_supply)
 
         assert (round(int(amountA),-10) >= round(int(amountAMin),-10)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
         assert amountA > 0 and amountB > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED'
@@ -358,8 +359,8 @@ class UniswapExchange(IExchange, LPERC20):
 
         if self.total_supply != 0:
             liquidity = min(
-                FullMath.divRoundingUp(amountA * self.total_supply, self.reserve0),
-                FullMath.divRoundingUp(amountB * self.total_supply, self.reserve1)
+                SaferMath().mul_div_round(amountA, self.total_supply, self.reserve0),
+                SaferMath().mul_div_round(amountB, self.total_supply, self.reserve1)
                 # amountA * self.total_supply / self.reserve0,
                 # amountB * self.total_supply / self.reserve1
             )
@@ -476,7 +477,7 @@ class UniswapExchange(IExchange, LPERC20):
         #assert  lside  ==  rside , 'UniswapV2: K'
     
         self._update(balanceA, balanceB)
-        self._tally_fees(FullMath.divRoundingUp(amountA_in * 3, 1000), FullMath.divRoundingUp(amountB_in * 3, 1000))        
+        self._tally_fees(SaferMath().mul_div_round(amountA_in, 3, 1000), SaferMath().mul_div_round(amountB_in, 3, 1000))        
         # self._tally_fees(amountA_in * 3 / 1000, amountB_in * 3 / 1000)           
  
     def quote(self, amountA, reserveA, reserveB):
@@ -501,7 +502,7 @@ class UniswapExchange(IExchange, LPERC20):
         
         assert amountA > 0, 'UniswapV2Library: INSUFFICIENT_AMOUNT'
         assert reserveA > 0 and reserveB > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
-        quote_out = FullMath.divRoundingUp(amountA * reserveB, reserveA)   
+        quote_out = SaferMath().mul_div_round(amountA, reserveB, reserveA)   
         
         return self.convert_to_human(quote_out)
         # return (amountA * reserveB) / reserveA;        
@@ -556,7 +557,7 @@ class UniswapExchange(IExchange, LPERC20):
 
         amount_in_with_fee = amount_in * 997  
         # amount_out = (amount_in * 997  * self.reserve1) / (self.reserve0 * 1000 + amount_in_with_fee)
-        amount_out =  FullMath.divRoundingUp(amount_in * 997  * self.reserve1, self.reserve0 * 1000 + amount_in_with_fee)
+        amount_out =  SaferMath().div_round(amount_in * 997  * self.reserve1, self.reserve0 * 1000 + amount_in_with_fee)
 
         return self.convert_to_human(amount_out) 
     
@@ -584,7 +585,7 @@ class UniswapExchange(IExchange, LPERC20):
 
         amount_in_with_fee = amount_in * 997    
         # amount_out = (amount_in_with_fee * self.reserve0) / (self.reserve1 * 1000 + amount_in_with_fee)
-        amount_out = FullMath.divRoundingUp(amount_in_with_fee * self.reserve0, self.reserve1 * 1000 + amount_in_with_fee)
+        amount_out = SaferMath().div_round(amount_in_with_fee * self.reserve0, self.reserve1 * 1000 + amount_in_with_fee)
 
         return self.convert_to_human(amount_out)  
 
@@ -634,7 +635,7 @@ class UniswapExchange(IExchange, LPERC20):
                 return None
             else:
                 # return self.reserve0/self.reserve1
-                return FullMath.divRoundingUp(self.reserve0, self.reserve1)
+                return SaferMath().div_round(self.reserve0, self.reserve1)
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
 

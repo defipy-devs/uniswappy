@@ -229,10 +229,10 @@ class UniswapExchange(IExchange, LPERC20):
         amountA = SaferMath().mul_div_round(liquidity, balanceA, self.total_supply)
         amountB = SaferMath().mul_div_round(liquidity, balanceB, self.total_supply)
 
-        assert (round(int(amountA),-10) >= round(int(amountAMin),-10)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
+        assert (round(int(amountA),-20) >= round(int(amountAMin),-20)), 'AMOUNTA {} AMOUNT_A_MIN {}'.format(round(amountA,5), round(amountAMin,5))
         assert amountA > 0 and amountB > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED'
-        assert round(int(amountA),-10) >= round(int(amountAMin),-10), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
-        assert round(int(amountB),-10) >= round(int(amountBMin),-10), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
+        assert round(int(amountA),-20) >= round(int(amountAMin),-20), 'UniswapV2: INSUFFICIENT_A_AMOUNT'
+        assert round(int(amountB),-20) >= round(int(amountBMin),-20), 'UniswapV2: INSUFFICIENT_B_AMOUNT'
         
         self.burn(to_addr, liquidity, amountA, amountB)
         return self.convert_to_human(amountA), self.convert_to_human(amountB)

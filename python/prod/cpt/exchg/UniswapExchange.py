@@ -694,6 +694,25 @@ class UniswapExchange(IExchange, LPERC20):
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'  
 
+    def get_fee(self, token):  
+        
+        """ get_fee
+
+            Get last fee amount of select token in the exchange pair
+                
+            Parameters
+            -----------------
+            token : ERC20
+                ERC20 token                
+        """         
+        
+        if(token.token_name == self.token0):
+            return self.convert_to_human(self.collected_fee0)
+        elif(token.token_name == self.token1):
+            return self.convert_to_human(self.collected_fee1) 
+        else:
+            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'  
+
     def convert_to_human(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)
         return val

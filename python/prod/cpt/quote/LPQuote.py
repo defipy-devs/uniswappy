@@ -65,9 +65,9 @@ class LPQuote():
         """             
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(token.token_name == lp.token0):        
-                reserve_out = lp.reserve0 
+                reserve_out = lp.convert_to_human(lp.reserve0) 
             elif(token.token_name == lp.token1):
-                reserve_out = lp.reserve1   
+                reserve_out = lp.convert_to_human(lp.reserve1)   
 
             if token.type == 'index':
                 self.quote_opposing = False

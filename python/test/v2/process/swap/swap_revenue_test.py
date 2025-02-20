@@ -64,20 +64,21 @@ class Test_SwapRevenue(unittest.TestCase):
         lp  = self.setup(sys1, dai1)
         
         pre_dai_amt = LPQuote(False).get_amount_from_lp(lp, dai1, 1)
-        pre_lp_amt = lp.liquidity_providers[USER_NM]
-        pre_sys_reserve = lp.reserve0
+        pre_lp_amt = lp.get_liquidity_from_provider(USER_NM)
+        pre_sys_reserve = lp.get_reserve(sys1)
 
         N_RUNS = 100
         for k in range(N_RUNS):
             requested_liquidity_in = 500
-            sys_settlement_amt = RebaseIndexToken().apply(lp, sys1, requested_liquidity_in) 
+            #sys_settlement_amt = RebaseIndexToken().apply(lp, sys1, requested_liquidity_in) 
+            sys_settlement_amt = LPQuote(True).get_amount_from_lp(lp, sys1, requested_liquidity_in)
             dep = SwapDeposit().apply(lp, sys1, USER_NM, sys_settlement_amt)
-            get_deposit = LPQuote(False).get_amount_from_lp(lp, sys1, lp.last_liquidity_deposit)
+            get_deposit = LPQuote(False).get_amount_from_lp(lp, sys1, lp.get_last_liquidity_deposit())
             out = WithdrawSwap().apply(lp, sys1, USER_NM, get_deposit)    
            
         post_dai_amt = LPQuote(False).get_amount_from_lp(lp, dai1, 1)
-        post_lp_amt = lp.liquidity_providers[USER_NM]
-        post_sys_reserve = lp.reserve0
+        post_lp_amt = lp.get_liquidity_from_provider(USER_NM)
+        post_sys_reserve = lp.get_reserve(sys1)
         
         self.assertTrue(round(pre_sys_reserve,8) < round(post_sys_reserve,8))
         self.assertTrue(round(pre_dai_amt,8) == round(post_dai_amt,8))   

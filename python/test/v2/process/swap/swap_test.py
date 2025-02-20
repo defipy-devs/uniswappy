@@ -34,14 +34,14 @@ class Test_Swap(unittest.TestCase):
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
         out = Swap().apply(lp_tkn, tkn, USER0, 1000)
-        self.assertEqual(round(lp_tkn.reserve0,6), 990.12842)
+        self.assertEqual(round(lp_tkn.get_reserve(eth),6), 990.12842)
       
     def test_swap2(self):
         tkn = ERC20("TKN", "0x111")
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
         out = Swap().apply(lp_tkn, eth, USER0, 10)
-        self.assertEqual(round(lp_tkn.reserve1,6), 99012.841966)
+        self.assertEqual(round(lp_tkn.get_reserve(tkn),6), 99012.841966)
 
 if __name__ == '__main__':
     unittest.main()                  

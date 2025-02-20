@@ -38,9 +38,11 @@ class Test_SwapDeposit(unittest.TestCase):
         lp_tkn = self.setup_lp(eth, tkn)
         deposit_amt = SwapDeposit().apply(lp_tkn, tkn, USER0, 100)
 
+        print(deposit_amt)
+
         self.assertEqual(round(deposit_amt,6), 100)
-        self.assertEqual(round(lp_tkn.reserve0,6), 1000.0)
-        self.assertEqual(round(lp_tkn.reserve1,6), 100100.0)
+        self.assertEqual(round(lp_tkn.get_reserve(eth),6), 1000.0) 
+        self.assertEqual(round(lp_tkn.get_reserve(tkn),6), 100100.0)
         
     def test_deposit2(self):
         lp_burn = 300
@@ -50,8 +52,8 @@ class Test_SwapDeposit(unittest.TestCase):
         deposit_amt = SwapDeposit().apply(lp_tkn, eth, USER0, 10)
 
         self.assertEqual(round(deposit_amt,6), 10)    
-        self.assertEqual(round(lp_tkn.reserve0,6), 1010.0) 
-        self.assertEqual(round(lp_tkn.reserve1,6), 100000.0)
+        self.assertEqual(round(lp_tkn.get_reserve(eth),6), 1010.0) 
+        self.assertEqual(round(lp_tkn.get_reserve(tkn),6), 100000.0)
                
 if __name__ == '__main__':
     unittest.main()

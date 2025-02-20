@@ -74,11 +74,11 @@ class SwapDeposit(Process):
             if(token_in.token_name == lp.token1):
                 balance0 = amount_out 
                 balance1 = lp.quote(balance0, lp.reserve0, lp.reserve1)
-                deposited = balance1 + SaferMath().mul(p_in, amount_in)
+                deposited = balance1 + p_in*amount_in if lp.precision == UniswapExchangeData.TYPE_DEC else balance1 + SaferMath().mul(p_in, amount_in)
             elif(token_in.token_name == lp.token0):
                 balance1 = amount_out
                 balance0 = lp.quote(balance1, lp.reserve1, lp.reserve0)
-                deposited = balance0 + SaferMath().mul(p_in, amount_in)
+                deposited = balance0 + p_in*amount_in if lp.precision == UniswapExchangeData.TYPE_DEC else balance0 + SaferMath().mul(p_in, amount_in)
             lp.add_liquidity(user_nm, balance0, balance1, balance0, balance1) 
             
         elif(lp.version == UniswapExchangeData.VERSION_V3):  

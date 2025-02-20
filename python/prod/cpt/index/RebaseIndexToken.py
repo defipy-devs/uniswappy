@@ -5,6 +5,9 @@
 from ...erc import ERC20
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import TickMath
+from ...utils.tools.v3 import UniV3Helper
+from ...utils.tools.v3 import FullMath
+from ...utils.tools import SaferMath
 
 class RebaseIndexToken():
     
@@ -48,12 +51,18 @@ class RebaseIndexToken():
             
         (x, y) = self.get_reserves(lp, token_in)
         L = lp.get_liquidity()
-        a0 = dL*x/L
-        a1 = dL*y/L
-        gamma = 997/1000
+
+        x = lp.convert_to_machine(x)
+        y = lp.convert_to_machine(y)
+        L = lp.convert_to_machine(L)
+        dL = lp.convert_to_machine(dL)
+
+        a0 = SaferMath().mul_div_round(dL, x, L)
+        a1 = SaferMath().mul_div_round(dL, y, L)
+        gamma = 997
 
         dy1 = a1
-        dy2 = gamma*a0*(y - a1)/(x - a0 + gamma*a0)
+        dy2 = SaferMath().div_round(gamma*a0*(y - a1), 1000*x - 1000*a0 + gamma*a0)
         itkn_amt = dy1 + dy2
 
         return itkn_amt if itkn_amt > 0 else 0  
@@ -94,5 +103,6 @@ class RebaseIndexToken():
         else: 
             x = lp.get_reserve(tokens[lp.token1])
             y = lp.get_reserve(tokens[lp.token0])
-        return (x, y)          
+        return (x, y)   
+        
             

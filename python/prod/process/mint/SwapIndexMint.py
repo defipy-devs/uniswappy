@@ -45,8 +45,8 @@ class SwapIndexMint(Process):
             -------
             (amount_in, amount_out) : float, float
                 token swap amounts                
-        """           
-        
+        """      
+
         lp_amt0 = lp_tkn.total_supply
         out = SwapDeposit().apply(lp_tkn, token, user_nm, amt, lwr_tick, upr_tick)
         lp_amt1 = lp_tkn.total_supply

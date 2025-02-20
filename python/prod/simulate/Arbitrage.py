@@ -50,7 +50,7 @@ class Arbitrage():
                 amt_x_sell += amt
                 amt_y_buy += Swap().apply(self.lp, x_tkn, user_nm, amt)
                 p_x = LPQuote().get_price(self.lp, x_tkn, lwr_tick, upr_tick)
-                #print('p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))
+                #print('[1] p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))
 
         elif(p_x != None and p_x <= price_benchmark and num_states > 3):
             while(p_x <= price_benchmark):  
@@ -65,7 +65,7 @@ class Arbitrage():
                     amt_y_sell += q_amt
                     amt_x_buy += Swap().apply(self.lp, y_tkn, user_nm, q_amt)
                     p_x = LPQuote().get_price(self.lp, x_tkn, lwr_tick, upr_tick)
-                #print('p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))    
+                #print('[2] p-bench {:.3f} p_x {:.3f}'.format(price_benchmark, p_x))    
         
         self.net_x = amt_x_buy - amt_x_sell
         self.net_y = amt_y_buy - amt_y_sell 

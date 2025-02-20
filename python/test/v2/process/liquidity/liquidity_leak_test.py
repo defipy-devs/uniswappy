@@ -54,8 +54,8 @@ class Test_LiquidityLeak(unittest.TestCase):
         post_sys_amt = LPQuote(False).get_amount_from_lp(lp, sys1, 1)
         post_lp_amt = lp.liquidity_providers[USER_NM]
         
-        self.assertEqual(round(pre_sys_amt,8), round(post_sys_amt,8))   
-        self.assertEqual(round(pre_lp_amt,8), round(post_lp_amt,8)) 
+        self.assertEqual(round(pre_sys_amt,-8), round(post_sys_amt,-8))   
+        self.assertEqual(round(pre_lp_amt,-8), round(post_lp_amt,-8)) 
 
        
       

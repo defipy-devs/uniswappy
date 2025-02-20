@@ -12,6 +12,8 @@ from ...math.model import EventSelectionModel
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import UniV3Helper
 from ...utils.tools.v3 import TickMath
+from ...utils.tools.v3 import FullMath
+from ...utils.tools import SaferMath
 
 class SwapDeposit(Process):
     
@@ -62,8 +64,8 @@ class SwapDeposit(Process):
         trading_token = self.get_trading_token(lp, token_in)
 
         # Step 2: deposit   
-        if(lp.version == UniswapExchangeData.VERSION_V2):
-
+        if(lp.version == UniswapExchangeData.VERSION_V2):  
+        
             # Step 1: swap 
             p_in = self._calc_univ2_deposit_portion(lp, token_in, amount_in)
             amount_out = Swap().apply(lp, token_in, user_nm, p_in*amount_in)
@@ -72,11 +74,11 @@ class SwapDeposit(Process):
             if(token_in.token_name == lp.token1):
                 balance0 = amount_out 
                 balance1 = lp.quote(balance0, lp.reserve0, lp.reserve1)
-                deposited = balance1 + p_in*amount_in
+                deposited = balance1 + p_in*amount_in if lp.precision == UniswapExchangeData.TYPE_DEC else balance1 + SaferMath().mul(p_in, amount_in)
             elif(token_in.token_name == lp.token0):
                 balance1 = amount_out
                 balance0 = lp.quote(balance1, lp.reserve1, lp.reserve0)
-                deposited = balance0 + p_in*amount_in
+                deposited = balance0 + p_in*amount_in if lp.precision == UniswapExchangeData.TYPE_DEC else balance0 + SaferMath().mul(p_in, amount_in)
             lp.add_liquidity(user_nm, balance0, balance1, balance0, balance1) 
             
         elif(lp.version == UniswapExchangeData.VERSION_V3):  
@@ -157,24 +159,32 @@ class SwapDeposit(Process):
         
         diff = amt_tkn_in - (swap_in + amt_deposit) 
         return abs(diff)+opt_tol
+
     
     def _calc_univ2_deposit_portion(self, lp, token_in, dx):
-
+        
+        dx = lp.convert_to_machine(dx)
         tkn_supply = self._get_tkn_supply(lp, token_in)
-        a = 997*(dx**2)/(1000*tkn_supply)
-        b = dx*(1997/1000)
-        c = -dx
 
-        alpha = -(b - math.sqrt(b*b - 4*a*c)) / (2*a)
-        return alpha 
+        tkn_supply_ = SaferMath().mul(1000, tkn_supply)
+        dx2 = SaferMath().mul(dx, dx)
+        a = SaferMath().mul_div_round(997, dx2, tkn_supply_)
+        b = SaferMath().mul_div_round(dx, 1997, 1000)
+        c = -dx
+        
+        radicand = SaferMath().mul(b, b) - SaferMath().mul(4, SaferMath().mul(a, c))
+        alpha_numerator = -SaferMath().sub(b, math.isqrt(radicand))
+        alpha_denominator = SaferMath().mul(2, a)
+        alpha = alpha_numerator / alpha_denominator
+        return alpha  
 
     def _get_tkn_supply(self, lp, token_in):
         tokens = lp.factory.token_from_exchange[lp.name]
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(token_in.token_name == lp.token0):
-                tkn_supply = lp.get_reserve(tokens[lp.token0])
+                tkn_supply = lp.reserve0
             else:    
-                tkn_supply = lp.get_reserve(tokens[lp.token1])
+                tkn_supply = lp.reserve1
         elif(lp.version == UniswapExchangeData.VERSION_V3):   
             if(token_in.token_name == lp.token0):
                 tkn_supply = lp.get_reserve(tokens[lp.token0])

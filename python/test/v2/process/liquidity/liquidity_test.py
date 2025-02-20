@@ -35,34 +35,32 @@ class Test_Liquidity(unittest.TestCase):
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
         liq = AddLiquidity().apply(lp_tkn, eth, USER0, 10)     
-        self.assertEqual(lp_tkn.reserve0, 1010)
-        self.assertEqual(lp_tkn.reserve1, 101000.0)
+        self.assertEqual(lp_tkn.get_reserve(eth), 1010)
+        self.assertEqual(lp_tkn.get_reserve(tkn), 101000.0)
 
     def test_liquidity2(self):
         tkn = ERC20("TKN", "0x111")
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
         liq = AddLiquidity().apply(lp_tkn, tkn, USER0, 1000)  
-        self.assertEqual(lp_tkn.reserve0, 1010.0)
-        self.assertEqual(lp_tkn.reserve1, 101000.0)
+        self.assertEqual(lp_tkn.get_reserve(eth), 1010)
+        self.assertEqual(lp_tkn.get_reserve(tkn), 101000.0)
         
     def test_liquidity3(self):
         tkn = ERC20("TKN", "0x111")
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
-        print(lp_tkn.reserve0)
         liq = RemoveLiquidity().apply(lp_tkn, eth, USER0, 10) 
-        self.assertEqual(lp_tkn.reserve0, 990.0)
-        self.assertEqual(lp_tkn.reserve1, 99000.0)   
+        self.assertEqual(lp_tkn.get_reserve(eth), 990.0)
+        self.assertEqual(lp_tkn.get_reserve(tkn), 99000.0)   
         
     def test_liquidity4(self):
         tkn = ERC20("TKN", "0x111")
         eth = ERC20("ETH", "0x09")        
         lp_tkn = self.setup_lp(eth, tkn)
-        print(lp_tkn.reserve0)
         liq = RemoveLiquidity().apply(lp_tkn, tkn, USER0, 1000) 
-        self.assertEqual(lp_tkn.reserve0, 990.0)
-        self.assertEqual(lp_tkn.reserve1, 99000.0)         
+        self.assertEqual(lp_tkn.get_reserve(eth), 990.0)
+        self.assertEqual(lp_tkn.get_reserve(tkn), 99000.0)         
 
 if __name__ == '__main__':
     unittest.main()

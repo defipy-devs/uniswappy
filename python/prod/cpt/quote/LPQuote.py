@@ -65,9 +65,9 @@ class LPQuote():
         """             
         if(lp.version == UniswapExchangeData.VERSION_V2):
             if(token.token_name == lp.token0):        
-                reserve_out = lp.reserve0 
+                reserve_out = lp.convert_to_human(lp.reserve0) 
             elif(token.token_name == lp.token1):
-                reserve_out = lp.reserve1   
+                reserve_out = lp.convert_to_human(lp.reserve1)   
 
             if token.type == 'index':
                 self.quote_opposing = False
@@ -229,7 +229,7 @@ class LPQuote():
             amt_out = self.get_amount(lp, tkn, itkn_amt, lwr_tick, upr_tick) if self.quote_opposing else itkn_amt
         else:
             amt_out = 0
-        return amt_out   
+        return lp.convert_to_human(amt_out)  
     
     
     def get_lp_from_amount(self, lp, tkn, amount_in, lwr_tick = None, upr_tick = None):
@@ -257,5 +257,5 @@ class LPQuote():
             lp_amt = SettlementLPToken().apply(lp, tkn, amount_in, lwr_tick, upr_tick)
         else:
             lp_amt = 0
-        return lp_amt   
+        return lp.convert_to_human(lp_amt)     
          

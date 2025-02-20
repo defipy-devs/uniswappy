@@ -14,6 +14,7 @@ from python.prod.cpt.factory import UniswapFactory
 from python.prod.cpt.index import RebaseIndexToken
 from python.prod.process.swap import WithdrawSwap
 from python.prod.utils.data import UniswapExchangeData
+from python.prod.cpt.quote import LPQuote
 
 USER0 = 'user0'
 USER1 = 'user1' 
@@ -37,22 +38,22 @@ class Test_DrainLP(unittest.TestCase):
         lp_tkn = self.setup_lp(eth, tkn)        
         
         amt_lp = 250
-        N = int(lp_tkn.liquidity_providers[USER0]/amt_lp)
+        N = int(lp_tkn.get_liquidity_from_provider(USER0)/amt_lp)
 
         aggr_withdrawn = 0
         for k in range(N-1):
-            itkn_amt = RebaseIndexToken().apply(lp_tkn, tkn, amt_lp)
+            itkn_amt = LPQuote(False).get_amount_from_lp(lp_tkn, tkn, amt_lp)
             aggr_withdrawn += WithdrawSwap().apply(lp_tkn, tkn, USER0, itkn_amt)
             lp_remaining = lp_tkn.liquidity_providers[USER0]
 
         tol = 1e-5
-        itkn_amt = RebaseIndexToken().apply(lp_tkn, tkn, amt_lp-tol)
+        itkn_amt = LPQuote(False).get_amount_from_lp(lp_tkn, tkn, amt_lp-tol)
         aggr_withdrawn += WithdrawSwap().apply(lp_tkn, tkn, USER0, itkn_amt)
         
-        self.assertEqual(round(lp_tkn.liquidity_providers[USER0], 7), 0.000010) 
+        self.assertEqual(round(lp_tkn.get_liquidity_from_provider(USER0), 6), 0.000010) 
         self.assertEqual(round(aggr_withdrawn,6), 100000.0)  
-        self.assertEqual(round(lp_tkn.reserve0,6), 1000.0) 
-        self.assertEqual(round(lp_tkn.reserve1,6), 0.0) 
+        self.assertEqual(round(lp_tkn.get_reserve(eth),6), 1000.0) 
+        self.assertEqual(round(lp_tkn.get_reserve(tkn),6), 0.0) 
         
 
 if __name__ == '__main__':

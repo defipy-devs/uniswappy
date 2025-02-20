@@ -200,7 +200,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount1 : float
                 Amount of token1 that was paid to mint the given amount of liquidity.                   
         """          
-        amount = self._convert_to_machine(amount)
+        amount = self.convert_to_machine(amount)
         
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
@@ -231,8 +231,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         assert balance0Before + amount0 <= tokens.get(self.token0).token_total, 'UniswapV3: M0' 
         assert balance1Before + amount1 <= tokens.get(self.token1).token_total, 'UniswapV3: M0' 
  
-        amount0 = self._convert_to_human(amount0)
-        amount1 = self._convert_to_human(amount1)        
+        amount0 = self.convert_to_human(amount0)
+        amount1 = self.convert_to_human(amount1)        
               
         return (amount0, amount1)
         
@@ -268,8 +268,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Amount of token1 that was paid to mint the given amount of liquidity.                   
         """ 
 
-        amount0Requested = self._convert_to_machine(amount0Requested)
-        amount1Requested = self._convert_to_machine(amount1Requested)
+        amount0Requested = self.convert_to_machine(amount0Requested)
+        amount1Requested = self.convert_to_machine(amount1Requested)
         
         checkInputTypes(
             accounts=(recipient),
@@ -304,8 +304,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tokens.get(self.token1).deposit(recipient, amount1) 
             #self.ledger.transferToken(self, recipient, self.token1, amount1)
   
-        amount0 = self._convert_to_human(amount0)
-        amount1 = self._convert_to_human(amount1)        
+        amount0 = self.convert_to_human(amount0)
+        amount1 = self.convert_to_human(amount1)        
 
         return (recipient, tickLower, tickUpper, amount0, amount1)   
         
@@ -340,7 +340,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount : int
                 How much liquidity to burn                  
         """  
-        amount = self._convert_to_machine(amount)
+        amount = self.convert_to_machine(amount)
         
         checkInputTypes(
             accounts=(recipient), int24=(tickLower, tickUpper), uint128=(amount)
@@ -372,9 +372,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position.tokensOwed0 += amount0
             position.tokensOwed1 += amount1
 
-        amount = self._convert_to_human(amount)   
-        amount0 = self._convert_to_human(amount0)
-        amount1 = self._convert_to_human(amount1)
+        amount = self.convert_to_human(amount)   
+        amount0 = self.convert_to_human(amount0)
+        amount1 = self.convert_to_human(amount1)
              
         return (recipient, tickLower, tickUpper, amount, amount0, amount1)
 
@@ -405,7 +405,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             amount1 : int
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
-        amount = self._convert_to_machine(amount)
+        amount = self.convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -440,7 +440,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """           
         
-        amount = self._convert_to_machine(amount)
+        amount = self.convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -509,7 +509,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 Delta of the balance of token1 of the pool, exact when negative, minimum when positive                             
         """         
 
-        amount = self._convert_to_machine(amount)
+        amount = self.convert_to_machine(amount)
         sqrtPriceLimitX96 = (
             sqrtPriceLimit
             if sqrtPriceLimit != None
@@ -725,9 +725,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tokens.get(self.token1).deposit(recipient, abs(amount1))
             self._swap_tokens(abs(amount0), 0, recipient)            
 
-        amount0 = self._convert_to_human(amount0)
-        amount1 = self._convert_to_human(amount1)
-        liquidity = self._convert_to_human(state.liquidity)
+        amount0 = self.convert_to_human(amount0)
+        amount1 = self.convert_to_human(amount1)
+        liquidity = self.convert_to_human(state.liquidity)
         self._update_fees()
         
         return (
@@ -913,12 +913,12 @@ class UniswapV3Exchange(IExchange, LPERC20):
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'           
 
-    def _convert_to_human(self, val): 
+    def convert_to_human(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)
         return val
 
-    def _convert_to_machine(self, val): 
-        val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
+    def convert_to_machine(self, val): 
+        val = int(val) if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
         return val   
 
     def _update_fees(self): 
@@ -1045,7 +1045,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 self.total_supply = LiquidityMath.addDelta(
                     self.total_supply, params.liquidityDelta
                 )
-                self.last_liquidity_deposit = self._convert_to_human(params.liquidityDelta)
+                self.last_liquidity_deposit = self.convert_to_human(params.liquidityDelta)
             else:
                 ## current tick is above the passed range; liquidity can only become in range by crossing from right to
                 ## left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it

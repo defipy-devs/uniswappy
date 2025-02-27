@@ -62,9 +62,6 @@ class UniswapExchange(IExchange, LPERC20):
         print(f"Exchange {self.name} ({self.symbol})")
         print(f"Reserves: {self.token0} = {reserve0}, {self.token1} = {reserve1}")
         print(f"Liquidity: {total_supply} \n")    
-        
-        #print(f"Reserves: {self.token0} = {self.reserve0}, {self.token1} = {self.reserve1}")
-        #print(f"Liquidity: {self.total_supply} \n")
 
     def add_liquidity(self, _from_addr, amountADesired, amountBDesired, amountAMin, amountBMin):
         
@@ -177,9 +174,6 @@ class UniswapExchange(IExchange, LPERC20):
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
 
-        # amountA = liquidity * balanceA / self.total_supply     
-        # amountB = liquidity * balanceB / self.total_supply   
-        
         amountA = SaferMath().mul_div_round(liquidity, balanceA, self.total_supply)
         amountB = SaferMath().mul_div_round(liquidity, balanceB, self.total_supply)
         
@@ -222,9 +216,6 @@ class UniswapExchange(IExchange, LPERC20):
         total_liquidity = self.liquidity_providers[to_addr]
         if liquidity >= total_liquidity:
             liquidity = total_liquidity
-
-        # amountA = liquidity * balanceA / self.total_supply    
-        # amountB = liquidity * balanceB / self.total_supply  
 
         amountA = SaferMath().mul_div_round(liquidity, balanceA, self.total_supply)
         amountB = SaferMath().mul_div_round(liquidity, balanceB, self.total_supply)
@@ -294,10 +285,6 @@ class UniswapExchange(IExchange, LPERC20):
             amountB : float
                 est. amount from reserve1 to be burned               
         """  
-
-        #liquidity = self._convert_to_machine(liquidity)
-        #amountA = self._convert_to_machine(amountA)
-        #amountB = self._convert_to_machine(amountB)
         
         self._burn(to_addr, liquidity)
 
@@ -361,11 +348,8 @@ class UniswapExchange(IExchange, LPERC20):
             liquidity = min(
                 SaferMath().mul_div_round(amountA, self.total_supply, self.reserve0),
                 SaferMath().mul_div_round(amountB, self.total_supply, self.reserve1)
-                # amountA * self.total_supply / self.reserve0,
-                # amountB * self.total_supply / self.reserve1
             )
         else:
-            # liquidity = math.sqrt(amountA * amountB) - MINIMUM_LIQUIDITY
             liquidity = math.isqrt(amountA * amountB) - MINIMUM_LIQUIDITY
             self._mint("0", MINIMUM_LIQUIDITY)
             
@@ -477,8 +461,7 @@ class UniswapExchange(IExchange, LPERC20):
         #assert  lside  ==  rside , 'UniswapV2: K'
     
         self._update(balanceA, balanceB)
-        self._tally_fees(SaferMath().mul_div_round(amountA_in, 3, 1000), SaferMath().mul_div_round(amountB_in, 3, 1000))        
-        # self._tally_fees(amountA_in * 3 / 1000, amountB_in * 3 / 1000)           
+        self._tally_fees(SaferMath().mul_div_round(amountA_in, 3, 1000), SaferMath().mul_div_round(amountB_in, 3, 1000))             
  
     def quote(self, amountA, reserveA, reserveB):
         
@@ -505,7 +488,6 @@ class UniswapExchange(IExchange, LPERC20):
         quote_out = SaferMath().mul_div_round(amountA, reserveB, reserveA)   
         
         return self.convert_to_human(quote_out)
-        # return (amountA * reserveB) / reserveA;        
 
     def get_amount_out(self, amount_in, token_in):
 
@@ -556,7 +538,6 @@ class UniswapExchange(IExchange, LPERC20):
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
         amount_in_with_fee = amount_in * 997  
-        # amount_out = (amount_in * 997  * self.reserve1) / (self.reserve0 * 1000 + amount_in_with_fee)
         amount_out =  SaferMath().div_round(amount_in * 997  * self.reserve1, self.reserve0 * 1000 + amount_in_with_fee)
 
         return self.convert_to_human(amount_out) 
@@ -584,7 +565,6 @@ class UniswapExchange(IExchange, LPERC20):
         assert self.reserve0 > 0 and self.reserve1 > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
 
         amount_in_with_fee = amount_in * 997    
-        # amount_out = (amount_in_with_fee * self.reserve0) / (self.reserve1 * 1000 + amount_in_with_fee)
         amount_out = SaferMath().div_round(amount_in_with_fee * self.reserve0, self.reserve1 * 1000 + amount_in_with_fee)
 
         return self.convert_to_human(amount_out)  

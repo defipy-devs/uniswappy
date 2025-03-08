@@ -58,7 +58,7 @@ Liquidity: 10000.0 <br/><br/>
 ## Uniswap V3
 
 * See [test notebook](https://github.com/defipy-devs/uniswappy/blob/main/notebooks/tutorials/uniswap_v3.ipynb) 
-for basic usage
+for basic usage and [tutorial](https://defipy.readthedocs.io/en/latest/math/univ3_math.html) on Uniswap V2 math
 
 ```
 from uniswappy import *

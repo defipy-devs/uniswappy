@@ -2,16 +2,14 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-from ...erc import ERC20
 from ...erc import LPERC20
 from ...utils.interfaces import IExchange 
 from ...utils.data import UniswapExchangeData
 from ...utils.data import FactoryData
-from ...utils.tools.v3 import FullMath
 from ...utils.tools.v3 import UniV3Helper
 from ...utils.tools import SaferMath
 import math
-from decimal import Decimal
+
 
 #MINIMUM_LIQUIDITY = 1e-15
 MINIMUM_LIQUIDITY = 1000
@@ -585,7 +583,7 @@ class UniswapExchange(IExchange, LPERC20):
                 update amount of asset B      
         """   
         
-        amountA_update = amountA_update if amount0_update != None else self.reserve0
+        amountA_update = amountA_update if amountA_update != None else self.reserve0
         amountB_update = amountB_update if amountB_update != None else self.reserve1
         self.burn(user_nm, self.liquidity_providers[user_nm], self.reserve0, self.reserve1)
         tokens = self.factory.token_from_exchange[self.name]

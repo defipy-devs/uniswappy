@@ -6,7 +6,7 @@ from ..Process import Process
 from ..deposit import SwapDeposit
 from ...math.model import TokenDeltaModel
 from ...math.model import EventSelectionModel
-
+from ...cpt.vault import IndexVault
 class SwapIndexMint(Process):
     
     """ Process to swap-deposit single token into LP and mint its respective indexing token

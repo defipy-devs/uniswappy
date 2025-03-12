@@ -2,6 +2,7 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
+from ..utils.tools.v3 import UniV3Helper
 from ..simulate import SolveDeltas
 from ..process.deposit import SwapDeposit
 from ..process.swap import WithdrawSwap
@@ -145,8 +146,8 @@ class CorrectReserves:
 
 
     def get_ticks(self, tkn_x):
-        lwr_tick = UniV3Helper().get_tick_price(self.lp, -1, lp.get_price(tkn_x), 1000)
-        upr_tick = UniV3Helper().get_tick_price(self.lp, 1, lp.get_price(tkn_x), 1000)
+        lwr_tick = UniV3Helper().get_tick_price(self.lp, -1, self.lp.get_price(tkn_x), 1000)
+        upr_tick = UniV3Helper().get_tick_price(self.lp, 1, self.lp.get_price(tkn_x), 1000)
         return lwr_tick, upr_tick
               
          

@@ -60,7 +60,7 @@ class SwapDeposit(Process):
                 token swap amounts                
         """          
         
-        amount_in = tDel.delta() if amount_in == None else amount_in    
+        amount_in = self.tDel.delta() if amount_in == None else amount_in    
         trading_token = self.get_trading_token(lp, token_in)
 
         # Step 2: deposit   

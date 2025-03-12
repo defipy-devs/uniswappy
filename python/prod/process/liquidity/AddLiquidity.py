@@ -52,7 +52,7 @@ class AddLiquidity(Process):
                 token swap amounts                
         """          
         
-        amount_in = tDel.delta() if amount_in == None else amount_in
+        amount_in = self.tDel.delta() if amount_in == None else amount_in
         tokens = lp.factory.token_from_exchange[lp.name]  
 
         if(lp.version == UniswapExchangeData.VERSION_V2):            

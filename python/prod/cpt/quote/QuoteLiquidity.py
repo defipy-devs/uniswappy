@@ -38,7 +38,7 @@ class QuoteLiquidity():
                 base_tkn = tkn
                 base_tkn_amt = lp_in.get_reserve(tkn)
 
-        elif(p_in.version == UniswapExchangeData.VERSION_V3):
+        elif(lp_in.version == UniswapExchangeData.VERSION_V3):
             lp_child = ChildLP(lp_in)
             base_tkn = lp_child.get_base_tkn(tkn)
             base_tkn_amt = lp_child.get_reserve(tkn)

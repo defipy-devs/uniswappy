@@ -57,7 +57,7 @@ class WithdrawSwap(Process):
                 amount of withdrawn token               
         """          
         
-        amount_out = tDel.delta() if amount_out == None else amount_out
+        amount_out = self.tDel.delta() if amount_out == None else amount_out
       
         if(lp.version == UniswapExchangeData.VERSION_V2):            
             # Step 1: withdrawal

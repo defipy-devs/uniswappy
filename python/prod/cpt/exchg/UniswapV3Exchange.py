@@ -939,7 +939,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         elif(token.token_name == self.token1):
             return liq*sqrt_P
         else:
-            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'           
+            assert False, 'UniswapV3: WRONG_INPUT_TOKEN'           
 
     def convert_to_human(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)

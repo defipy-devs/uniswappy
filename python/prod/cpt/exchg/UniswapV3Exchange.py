@@ -106,6 +106,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         super().__init__(exchg_struct.tkn0.token_name+exchg_struct.tkn1.token_name, exchg_struct.address)
         self.version = exchg_struct.version
         self.factory = factory_struct
+        self.precision = exchg_struct.precision
         self.token0 = exchg_struct.tkn0.token_name     
         self.token1 = exchg_struct.tkn1.token_name       
         self.reserve0 = 0             
@@ -862,6 +863,33 @@ class UniswapV3Exchange(IExchange, LPERC20):
                 return 1/sqrt_P**2 
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'   
+
+
+    def get_last_liquidity_deposit(self):  
+        
+        """ get_last_liquidity_deposit
+
+            Get the last liquidity deposit that went into pool         
+        """          
+
+        return self.convert_to_human(self.last_liquidity_deposit)     
+
+
+    def get_liquidity_from_provider(self, provider_account):  
+        
+        """ get_liquidity_from_provider
+
+            Get liquidity from provider  
+            
+            Parameters
+            -----------------
+            provider_account : str
+                Provider account name  
+            
+        """          
+
+        return self.convert_to_human(self.liquidity_providers[provider_account])     
+    
                   
     def get_liquidity(self):  
         
@@ -870,7 +898,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Get liquidity of exchange pool         
         """          
 
-        return UniV3Helper().gwei2dec(self.total_supply)        
+        return self.convert_to_human(self.total_supply)         
             
     def get_reserve(self, token):  
         
@@ -885,11 +913,11 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """         
         
         if(token.token_name == self.token0):
-            return UniV3Helper().gwei2dec(self.reserve0) 
+            return self.convert_to_human(self.reserve0)
         elif(token.token_name == self.token1):
-            return UniV3Helper().gwei2dec(self.reserve1)
+            return self.convert_to_human(self.reserve1) 
         else:
-            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
+            assert False, 'UniswapV3: WRONG_INPUT_TOKEN'      
 
     def get_virtual_reserve(self, token):  
         
@@ -911,7 +939,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         elif(token.token_name == self.token1):
             return liq*sqrt_P
         else:
-            assert False, 'UniswapV2: WRONG_INPUT_TOKEN'           
+            assert False, 'UniswapV3: WRONG_INPUT_TOKEN'           
 
     def convert_to_human(self, val): 
         val = val if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().gwei2dec(val)

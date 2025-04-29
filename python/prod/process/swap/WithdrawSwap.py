@@ -69,7 +69,6 @@ class WithdrawSwap(Process):
             trading_token = self.get_trading_token(lp, token_out)
             out = Swap().apply(lp, trading_token, user_nm, res[trading_token.token_name])  
             withdrawn = out + p_out*amount_out 
-            #withdrawn = p_out*amount_out 
 
         elif(lp.version == UniswapExchangeData.VERSION_V3): 
 

@@ -991,7 +991,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """         
         
         assert amountA_out > 0 or amountB_out > 0, 'UniswapV3: INSUFFICIENT_OUTPUT_AMOUNT'
-        assert amountA_out < self.reserve0 and amountB_out < self.reserve1, 'UniswapV3: INSUFFICIENT_LIQUIDITY'
+        assert amountA_out <= self.reserve0 and amountB_out <= self.reserve1, 'UniswapV3: INSUFFICIENT_LIQUIDITY'
 
         tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0).token_addr != to_addr, 'UniswapV3: INVALID_TO_ADDRESS'
@@ -1070,10 +1070,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
                     self.slot0.sqrtPriceX96,
                     params.liquidityDelta,
                 )
-                self.total_supply = LiquidityMath.addDelta(
-                    self.total_supply, params.liquidityDelta
-                )
-                self.last_liquidity_deposit = self.convert_to_human(params.liquidityDelta)
             else:
                 ## current tick is above the passed range; liquidity can only become in range by crossing from right to
                 ## left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
@@ -1082,6 +1078,10 @@ class UniswapV3Exchange(IExchange, LPERC20):
                     TickMath.getSqrtRatioAtTick(params.tickUpper),
                     params.liquidityDelta,
                 )
+            self.total_supply = LiquidityMath.addDelta(
+                self.total_supply, params.liquidityDelta
+            )
+            self.last_liquidity_deposit = self.convert_to_human(params.liquidityDelta)
 
         return (position, amount0, amount1)  
     

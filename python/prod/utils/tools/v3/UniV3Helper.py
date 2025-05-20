@@ -82,15 +82,18 @@ class UniV3Helper():
     def gwei2dec(self, tkn_amt, precision=None):   
         precision = GWEI_PRECISION if precision == None else precision
         return float(Decimal(str(tkn_amt))/Decimal(str(10**precision)))      
-    
+
+    # see https://atiselsts.github.io/pdfs/uniswap-v3-liquidity-math.pdf
     def calc_Lx(self, p_sqrt_human, dx, lwr_tick, upr_tick):
         pa_sqrt_human = TickMath.getSqrtRatioAtTick(lwr_tick)/Q96
         pb_sqrt_human = TickMath.getSqrtRatioAtTick(upr_tick)/Q96
-        Lx = dx/(1/p_sqrt_human - 1/pb_sqrt_human)
+        assert p_sqrt_human <= pb_sqrt_human, "OOP"
+        Lx = dx/(1/max(p_sqrt_human, pa_sqrt_human) - 1/pb_sqrt_human)
         return Lx
     
-    def calc_Ly(self, p_sqrt_human, dy, lwr_tick, upr_tick):
+    def calc_Ly(self, p_sqrt_human, dy, lwr_tick, upr_tick, price_tick=None):
         pa_sqrt_human = TickMath.getSqrtRatioAtTick(lwr_tick)/Q96
         pb_sqrt_human = TickMath.getSqrtRatioAtTick(upr_tick)/Q96
-        Ly = dy/(p_sqrt_human - pa_sqrt_human)
+        assert p_sqrt_human >= pa_sqrt_human, "OOP"
+        Ly = dy/(min(p_sqrt_human, pb_sqrt_human) - pa_sqrt_human)
         return Ly

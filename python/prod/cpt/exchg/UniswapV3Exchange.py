@@ -1070,10 +1070,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
                     self.slot0.sqrtPriceX96,
                     params.liquidityDelta,
                 )
-                self.total_supply = LiquidityMath.addDelta(
-                    self.total_supply, params.liquidityDelta
-                )
-                self.last_liquidity_deposit = self.convert_to_human(params.liquidityDelta)
             else:
                 ## current tick is above the passed range; liquidity can only become in range by crossing from right to
                 ## left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
@@ -1082,6 +1078,10 @@ class UniswapV3Exchange(IExchange, LPERC20):
                     TickMath.getSqrtRatioAtTick(params.tickUpper),
                     params.liquidityDelta,
                 )
+            self.total_supply = LiquidityMath.addDelta(
+                self.total_supply, params.liquidityDelta
+            )
+            self.last_liquidity_deposit = self.convert_to_human(params.liquidityDelta)
 
         return (position, amount0, amount1)  
     

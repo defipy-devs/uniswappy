@@ -48,7 +48,7 @@ class UniV3Helper():
         human_price = (sqrtPriceX96/Q96)**2 if human_price == None else human_price
         tick_p = math.floor(math.log(human_price)/math.log(1.0001))
 
-        tick_space = self.tickSpacing if tick_space == None else tick_space
+        tick_space = lp.tickSpacing if tick_space == None else tick_space
         if pos == -1:
             tick_p = tick_p - tick_space
         elif pos == 1:

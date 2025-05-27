@@ -1034,7 +1034,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
         """         
         
         assert amountA_out > 0 or amountB_out > 0, 'UniswapV3: INSUFFICIENT_OUTPUT_AMOUNT'
-        assert amountA_out <= self.reserve0 and amountB_out <= self.reserve1, 'UniswapV3: INSUFFICIENT_LIQUIDITY'
 
         tokens = self.factory.token_from_exchange[self.name]
         assert tokens.get(self.token0).token_addr != to_addr, 'UniswapV3: INVALID_TO_ADDRESS'

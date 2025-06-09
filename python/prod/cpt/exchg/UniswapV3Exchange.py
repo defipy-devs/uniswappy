@@ -112,8 +112,6 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.reserve0 = 0             
         self.reserve1 = 0 
         self.fee = exchg_struct.fee
-        self.fee0_arr = []
-        self.fee1_arr = []
         self.aggr_fee0 = 0
         self.aggr_fee1 = 0
         self.collected_fee0 = 0

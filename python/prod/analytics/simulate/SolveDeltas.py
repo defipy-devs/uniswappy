@@ -3,7 +3,7 @@
 # Email: defipy.devs@gmail.com
 
 from scipy.optimize import fsolve
-from ..utils.data import UniswapExchangeData
+from ...utils.data import UniswapExchangeData
 import warnings
 warnings.filterwarnings("ignore")
 

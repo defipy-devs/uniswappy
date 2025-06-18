@@ -4,7 +4,7 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='UniswapPy',
-      version='1.6.2',
+      version='1.7.0',
       description='Uniswap Analytics with Python',
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -35,7 +35,8 @@ setup(name='UniswapPy',
           'uniswappy.process.mint',
           'uniswappy.process.swap',
           'uniswappy.process.join',
-          'uniswappy.simulate',
+          'uniswappy.analytics.simulate',
+          'uniswappy.analytics.risk',
           'uniswappy.utils.interfaces',
           'uniswappy.utils.data',
           'uniswappy.utils.client',

@@ -612,8 +612,8 @@ class UniswapExchange(IExchange, LPERC20):
             if(self.reserve1 == 0):
                 return None
             else:
-                # return self.reserve0/self.reserve1
-                return SaferMath().div_round(self.reserve0, self.reserve1)
+                return self.reserve0/self.reserve1
+                #return SaferMath().div_round(self.reserve0, self.reserve1)
         else:
             assert False, 'UniswapV2: WRONG_INPUT_TOKEN'      
 

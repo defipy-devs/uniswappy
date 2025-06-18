@@ -2,11 +2,11 @@
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com
 
-from ..utils.data import UniswapExchangeData
-from ..cpt.factory import UniswapFactory
-from ..simulate import SolveDeltas
-from ..process.deposit import SwapDeposit
-from ..process.swap import WithdrawSwap
+from ...utils.data import UniswapExchangeData
+from ...cpt.factory import UniswapFactory
+from ...simulate import SolveDeltas
+from ...process.deposit import SwapDeposit
+from ...process.swap import WithdrawSwap
 
 USER_NM = 'USER_SIM'
 

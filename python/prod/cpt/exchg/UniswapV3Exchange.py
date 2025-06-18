@@ -872,7 +872,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             Get the last liquidity deposit that went into pool         
         """          
 
-        return self.convert_to_human(self.last_liquidity_deposit)     
+        return self.last_liquidity_deposit    
 
 
     def get_liquidity_from_provider(self, provider_account):  

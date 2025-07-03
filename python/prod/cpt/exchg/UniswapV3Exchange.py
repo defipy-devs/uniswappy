@@ -128,8 +128,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.feeGrowthGlobal1X128 = 0  
         self.protocolFees = ProtocolFees(0, 0)
         self.tickSpacing = exchg_struct.tick_spacing
-        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)      
-
+        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)  
+        self.liquidity_providers = {}
+    
     def summary(self):
 
         """ summary
@@ -209,6 +210,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         (_, amount0Int, amount1Int) = self._modifyPosition(
             ModifyPositionParams(recipient, tickLower, tickUpper, amount)
         )
+        self._update_provider_liquidity(recipient, amount)
 
         amount0 = toUint256(abs(amount0Int))
         amount1 = toUint256(abs(amount1Int))
@@ -353,7 +355,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         (position, amount0Int, amount1Int) = self._modifyPosition(
             ModifyPositionParams(recipient, tickLower, tickUpper, -amount)
         )
-
+        self._update_provider_liquidity(recipient, -amount)
+        
         tokens = self.factory.token_from_exchange[self.name]
         tokens.get(self.token0).deposit(recipient, amount0Int)
         tokens.get(self.token1).deposit(recipient, amount1Int)     
@@ -947,6 +950,23 @@ class UniswapV3Exchange(IExchange, LPERC20):
         val = int(val) if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
         return val   
 
+    def _update_provider_liquidity(self, recipient, amount):
+
+        if((recipient in self.liquidity_providers) and (amount > 0)):
+            self.liquidity_providers[recipient] = self.liquidity_providers[recipient] + amount
+            
+        elif((recipient in self.liquidity_providers) and (amount <= 0)):
+            if(self.liquidity_providers[recipient] > abs(amount)):   
+                self.liquidity_providers[recipient] = self.liquidity_providers[recipient] + amount
+            else:
+                assert False, 'UniswapV3: INSUFFICIENT_SUBTRACT_AMOUNT' 
+                
+        elif((recipient not in self.liquidity_providers) and (amount > 0)):  
+            self.liquidity_providers[recipient] = amount
+            
+        elif((recipient not in self.liquidity_providers) and (amount <= 0)):
+            assert False, 'UniswapV3: INSUFFICIENT_ADD_AMOUNT'     
+            
     def _update_fees(self): 
         liquidity = UniV3Helper().gwei2dec(self.total_supply)
         self.collected_fee0 = liquidity*self.feeGrowthGlobal0X128/2**128

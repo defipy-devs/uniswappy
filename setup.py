@@ -4,14 +4,23 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='UniswapPy',
-      version='1.7.0',
+      version='1.7.2',
       description='Uniswap Analytics with Python',
       long_description=long_description,
       long_description_content_type="text/markdown",
       url='https://github.com/defipy-devs/uniswappy',
       author = "icmoore",
       author_email = "defipy.devs@gmail.com",
-      license='MIT',
+      license="Apache-2.0",
+      classifiers=[
+            "License :: OSI Approved :: Apache Software License",
+            "Programming Language :: Python :: 3",
+            "Operating System :: OS Independent",
+            "Intended Audience :: Developers",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Topic :: Scientific/Engineering :: Information Analysis",
+            "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+      ],
       package_dir = {"uniswappy": "python/prod"},
       packages=[
           'uniswappy',

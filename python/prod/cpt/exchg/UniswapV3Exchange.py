@@ -1,6 +1,17 @@
-# Copyright [2024] [Ian Moore]
-# Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+# Copyright 2023–2025 Ian Moore
 # Email: defipy.devs@gmail.com
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
 
 # Modified version of original MIT licenced UniswapPool class from chainflip-io
 # - https://github.com/chainflip-io/chainflip-uniswapV3-python
@@ -128,8 +139,9 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.feeGrowthGlobal1X128 = 0  
         self.protocolFees = ProtocolFees(0, 0)
         self.tickSpacing = exchg_struct.tick_spacing
-        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)      
-
+        self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)  
+        self.liquidity_providers = {}
+    
     def summary(self):
 
         """ summary
@@ -209,6 +221,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
         (_, amount0Int, amount1Int) = self._modifyPosition(
             ModifyPositionParams(recipient, tickLower, tickUpper, amount)
         )
+        self._update_provider_liquidity(recipient, amount)
 
         amount0 = toUint256(abs(amount0Int))
         amount1 = toUint256(abs(amount1Int))
@@ -324,7 +337,7 @@ class UniswapV3Exchange(IExchange, LPERC20):
             tickLower : int
                 Lower tick of the position in which to add liquidity  
             tickUpper : int
-                Lower tick of the position in which to add liquidity                 
+                Upper tick of the position in which to add liquidity                 
             amount : int
                 How much liquidity to burn
                 
@@ -353,7 +366,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         (position, amount0Int, amount1Int) = self._modifyPosition(
             ModifyPositionParams(recipient, tickLower, tickUpper, -amount)
         )
-
+        self._update_provider_liquidity(recipient, -amount)
+        
         tokens = self.factory.token_from_exchange[self.name]
         tokens.get(self.token0).deposit(recipient, amount0Int)
         tokens.get(self.token1).deposit(recipient, amount1Int)     
@@ -947,6 +961,23 @@ class UniswapV3Exchange(IExchange, LPERC20):
         val = int(val) if self.precision == UniswapExchangeData.TYPE_GWEI else UniV3Helper().dec2gwei(val)
         return val   
 
+    def _update_provider_liquidity(self, recipient, amount):
+
+        if((recipient in self.liquidity_providers) and (amount > 0)):
+            self.liquidity_providers[recipient] = self.liquidity_providers[recipient] + amount
+            
+        elif((recipient in self.liquidity_providers) and (amount <= 0)):
+            if(self.liquidity_providers[recipient] > abs(amount)):   
+                self.liquidity_providers[recipient] = self.liquidity_providers[recipient] + amount
+            else:
+                assert False, 'UniswapV3: INSUFFICIENT_SUBTRACT_AMOUNT' 
+                
+        elif((recipient not in self.liquidity_providers) and (amount > 0)):  
+            self.liquidity_providers[recipient] = amount
+            
+        elif((recipient not in self.liquidity_providers) and (amount <= 0)):
+            assert False, 'UniswapV3: INSUFFICIENT_ADD_AMOUNT'     
+            
     def _update_fees(self): 
         liquidity = UniV3Helper().gwei2dec(self.total_supply)
         self.collected_fee0 = liquidity*self.feeGrowthGlobal0X128/2**128

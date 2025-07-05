@@ -136,6 +136,11 @@ in analyzing outcomes; see
 article [How to Simulate a Uniswap V3 Order Book in Python](https://medium.com/datadriveninvestor/how-to-simulate-a-uniswap-v3-order-book-in-python-149480d12305)
 
 If you find this package helpful, please leave a ⭐!
+
+## License
+Licensed under the Apache License, Version 2.0.  
+See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.  
+Portions of this project may include code from third-party projects under compatible open-source licenses.
  
  
 

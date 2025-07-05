@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-# Modified version of original MIT licenced UniswapPool class from chainflip-io
-# - https://github.com/chainflip-io/chainflip-uniswapV3-python
+# This file contains code adapted from chainflip-io (https://github.com/chainflip-io/chainflip-uniswapV3-python)
+# Licensed under the MIT License.
+# Original copyright (c) 2022 chainflip-io contributors.
 
 import math
 from decimal import Decimal

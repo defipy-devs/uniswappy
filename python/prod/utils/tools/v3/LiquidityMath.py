@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-# Modified version of original MIT licenced TickMath file from chainflip-io
-# - https://github.com/chainflip-io/chainflip-uniswapV3-python
+# This file contains code adapted from chainflip-io (https://github.com/chainflip-io/chainflip-uniswapV3-python)
+# Licensed under the MIT License.
+# Original copyright (c) 2022 chainflip-io contributors.
 
 from . import TickMath
 

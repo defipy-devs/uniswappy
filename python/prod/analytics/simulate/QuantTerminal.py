@@ -1,3 +1,6 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Apache 2.0 License (DeFiPy)
+# ─────────────────────────────────────────────────────────────────────────────
 # Copyright [2024] [Ian Moore, Bart Hofkin]
 # Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
 # Email: defipy.devs@gmail.com

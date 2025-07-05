@@ -12,7 +12,7 @@ from ...cpt.factory import UniswapFactory
 from ...cpt.quote import LPTokenQuote
 from ...cpt.quote import IndexTokenQuote
 from ...cpt.quote import TreeAmountQuote
-from ...simulate import CorrectReserves
+from ...analytics.simulate import CorrectReserves
 from ...process.deposit import SwapDeposit
 from ...process.swap import WithdrawSwap
 from ...process.swap import Swap

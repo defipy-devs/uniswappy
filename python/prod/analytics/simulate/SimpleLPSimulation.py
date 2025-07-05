@@ -15,7 +15,7 @@
 
 from ...utils.data import UniswapExchangeData
 from ...cpt.factory import UniswapFactory
-from ...simulate import SolveDeltas
+from ...analytics.simulate import SolveDeltas
 from ...process.deposit import SwapDeposit
 from ...process.swap import WithdrawSwap
 

@@ -14,7 +14,7 @@
 # limitations under the License
 
 from ...utils.tools.v3 import UniV3Helper
-from ...simulate import SolveDeltas
+from ...analytics.simulate import SolveDeltas
 from ...process.deposit import SwapDeposit
 from ...process.swap import WithdrawSwap
 from ...utils.data import UniswapExchangeData

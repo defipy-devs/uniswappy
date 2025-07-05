@@ -1,3 +1,6 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Apache 2.0 License (DeFiPy)
+# ─────────────────────────────────────────────────────────────────────────────
 # Copyright 2023–2025 Ian Moore
 # Email: defipy.devs@gmail.com
 #
@@ -13,6 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
+# ─────────────────────────────────────────────────────────────────────────────
+# MIT License Attribution (Third-Party Code)
+# ─────────────────────────────────────────────────────────────────────────────
 # This file contains code adapted from chainflip-io (https://github.com/chainflip-io/chainflip-uniswapV3-python)
 # Licensed under the MIT License.
 # Original copyright (c) 2022 chainflip-io contributors.

@@ -34,6 +34,7 @@ from ...utils.tools.v3.Shared import *
 from ...utils.tools.v3 import Position, Tick, SqrtPriceMath, LiquidityMath
 from ...utils.tools.v3 import SwapMath, TickMath, SafeMath, FullMath, UniV3Utils
 from ...utils.tools.v3 import UniV3Helper
+from ...utils.tools.v3.Position import PositionInfo
 
 MINIMUM_LIQUIDITY = 1e-15
 GWEI_PRECISION = 18
@@ -148,7 +149,8 @@ class UniswapV3Exchange(IExchange, LPERC20):
         self.tickSpacing = exchg_struct.tick_spacing
         self.maxLiquidityPerTick = Tick.tickSpacingToMaxLiquidityPerTick(self.tickSpacing)  
         self.liquidity_providers = {}
-    
+        self.positions_for_owner = {}
+
     def summary(self):
 
         """ summary
@@ -1176,6 +1178,18 @@ class UniswapV3Exchange(IExchange, LPERC20):
             position, liquidityDelta, feeGrowthInside0X128, feeGrowthInside1X128
         )
 
+        if owner not in self.positions_for_owner:
+            self.positions_for_owner[owner] = set()
+
+        if position != PositionInfo(0, 0, 0, 0, 0):
+            self.positions_for_owner[owner].add(
+                (tickLower, tickUpper)
+            )
+        else:
+            self.positions_for_owner[owner].discard(
+                (tickLower, tickUpper)
+            )
+
         ## clear any tick data that is no longer needed
         if liquidityDelta < 0:
             if flippedLower:
@@ -1183,4 +1197,34 @@ class UniswapV3Exchange(IExchange, LPERC20):
             if flippedUpper:
                 Tick.clear(self.ticks, tickUpper)
         return position    
-    
+
+    def get_owners(self) -> list[str]:
+        """
+        Return a list of all owners
+
+        Returns:
+            list[str]: List of owner identifiers
+        """
+        return list(self.positions_for_owner.keys())
+
+    def get_positions_for_owner(
+            self, owner: str
+    ) -> list[tuple[int, int, Position]]:
+        """
+        Retrieve positions for an owner
+
+        Args:
+            owner: identifier
+
+        Returns:
+             list[tuple[int, int, Position]]: list of tuples
+                  - low tick
+                  - high tick
+                  - Position object for the tick
+        """
+        owner_ticks = self.positions_for_owner.get(owner, set())
+        return [
+            (tick[0], tick[1], Position.get(
+                self.positions, owner, tick[0], tick[1]
+            )) for tick in owner_ticks
+        ]

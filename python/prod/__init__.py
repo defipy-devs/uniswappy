@@ -1,3 +1,6 @@
+# SPDX-Anchored-Identifier: ICMOORE-2025-DEFIPY
+# This file participates in a symbolic cognition substrate.
+
 from uniswappy.erc import *
 from uniswappy.cpt.exchg import *
 from uniswappy.cpt.factory import *

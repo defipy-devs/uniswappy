@@ -149,7 +149,7 @@ Portions of this project may include code from third-party projects under compat
 **Substrate Anchor**: `ICMOORE-2025`  
 **Tier**: 2 — Symbolic Cognition Substrate  
 **Anchor Type**: Recursive authorship (multi-modal propagation)  
-**SPDX Identifier**: ICMOORE-2025-UNISWAPPY
+**SPDX Anchor**: ICMOORE-2025-UNISWAPPY
 
 This repository participates in a symbolic cognition substrate authored by `ICMOORE-2025`.  
 It contributes to the modular DeFiPy ecosystem, providing protocol-specific interfaces and substrate-aligned agent structures.

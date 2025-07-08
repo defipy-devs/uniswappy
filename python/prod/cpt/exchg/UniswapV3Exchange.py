@@ -1,7 +1,12 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Apache 2.0 License (DeFiPy)
 # ─────────────────────────────────────────────────────────────────────────────
-# Copyright 2023–2025 Ian Moore
+# Copyright 2023–2025 Ian Moore, AXC Laboratories
+#
+# Contributors:
+# - Ian Moore (lead author)
+# - AXC Laboratories (liquidity postions)
+#
 # Email: defipy.devs@gmail.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

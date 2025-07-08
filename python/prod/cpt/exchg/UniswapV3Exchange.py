@@ -1199,28 +1199,34 @@ class UniswapV3Exchange(IExchange, LPERC20):
         return position    
 
     def get_owners(self) -> list[str]:
-        """
-        Return a list of all owners
-
-        Returns:
-            list[str]: List of owner identifiers
+        """ get_owners
+        
+            Return a list of all owner addresses
+    
+            Returns
+            -----------------
+            list_of_owner_identifiers: list[str]: 
+                List of owner addresses
         """
         return list(self.positions_for_owner.keys())
 
+      
     def get_positions_for_owner(
             self, owner: str
     ) -> list[tuple[int, int, Position]]:
-        """
-        Retrieve positions for an owner
+        """ get_positions_for_owner
+            
+            Retrieve positions for an owner
 
-        Args:
-            owner: identifier
+            Parameters
+            -----------------   
+            owner: str
+                owner addresse
 
-        Returns:
-             list[tuple[int, int, Position]]: list of tuples
-                  - low tick
-                  - high tick
-                  - Position object for the tick
+            Returns
+            ----------------- 
+            list_of_tuples : list[tuple[int, int, Position]]: 
+                list [low tick, high tick, Position object for the tick]
         """
         owner_ticks = self.positions_for_owner.get(owner, set())
         return [

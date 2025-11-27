@@ -2,11 +2,22 @@
 This package contains python re-factors of both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
 pairing codes, and can be utilized for the purpose of analysing and modelling its behavior for DeFi. 
 
-## Docs
-Visit [docs](https://defipy.org) for full documentation with walk-through 
-tutorials
+## 📘 Official Textbook
 
-## Installation 
+Looking for a structured, graduate-level walkthrough of DeFiPy and DeFi analytics?
+
+**_DeFiPy: Python SDK for On-Chain Analytics_** is the official companion textbook for this project.  
+It covers:
+
+- AMM math and invariants (Uniswap V2 & V3, Balancer, Stableswap)
+- On-chain analytics and pool/event decoding
+- Python workflows for DeFi modeling and simulation
+- Agent-based architectures and risk pipelines built on DeFiPy
+
+👉 **Buy on Amazon:** https://www.amazon.com/dp/B0G3RV5QRB  
+👉 **Docs:** [DeFiPy docs](https://defipy.org)
+
+## 🔍 Install 
 ```
 > git clone https://github.com/defipy-devs/uniswappy
 > pip install .

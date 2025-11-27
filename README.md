@@ -17,7 +17,7 @@ It covers:
 👉 **Buy on Amazon:** https://www.amazon.com/dp/B0G3RV5QRB  
 
 ## 📝 Docs
-Visit [**Docs:**](https://defipy.org) for full documentation 
+Visit [**DeFiPy docs**](https://defipy.org) for full documentation 
 
 ## 🔍 Install 
 ```

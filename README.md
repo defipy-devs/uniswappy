@@ -15,7 +15,9 @@ It covers:
 - Agent-based architectures and risk pipelines built on DeFiPy
 
 👉 **Buy on Amazon:** https://www.amazon.com/dp/B0G3RV5QRB  
-👉 **Docs:** [DeFiPy docs](https://defipy.org)
+
+## 📝 Docs
+👉 Visit [**Docs:**](https://defipy.org) for full documentation 
 
 ## 🔍 Install 
 ```

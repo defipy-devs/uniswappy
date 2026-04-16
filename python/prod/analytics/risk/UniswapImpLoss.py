@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from math import sqrt
+from decimal import Decimal, getcontext
+getcontext().prec = 50
 from ...cpt.quote import LPQuote
 from ...utils.tools.v3 import TickMath
 
@@ -34,12 +35,12 @@ class UniswapImpLoss:
         """Calculate the value if initial tokens were held."""
         tokens = self.lp.factory.token_from_exchange[self.lp.name]
         if(tkn.token_name == self.lp.token0):
-            current_price = self.lp.get_price(tokens[self.lp.token1])
-            val = self.y_tkn_init*current_price + self.x_tkn_init
+            current_price = Decimal(str(self.lp.get_price(tokens[self.lp.token1])))
+            val = Decimal(str(self.y_tkn_init)) * current_price + Decimal(str(self.x_tkn_init))
         elif(tkn.token_name == self.lp.token1):   
-            current_price = self.lp.get_price(tokens[self.lp.token0])
-            val = self.x_tkn_init * current_price + self.y_tkn_init
-        return val 
+            current_price = Decimal(str(self.lp.get_price(tokens[self.lp.token0])))
+            val = Decimal(str(self.x_tkn_init)) * current_price + Decimal(str(self.y_tkn_init))
+        return float(val)
 
     def get_init_amt(self, tkn):
         if(tkn.token_name == self.lp.token0):
@@ -61,9 +62,9 @@ class UniswapImpLoss:
             tokens = self.lp.factory.token_from_exchange[self.lp.name]
             x_tkn = tokens[self.lp.token0]
             y_tkn = tokens[self.lp.token1]
-            initial_price = self.y_tkn_init / self.x_tkn_init
-            current_price = self.lp.get_price(x_tkn)
-            alpha = current_price / initial_price
+            initial_price = Decimal(str(self.y_tkn_init)) / Decimal(str(self.x_tkn_init))
+            current_price = Decimal(str(self.lp.get_price(x_tkn)))
+            alpha = float(current_price / initial_price)
             if(self.lp.version == 'V2'):
                 iloss = self.calc_iloss(alpha)
             elif(self.lp.version == 'V3'):    
@@ -73,21 +74,25 @@ class UniswapImpLoss:
         return iloss
 
     def calc_iloss(self, alpha, r = None):
-        if(r == None):
-            return (2 * sqrt(alpha)) / (1 + alpha) - 1
+        d_alpha = Decimal(str(alpha))
+        sqrt_alpha = d_alpha.sqrt()
+        iloss = (2 * sqrt_alpha) / (1 + d_alpha) - 1
+        if r is None:
+            return float(iloss)
         else:
-            iloss = (2 * sqrt(alpha)) / (1 + alpha) - 1
-            scale =  sqrt(r)/(sqrt(r)-1)
-            return scale*iloss 
+            d_r = Decimal(str(r))
+            sqrt_r = d_r.sqrt()
+            scale = sqrt_r / (sqrt_r - 1)
+            return float(scale * iloss)
 
     def calc_price_range(self, lwr_tick, upr_tick):
-        Q96 = 2**96
-        sqrtp_cur = self.lp.slot0.sqrtPriceX96/Q96
-        sqrtp_pb = TickMath.getSqrtRatioAtTick(upr_tick)/Q96
-        sqrtp_pa = TickMath.getSqrtRatioAtTick(lwr_tick)/Q96
-        ra = sqrtp_pa**2/sqrtp_cur**2
-        rb = sqrtp_pb**2/sqrtp_cur**2    
-        return sum([ra,rb])/2
+        Q96 = Decimal(str(2**96))
+        sqrtp_cur = Decimal(str(self.lp.slot0.sqrtPriceX96)) / Q96
+        sqrtp_pb = Decimal(str(TickMath.getSqrtRatioAtTick(upr_tick))) / Q96
+        sqrtp_pa = Decimal(str(TickMath.getSqrtRatioAtTick(lwr_tick))) / Q96
+        ra = (sqrtp_pa ** 2) / (sqrtp_cur ** 2)
+        rb = (sqrtp_pb ** 2) / (sqrtp_cur ** 2)
+        return float((ra + rb) / 2)
 
     def _calc_dx(self, dL, upr_tick = None):
         if(self.lp.version == 'V2'):
@@ -106,14 +111,14 @@ class UniswapImpLoss:
         x_tkn = tokens[self.lp.token0]
         x = self.lp.get_reserve(x_tkn)
         L = self.lp.get_liquidity()
-        return x*dL/L
+        return float(Decimal(str(x)) * Decimal(str(dL)) / Decimal(str(L)))
 
     def _calc_univ2_dy(self, dL):
         tokens = self.lp.factory.token_from_exchange[self.lp.name]
         y_tkn = tokens[self.lp.token1]
         y = self.lp.get_reserve(y_tkn)
         L = self.lp.get_liquidity()
-        return y*dL/L
+        return float(Decimal(str(y)) * Decimal(str(dL)) / Decimal(str(L)))
     
     def _calc_univ3_dx(self, dL, upr_tick):
         Q96 = 2**96

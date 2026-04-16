@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-import numpy as np
 import math
+from decimal import Decimal, getcontext
+getcontext().prec = 50
 from ...utils.data import UniswapExchangeData
 from ...utils.tools.v3 import TickMath
 from ...utils.tools.v3 import UniV3Helper
@@ -85,28 +86,34 @@ class SettlementLPToken():
             return dL
 
     def calc_univ3_lp_settlement(self, lp, token_in, itkn_amt, lwr_tick, upr_tick):
-    
-        L = lp.get_liquidity()
+        # Full Decimal path to avoid catastrophic cancellation in discriminant
+        L = Decimal(str(lp.get_liquidity()))
+        Q96 = Decimal(str(2**96))
+        itkn_amt = Decimal(str(itkn_amt))
+        fee = Decimal(997)
+
         if(token_in.token_name == lp.token0):
-            sqrtp_cur = lp.slot0.sqrtPriceX96/2**96
-            sqrtp_pa = TickMath.getSqrtRatioAtTick(lwr_tick)/2**96
-            sqrtp_pb = TickMath.getSqrtRatioAtTick(upr_tick)/2**96 
-            dPy = (sqrtp_cur - sqrtp_pa)
-            dPx = (1/sqrtp_cur - 1/sqrtp_pb)          
+            sqrtp_cur = Decimal(str(lp.slot0.sqrtPriceX96)) / Q96
+            sqrtp_pa = Decimal(str(TickMath.getSqrtRatioAtTick(lwr_tick))) / Q96
+            sqrtp_pb = Decimal(str(TickMath.getSqrtRatioAtTick(upr_tick))) / Q96
+            dPy = sqrtp_cur - sqrtp_pa
+            dPx = Decimal(1) / sqrtp_cur - Decimal(1) / sqrtp_pb
         elif(token_in.token_name == lp.token1):
-            sqrtp_cur = 2**96/lp.slot0.sqrtPriceX96
-            sqrtp_pa = 2**96/TickMath.getSqrtRatioAtTick(lwr_tick)
-            sqrtp_pb = 2**96/TickMath.getSqrtRatioAtTick(upr_tick)
-            dPx = (1/sqrtp_cur - 1/sqrtp_pa)
-            dPy = (sqrtp_cur - sqrtp_pb)
-    
-        fee = 997
-        
-        a = fee*dPy*sqrtp_cur*dPx - 1000*dPx*(sqrtp_cur**2) - fee*dPy  
-        b = -fee*dPy*sqrtp_cur*itkn_amt + 1000*itkn_amt*(sqrtp_cur**2) + L*fee*dPy + 1000*L*dPx*(sqrtp_cur**2)
-        c = -1000*L*itkn_amt*(sqrtp_cur**2)
-    
-        return (-b + math.sqrt(b*b - 4*a*c)) / (2*a)  
+            sqrtp_cur = Q96 / Decimal(str(lp.slot0.sqrtPriceX96))
+            sqrtp_pa = Q96 / Decimal(str(TickMath.getSqrtRatioAtTick(lwr_tick)))
+            sqrtp_pb = Q96 / Decimal(str(TickMath.getSqrtRatioAtTick(upr_tick)))
+            dPx = Decimal(1) / sqrtp_cur - Decimal(1) / sqrtp_pa
+            dPy = sqrtp_cur - sqrtp_pb
+
+        a = fee * dPy * sqrtp_cur * dPx - Decimal(1000) * dPx * (sqrtp_cur**2) - fee * dPy
+        b = (-fee * dPy * sqrtp_cur * itkn_amt
+             + Decimal(1000) * itkn_amt * (sqrtp_cur**2)
+             + L * fee * dPy
+             + Decimal(1000) * L * dPx * (sqrtp_cur**2))
+        c = -Decimal(1000) * L * itkn_amt * (sqrtp_cur**2)
+
+        discriminant = b * b - 4 * a * c
+        return float((-b + discriminant.sqrt()) / (2 * a))
 
     def get_reserves(self, lp, token_in):
         tokens = lp.factory.token_from_exchange[lp.name]

@@ -16,7 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-from decimal import *
+from decimal import Decimal, ROUND_CEILING, getcontext
+
+getcontext().prec = 50  # Financial-grade precision; default 28 is marginal for 10^18-scaled values
 
 MAX_UINT256 = 2**256 - 1
 

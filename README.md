@@ -152,6 +152,28 @@ article [How to Simulate a Uniswap V3 Order Book in Python](https://medium.com/d
 
 If you find this package helpful, please leave a ⭐!
 
+## Testing
+
+Run the full test suite from the repo root:
+
+```
+> python -m pytest python/test/ -v
+```
+
+Tests cover V2 and V3 functionality including:
+
+- **Process**: join, swap, deposit, withdraw, add/remove liquidity
+- **CPT index**: rebase index token, settlement LP token, round-trip identity
+- **Quotes**: LP token pricing and reserve queries
+- **Analytics**: impermanent loss calculations
+- **V3**: mint, swap, LP quote, settlement, and rebase with tick ranges
+
+### Requirements
+
+```
+> pip install pytest
+```
+
 ## License
 Licensed under the Apache License, Version 2.0.  
 See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.  

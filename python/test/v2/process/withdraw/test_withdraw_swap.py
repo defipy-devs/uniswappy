@@ -67,6 +67,16 @@ class TestWithdrawSwap(unittest.TestCase):
         # Within fee tolerance (~0.3%)
         self.assertAlmostEqual(recovered, deposit_amt, delta=deposit_amt * 0.01)
 
+    def test_withdraw_eth_output_hardcoded(self):
+        # Withdraw 1 ETH worth → output is 1.0
+        result = WithdrawSwap().apply(self.lp, self.eth, USER, 1)
+        self.assertAlmostEqual(result, 1.0, places=6)
+
+    def test_withdraw_dai_output_hardcoded(self):
+        # Withdraw 100 DAI worth → output is 100
+        result = WithdrawSwap().apply(self.lp, self.dai, USER, 100)
+        self.assertAlmostEqual(result, 100.0, places=6)
+
 
 if __name__ == '__main__':
     unittest.main()

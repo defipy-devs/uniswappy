@@ -63,6 +63,20 @@ class TestSwapDeposit(unittest.TestCase):
         SwapDeposit().apply(self.lp, self.dai, USER, 100)
         self.assertGreater(self.lp.get_reserve(self.dai), reserve_before)
 
+    def test_swap_deposit_tkn_reserves_hardcoded(self):
+        # Deposit 100 DAI: ETH reserve stays at 1000, DAI reserve becomes 100100
+        deposit_amt = SwapDeposit().apply(self.lp, self.dai, USER, 100)
+        self.assertAlmostEqual(deposit_amt, 100, places=6)
+        self.assertAlmostEqual(self.lp.get_reserve(self.eth), 1000.0, places=6)
+        self.assertAlmostEqual(self.lp.get_reserve(self.dai), 100100.0, places=6)
+
+    def test_swap_deposit_eth_reserves_hardcoded(self):
+        # Deposit 10 ETH: ETH reserve becomes 1010, DAI reserve stays at 100000
+        deposit_amt = SwapDeposit().apply(self.lp, self.eth, USER, 10)
+        self.assertAlmostEqual(deposit_amt, 10, places=6)
+        self.assertAlmostEqual(self.lp.get_reserve(self.eth), 1010.0, places=6)
+        self.assertAlmostEqual(self.lp.get_reserve(self.dai), 100000.0, places=6)
+
 
 if __name__ == '__main__':
     unittest.main()

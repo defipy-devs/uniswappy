@@ -22,7 +22,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).split('/python/')[
 from python.prod.erc import ERC20
 from python.prod.cpt.factory import UniswapFactory
 from python.prod.utils.data import UniswapExchangeData
+from python.prod.cpt.index import RebaseIndexToken
 from python.prod.cpt.quote import LPQuote
+from python.prod.process.swap import WithdrawSwap
 
 USER = 'user0'
 ETH_AMT = 1000
@@ -39,49 +41,33 @@ def setup_v2_lp(eth_amt=ETH_AMT, dai_amt=DAI_AMT):
     return lp, eth, dai
 
 
-class TestLPQuote(unittest.TestCase):
+class TestDrainLP(unittest.TestCase):
 
     def setUp(self):
         self.lp, self.eth, self.dai = setup_v2_lp()
 
-    def test_get_price_eth(self):
-        price = LPQuote().get_price(self.lp, self.eth)
-        self.assertAlmostEqual(price, 100.0, places=2)
+    def test_drain_lp_to_zero(self):
+        """Repeatedly withdraw from LP until position is fully drained."""
+        amt_lp = 250
+        N = int(self.lp.get_liquidity_from_provider(USER) / amt_lp)
 
-    def test_get_price_dai(self):
-        price = LPQuote().get_price(self.lp, self.dai)
-        self.assertAlmostEqual(price, 0.01, places=4)
+        aggr_withdrawn = 0
+        for k in range(N - 1):
+            itkn_amt = LPQuote(False).get_amount_from_lp(self.lp, self.dai, amt_lp)
+            aggr_withdrawn += WithdrawSwap().apply(self.lp, self.dai, USER, itkn_amt)
 
-    def test_get_reserve_eth(self):
-        reserve = LPQuote().get_reserve(self.lp, self.eth)
-        self.assertEqual(reserve, ETH_AMT)
+        tol = 1e-5
+        itkn_amt = LPQuote(False).get_amount_from_lp(self.lp, self.dai, amt_lp - tol)
+        aggr_withdrawn += WithdrawSwap().apply(self.lp, self.dai, USER, itkn_amt)
 
-    def test_get_reserve_dai(self):
-        reserve = LPQuote().get_reserve(self.lp, self.dai)
-        self.assertEqual(reserve, DAI_AMT)
-
-    def test_get_amount_eth_to_dai(self):
-        amt = LPQuote().get_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(amt / 10000, 1.0, delta=0.01)
-
-    def test_get_amount_from_lp(self):
-        some_lp_amt = self.lp.total_supply * 0.1
-        amt = LPQuote(False).get_amount_from_lp(self.lp, self.eth, some_lp_amt)
-        self.assertGreater(amt, 0)
-
-    def test_get_lp_from_amount(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertGreater(lp_amt, 0)
-
-    def test_get_lp_from_amount_hardcoded(self):
-        # Actual value captured from run: 513.898338
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(lp_amt, 513.898338, places=4)
-
-    def test_round_trip_lp(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        recovered = LPQuote(False).get_amount_from_lp(self.lp, self.eth, lp_amt)
-        self.assertAlmostEqual(recovered / 100.0, 1.0, delta=0.001)
+        # LP position nearly zero
+        self.assertAlmostEqual(self.lp.get_liquidity_from_provider(USER), 0.0, places=4)
+        # All DAI withdrawn
+        self.assertAlmostEqual(aggr_withdrawn, DAI_AMT, places=4)
+        # ETH reserve unchanged (all withdrawals were in DAI)
+        self.assertAlmostEqual(self.lp.get_reserve(self.eth), ETH_AMT, places=4)
+        # DAI reserve fully drained
+        self.assertAlmostEqual(self.lp.get_reserve(self.dai), 0.0, places=4)
 
 
 if __name__ == '__main__':

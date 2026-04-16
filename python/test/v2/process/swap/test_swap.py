@@ -22,7 +22,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)).split('/python/')[
 from python.prod.erc import ERC20
 from python.prod.cpt.factory import UniswapFactory
 from python.prod.utils.data import UniswapExchangeData
-from python.prod.cpt.quote import LPQuote
+from python.prod.process.swap import Swap
+
+# NOTE: UniswapV2 K invariant check is currently disabled in UniswapExchange.swap()
+# These tests verify reserve changes and output amounts, not K conservation.
 
 USER = 'user0'
 ETH_AMT = 1000
@@ -39,49 +42,39 @@ def setup_v2_lp(eth_amt=ETH_AMT, dai_amt=DAI_AMT):
     return lp, eth, dai
 
 
-class TestLPQuote(unittest.TestCase):
+class TestSwap(unittest.TestCase):
 
     def setUp(self):
         self.lp, self.eth, self.dai = setup_v2_lp()
 
-    def test_get_price_eth(self):
-        price = LPQuote().get_price(self.lp, self.eth)
-        self.assertAlmostEqual(price, 100.0, places=2)
+    def test_swap_dai_for_eth_reserve_hardcoded(self):
+        # Swap 1000 DAI in → ETH reserve drops to 990.12842
+        Swap().apply(self.lp, self.dai, USER, 1000)
+        self.assertAlmostEqual(round(self.lp.get_reserve(self.eth), 6), 990.12842, places=5)
 
-    def test_get_price_dai(self):
-        price = LPQuote().get_price(self.lp, self.dai)
-        self.assertAlmostEqual(price, 0.01, places=4)
+    def test_swap_eth_for_dai_reserve_hardcoded(self):
+        # Swap 10 ETH in → DAI reserve drops to 99012.841966
+        Swap().apply(self.lp, self.eth, USER, 10)
+        self.assertAlmostEqual(round(self.lp.get_reserve(self.dai), 6), 99012.841966, places=4)
 
-    def test_get_reserve_eth(self):
-        reserve = LPQuote().get_reserve(self.lp, self.eth)
-        self.assertEqual(reserve, ETH_AMT)
+    def test_swap_output_positive(self):
+        result = Swap().apply(self.lp, self.dai, USER, 1000)
+        self.assertGreater(result, 0)
 
-    def test_get_reserve_dai(self):
-        reserve = LPQuote().get_reserve(self.lp, self.dai)
-        self.assertEqual(reserve, DAI_AMT)
+    def test_swap_reserves_move_opposite(self):
+        eth_before = self.lp.get_reserve(self.eth)
+        dai_before = self.lp.get_reserve(self.dai)
+        Swap().apply(self.lp, self.dai, USER, 1000)
+        self.assertLess(self.lp.get_reserve(self.eth), eth_before)
+        self.assertGreater(self.lp.get_reserve(self.dai), dai_before)
 
-    def test_get_amount_eth_to_dai(self):
-        amt = LPQuote().get_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(amt / 10000, 1.0, delta=0.01)
-
-    def test_get_amount_from_lp(self):
-        some_lp_amt = self.lp.total_supply * 0.1
-        amt = LPQuote(False).get_amount_from_lp(self.lp, self.eth, some_lp_amt)
-        self.assertGreater(amt, 0)
-
-    def test_get_lp_from_amount(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertGreater(lp_amt, 0)
-
-    def test_get_lp_from_amount_hardcoded(self):
-        # Actual value captured from run: 513.898338
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(lp_amt, 513.898338, places=4)
-
-    def test_round_trip_lp(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        recovered = LPQuote(False).get_amount_from_lp(self.lp, self.eth, lp_amt)
-        self.assertAlmostEqual(recovered / 100.0, 1.0, delta=0.001)
+    def test_swap_larger_input_worse_rate(self):
+        lp1, eth1, dai1 = setup_v2_lp()
+        lp2, eth2, dai2 = setup_v2_lp()
+        out_small = Swap().apply(lp1, dai1, USER, 100)
+        out_large = Swap().apply(lp2, dai2, USER, 10000)
+        # Rate = output / input; larger trade gets worse rate
+        self.assertGreater(out_small / 100, out_large / 10000)
 
 
 if __name__ == '__main__':

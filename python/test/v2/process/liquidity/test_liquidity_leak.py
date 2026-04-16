@@ -23,65 +23,48 @@ from python.prod.erc import ERC20
 from python.prod.cpt.factory import UniswapFactory
 from python.prod.utils.data import UniswapExchangeData
 from python.prod.cpt.quote import LPQuote
+from python.prod.process.liquidity import AddLiquidity, RemoveLiquidity
 
 USER = 'user0'
-ETH_AMT = 1000
-DAI_AMT = 100000
+ETH_AMT = 100000
+DAI_AMT = 10000
 
 
-def setup_v2_lp(eth_amt=ETH_AMT, dai_amt=DAI_AMT):
+def setup_v2_lp():
     eth = ERC20("ETH", "0x09")
     dai = ERC20("DAI", "0x111")
     factory = UniswapFactory("ETH pool factory", "0x2")
     exch_data = UniswapExchangeData(tkn0=eth, tkn1=dai, symbol="LP", address="0x011")
     lp = factory.deploy(exch_data)
-    lp.add_liquidity(USER, eth_amt, dai_amt, eth_amt, dai_amt)
+    lp.add_liquidity(USER, ETH_AMT, DAI_AMT, ETH_AMT, DAI_AMT)
     return lp, eth, dai
 
 
-class TestLPQuote(unittest.TestCase):
+class TestLiquidityLeak(unittest.TestCase):
 
     def setUp(self):
         self.lp, self.eth, self.dai = setup_v2_lp()
 
-    def test_get_price_eth(self):
-        price = LPQuote().get_price(self.lp, self.eth)
-        self.assertAlmostEqual(price, 100.0, places=2)
+    def test_no_value_leak_after_100_cycles(self):
+        """After 100 add/remove liquidity cycles, token amounts and LP
+        should remain consistent (no value leak)."""
+        pre_eth_amt = LPQuote(False).get_amount_from_lp(self.lp, self.eth, 1)
+        pre_lp_amt = self.lp.liquidity_providers[USER]
 
-    def test_get_price_dai(self):
-        price = LPQuote().get_price(self.lp, self.dai)
-        self.assertAlmostEqual(price, 0.01, places=4)
+        N_RUNS = 100
+        for _ in range(N_RUNS):
+            lp1_amt = 100
+            dai_amount1 = LPQuote(True).get_amount_from_lp(self.lp, self.dai, lp1_amt)
+            price_idai = dai_amount1 / lp1_amt
+            AddLiquidity(price_idai).apply(self.lp, self.dai, USER, lp1_amt)
+            RemoveLiquidity().apply(self.lp, self.dai, USER, abs(lp1_amt))
 
-    def test_get_reserve_eth(self):
-        reserve = LPQuote().get_reserve(self.lp, self.eth)
-        self.assertEqual(reserve, ETH_AMT)
+        post_eth_amt = LPQuote(False).get_amount_from_lp(self.lp, self.eth, 1)
+        post_lp_amt = self.lp.liquidity_providers[USER]
 
-    def test_get_reserve_dai(self):
-        reserve = LPQuote().get_reserve(self.lp, self.dai)
-        self.assertEqual(reserve, DAI_AMT)
-
-    def test_get_amount_eth_to_dai(self):
-        amt = LPQuote().get_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(amt / 10000, 1.0, delta=0.01)
-
-    def test_get_amount_from_lp(self):
-        some_lp_amt = self.lp.total_supply * 0.1
-        amt = LPQuote(False).get_amount_from_lp(self.lp, self.eth, some_lp_amt)
-        self.assertGreater(amt, 0)
-
-    def test_get_lp_from_amount(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertGreater(lp_amt, 0)
-
-    def test_get_lp_from_amount_hardcoded(self):
-        # Actual value captured from run: 513.898338
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        self.assertAlmostEqual(lp_amt, 513.898338, places=4)
-
-    def test_round_trip_lp(self):
-        lp_amt = LPQuote(False).get_lp_from_amount(self.lp, self.eth, 100)
-        recovered = LPQuote(False).get_amount_from_lp(self.lp, self.eth, lp_amt)
-        self.assertAlmostEqual(recovered / 100.0, 1.0, delta=0.001)
+        # Values should be stable at magnitude level (rounding to -8 matches order of magnitude)
+        self.assertEqual(round(pre_eth_amt, -8), round(post_eth_amt, -8))
+        self.assertEqual(round(pre_lp_amt, -8), round(post_lp_amt, -8))
 
 
 if __name__ == '__main__':

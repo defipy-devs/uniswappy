@@ -69,6 +69,30 @@ class TestAddLiquidity(unittest.TestCase):
         self.assertAlmostEqual(eth_end / eth_start, 1.0, delta=0.01)
         self.assertAlmostEqual(dai_end / dai_start, 1.0, delta=0.01)
 
+    def test_add_liquidity_eth_reserves_hardcoded(self):
+        # Add 10 ETH: reserves become 1010 ETH / 101000 DAI
+        AddLiquidity().apply(self.lp, self.eth, USER, 10)
+        self.assertEqual(self.lp.get_reserve(self.eth), 1010)
+        self.assertEqual(self.lp.get_reserve(self.dai), 101000.0)
+
+    def test_add_liquidity_dai_reserves_hardcoded(self):
+        # Add 1000 DAI: reserves become 1010 ETH / 101000 DAI
+        AddLiquidity().apply(self.lp, self.dai, USER, 1000)
+        self.assertEqual(self.lp.get_reserve(self.eth), 1010)
+        self.assertEqual(self.lp.get_reserve(self.dai), 101000.0)
+
+    def test_remove_liquidity_eth_reserves_hardcoded(self):
+        # Remove 10 ETH: reserves become 990 ETH / 99000 DAI
+        RemoveLiquidity().apply(self.lp, self.eth, USER, 10)
+        self.assertEqual(self.lp.get_reserve(self.eth), 990.0)
+        self.assertEqual(self.lp.get_reserve(self.dai), 99000.0)
+
+    def test_remove_liquidity_dai_reserves_hardcoded(self):
+        # Remove 1000 DAI: reserves become 990 ETH / 99000 DAI
+        RemoveLiquidity().apply(self.lp, self.dai, USER, 1000)
+        self.assertEqual(self.lp.get_reserve(self.eth), 990.0)
+        self.assertEqual(self.lp.get_reserve(self.dai), 99000.0)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 This package contains python re-factors of both original Uniswap [V2](https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol) and [V3](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol)
 pairing codes, and can be utilized for the purpose of analysing and modelling its behavior for DeFi. 
 
-🔗 SPDX-Anchor: [anchorregistry.ai/AR-2026-M86pm5A](https://anchorregistry.ai/AAR-2026-M86pm5A)
+🔗 SPDX-Anchor: [anchorregistry.ai/AR-2026-M86pm5A](https://anchorregistry.ai/AR-2026-M86pm5A)
 
 ## 📘 Official Textbook
 

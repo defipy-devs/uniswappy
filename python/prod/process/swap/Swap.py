@@ -65,7 +65,7 @@ class Swap(Process):
                 exchanged token amount               
         """          
         
-        amount_in = tDel.delta() if amount_in == None else amount_in
+        amount_in = self.tDel.delta() if amount_in == None else amount_in
         
         if(lp.version == UniswapExchangeData.VERSION_V2):
             amount_out = math.floor(lp.get_amount_out(amount_in, token_in))

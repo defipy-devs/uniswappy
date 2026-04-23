@@ -1,4 +1,5 @@
 from .SolveDeltas import SolveDeltas
+from .SolveDeltasRobust import SolveDeltasRobust
 from .SimpleLPSimulation import SimpleLPSimulation
 from .MarkovState import MarkovState
 from .Arbitrage import Arbitrage

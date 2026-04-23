@@ -4,7 +4,7 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='UniswapPy',
-      version='1.7.6',
+      version='1.7.8',
       description='Uniswap Analytics with Python',
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -53,7 +53,14 @@ setup(name='UniswapPy',
           'uniswappy.utils.tools.v3'
       ],
       install_requires=[
+          # Math & numerics
           'scipy >= 1.7.3',
-          'termcolor >= 2.4.0'
+          'numpy >= 1.21',
+          # Data
+          'pandas >= 1.3',
+          # Web
+          'requests >= 2.28',
+          # Terminal
+          'termcolor >= 2.4.0',
       ],
       zip_safe=False)

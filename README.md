@@ -6,8 +6,7 @@ pairing codes, and can be utilized for the purpose of analysing and modelling it
 
 ## Disclaimer
 
-**UniswapPy** is an **unofficial**, independent Python library for analytics, simulation, and modeling of the Uniswap protocol.  
-It is not affiliated with, endorsed by, or associated with Uniswap Labs.
+**UniswapPy** is an **unofficial**, independent Python library for analytics, simulation, and modeling of the Uniswap protocol. It is not affiliated with, endorsed by, or associated with Uniswap Labs.
 
 ## 📘 Official Textbook
 
